@@ -27,21 +27,21 @@ public class Event {
     private LocalDateTime eventDate;
     
     @Column(nullable = false)
-    private String location; // Barcelona, Madrid, Online, España
+    private String location;
     
     @Column(nullable = false)
-    private String eventType; // NETWORKING, WORKSHOP, TALK, COFFEE_CHAT
+    private String eventType;
     
     @Column(nullable = false)
-    private String level; // JUNIOR_FRIENDLY, ALL_LEVELS
+    private String level;
     
-    private String tags; // #IA, #React, #Career (separados por comas)
+    private String tags;
     
-    private String sourceUrl; // URL del evento original (Meetup, Eventbrite, etc.)
+    private String sourceUrl;
     
-    private String organizerName; // Nombre del organizador
+    private String organizerName;
     
-    private Boolean isActive; // Si el evento está activo o archivado
+    private Boolean isActive;
     
     @Column(nullable = false)
     private LocalDateTime createdAt;
