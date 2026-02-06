@@ -24,4 +24,7 @@ public interface EventService {
     List<EventResponse> getEventsByLocation(String location);
     
     List<EventResponse> getEventsByType(String eventType);
+
+    List<EventResponse> getLatestEvents();
+
 }

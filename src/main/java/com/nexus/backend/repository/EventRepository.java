@@ -20,4 +20,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByEventDateBeforeAndIsActiveTrue(LocalDateTime date);
     
     List<Event> findByLevelAndIsActiveTrue(String level);
+
+    List<Event> findTop3ByIsActiveTrueOrderByCreatedAtDesc();
+
 }
