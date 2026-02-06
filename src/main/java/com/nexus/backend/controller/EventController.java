@@ -32,24 +32,10 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EventResponse> getEventById(@PathVariable Long id) {
-        EventResponse event = eventService.getEventById(id);
-        return ResponseEntity.ok(event);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<EventResponse> updateEvent(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateEventRequest request) {
-        EventResponse response = eventService.updateEvent(id, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
-        eventService.deleteEvent(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/latest")
+    public ResponseEntity<List<EventResponse>> getLatestEvents() {
+        List<EventResponse> events = eventService.getLatestEvents();
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/upcoming")
@@ -74,5 +60,25 @@ public class EventController {
     public ResponseEntity<List<EventResponse>> getEventsByType(@PathVariable String type) {
         List<EventResponse> events = eventService.getEventsByType(type);
         return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEventById(@PathVariable Long id) {
+        EventResponse event = eventService.getEventById(id);
+        return ResponseEntity.ok(event);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EventResponse> updateEvent(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateEventRequest request) {
+        EventResponse response = eventService.updateEvent(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
+        eventService.deleteEvent(id);
+        return ResponseEntity.noContent().build();
     }
 }

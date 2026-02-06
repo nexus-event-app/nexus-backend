@@ -61,7 +61,6 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
         
-        // Soft delete - solo marcamos como inactivo
         event.setIsActive(false);
         eventRepository.save(event);
     }
@@ -99,4 +98,12 @@ public class EventServiceImpl implements EventService {
             .map(eventMapper::toResponse)
             .collect(Collectors.toList());
     }
+
+    @Override
+public List<EventResponse> getLatestEvents() {
+    return eventRepository.findTop3ByIsActiveTrueOrderByCreatedAtDesc()
+        .stream()
+        .map(eventMapper::toResponse)
+        .collect(Collectors.toList());
+}
 }
