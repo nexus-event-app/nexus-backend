@@ -25,7 +25,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/events/**").permitAll()
                 .requestMatchers("/api/news/**").permitAll()
+                .requestMatchers("/api/testimonials/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                
             )
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
         
