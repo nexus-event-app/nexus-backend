@@ -3,6 +3,8 @@ package com.nexus.backend.dto.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.nexus.backend.enums.NewsCategory;
+
 
 @Data
 @NoArgsConstructor
@@ -15,4 +17,6 @@ public class UpdateNewsRequest {
     private String imageUrl;
     private String author;
     private Boolean isActive;
+    private NewsCategory category;
+
 }

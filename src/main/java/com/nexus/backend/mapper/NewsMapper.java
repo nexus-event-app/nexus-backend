@@ -16,6 +16,7 @@ public class NewsMapper {
         news.setSourceUrl(request.getSourceUrl());
         news.setImageUrl(request.getImageUrl());
         news.setAuthor(request.getAuthor());
+        news.setCategory(request.getCategory());
         news.setIsActive(true);
         return news;
     }
@@ -36,10 +37,14 @@ public class NewsMapper {
         if (request.getAuthor() != null) {
             news.setAuthor(request.getAuthor());
         }
+        if (request.getCategory() != null) {
+            news.setCategory(request.getCategory());
+        }
         if (request.getIsActive() != null) {
             news.setIsActive(request.getIsActive());
         }
     }
+    
     public NewsResponse toResponse(News news) {
         return new NewsResponse(
             news.getId(),
@@ -50,7 +55,8 @@ public class NewsMapper {
             news.getAuthor(),
             news.getIsActive(),
             news.getCreatedAt(),
-            news.getUpdatedAt()
+            news.getUpdatedAt(),
+            news.getCategory()
         );
     }
 }

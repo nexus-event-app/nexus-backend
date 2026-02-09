@@ -4,6 +4,8 @@ import com.nexus.backend.dto.request.CreateNewsRequest;
 import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.dto.response.NewsResponse;
 import java.util.List;
+import com.nexus.backend.enums.NewsCategory;
+
 
 public interface NewsService {
     
@@ -18,4 +20,7 @@ public interface NewsService {
     void deleteNews(Long id);
     
     List<NewsResponse> getLatestNews();
+
+    List<NewsResponse> getNewsByCategory(NewsCategory category);
+
 }

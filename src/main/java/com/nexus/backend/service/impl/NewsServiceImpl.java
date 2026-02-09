@@ -7,6 +7,7 @@ import com.nexus.backend.entity.News;
 import com.nexus.backend.mapper.NewsMapper;
 import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.service.NewsService;
+import com.nexus.backend.enums.NewsCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,14 @@ public class NewsServiceImpl implements NewsService {
     @Override
     public List<NewsResponse> getLatestNews() {
         return newsRepository.findTop3ByIsActiveTrueOrderByCreatedAtDesc()
+            .stream()
+            .map(newsMapper::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NewsResponse> getNewsByCategory(NewsCategory category) {
+        return newsRepository.findByIsActiveTrueAndCategoryOrderByCreatedAtDesc(category)
             .stream()
             .map(newsMapper::toResponse)
             .collect(Collectors.toList());

@@ -1,5 +1,6 @@
 package com.nexus.backend.entity;
 
+import com.nexus.backend.enums.NewsCategory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,10 @@ public class News {
     private String imageUrl;
     
     private String author;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NewsCategory category = NewsCategory.GENERAL;
     
     @Column(name = "is_active")
     private Boolean isActive = true;
