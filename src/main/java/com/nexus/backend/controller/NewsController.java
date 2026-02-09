@@ -3,6 +3,7 @@ package com.nexus.backend.controller;
 import com.nexus.backend.dto.request.CreateNewsRequest;
 import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.dto.response.NewsResponse;
+import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.service.NewsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,12 @@ public class NewsController {
     @GetMapping("/latest")
     public ResponseEntity<List<NewsResponse>> getLatestNews() {
         List<NewsResponse> news = newsService.getLatestNews();
+        return ResponseEntity.ok(news);
+    }
+
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<NewsResponse>> getNewsByCategory(@PathVariable NewsCategory category) {
+        List<NewsResponse> news = newsService.getNewsByCategory(category);
         return ResponseEntity.ok(news);
     }
     

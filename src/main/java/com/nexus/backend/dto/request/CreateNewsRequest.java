@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.nexus.backend.enums.NewsCategory;
+
 
 @Data
 @NoArgsConstructor
@@ -20,4 +22,7 @@ public class CreateNewsRequest {
     private String imageUrl;
     
     private String author;
+    
+    private NewsCategory category = NewsCategory.GENERAL;
+
 }
