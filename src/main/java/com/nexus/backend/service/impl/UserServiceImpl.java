@@ -28,16 +28,11 @@ public class UserServiceImpl implements UserService {
         }
         
         User user = userMapper.toEntity(request);
-        
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         
         User savedUser = userRepository.save(user);
         
         return userMapper.toResponse(savedUser);
-    }
-
-    private void getEmail() {
-        // TODO
     }
     
     @Override
