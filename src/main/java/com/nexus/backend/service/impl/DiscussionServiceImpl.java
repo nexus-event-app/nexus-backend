@@ -62,9 +62,18 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = discussionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
         
-        if (!discussion.getAuthor().getId().equals(userId)) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        boolean isAuthor = discussion.getAuthor().getId().equals(userId);
+        boolean isAdmin = "ADMIN".equals(user.getRole());
+        
+        if (!isAuthor && !isAdmin) {
             throw new RuntimeException("No tienes permiso para eliminar esta discusión");
         }
+        
+        commentRepository.findByDiscussionIdOrderByCreatedAtAsc(id)
+                .forEach(comment -> commentRepository.delete(comment));
         
         discussionRepository.delete(discussion);
     }
