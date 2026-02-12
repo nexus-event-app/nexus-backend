@@ -47,21 +47,40 @@ public class DiscussionController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<DiscussionResponse> getDiscussionById(@PathVariable Long id) {
-        DiscussionResponse response = discussionService.getDiscussionById(id);
+    public ResponseEntity<DiscussionResponse> getDiscussionById(
+            @PathVariable Long id,
+            @RequestHeader(value = "User-Id", required = false) Long userId) {
+        DiscussionResponse response;
+        if (userId != null) {
+            response = discussionService.getDiscussionById(id, userId);
+        } else {
+            response = discussionService.getDiscussionById(id);
+        }
         return ResponseEntity.ok(response);
     }
     
     @GetMapping
-    public ResponseEntity<List<DiscussionResponse>> getAllDiscussions() {
-        List<DiscussionResponse> discussions = discussionService.getAllDiscussions();
+    public ResponseEntity<List<DiscussionResponse>> getAllDiscussions(
+            @RequestHeader(value = "User-Id", required = false) Long userId) {
+        List<DiscussionResponse> discussions;
+        if (userId != null) {
+            discussions = discussionService.getAllDiscussions(userId);
+        } else {
+            discussions = discussionService.getAllDiscussions();
+        }
         return ResponseEntity.ok(discussions);
     }
     
     @GetMapping("/category/{category}")
     public ResponseEntity<List<DiscussionResponse>> getDiscussionsByCategory(
-            @PathVariable DiscussionCategory category) {
-        List<DiscussionResponse> discussions = discussionService.getDiscussionsByCategory(category);
+            @PathVariable DiscussionCategory category,
+            @RequestHeader(value = "User-Id", required = false) Long userId) {
+        List<DiscussionResponse> discussions;
+        if (userId != null) {
+            discussions = discussionService.getDiscussionsByCategory(category, userId);
+        } else {
+            discussions = discussionService.getDiscussionsByCategory(category);
+        }
         return ResponseEntity.ok(discussions);
     }
     
@@ -70,5 +89,13 @@ public class DiscussionController {
             @RequestHeader("User-Id") Long userId) {
         List<DiscussionResponse> discussions = discussionService.getMyDiscussions(userId);
         return ResponseEntity.ok(discussions);
+    }
+    
+    @PostMapping("/{id}/like")
+    public ResponseEntity<DiscussionResponse> toggleLike(
+            @PathVariable Long id,
+            @RequestHeader("User-Id") Long userId) {
+        DiscussionResponse response = discussionService.toggleLike(id, userId);
+        return ResponseEntity.ok(response);
     }
 }

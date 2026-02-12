@@ -20,6 +20,8 @@ public class DiscussionResponse {
     private String authorName;
     private Boolean isActive;
     private Integer commentCount;
+    private Integer likesCount;
+    private Boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

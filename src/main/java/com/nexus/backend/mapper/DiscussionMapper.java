@@ -17,6 +17,7 @@ public class DiscussionMapper {
         discussion.setCategory(request.getCategory());
         discussion.setAuthor(author);
         discussion.setIsActive(true);
+        discussion.setLikesCount(0);
         return discussion;
     }
     
@@ -30,12 +31,9 @@ public class DiscussionMapper {
         if (request.getCategory() != null) {
             discussion.setCategory(request.getCategory());
         }
-        if (request.getIsActive() != null) {
-            discussion.setIsActive(request.getIsActive());
-        }
     }
     
-    public DiscussionResponse toResponse(Discussion discussion, Integer commentCount) {
+    public DiscussionResponse toResponse(Discussion discussion, Integer commentCount, Boolean isLikedByCurrentUser) {
         DiscussionResponse response = new DiscussionResponse();
         response.setId(discussion.getId());
         response.setTitle(discussion.getTitle());
@@ -45,6 +43,8 @@ public class DiscussionMapper {
         response.setAuthorName(discussion.getAuthor().getName());
         response.setIsActive(discussion.getIsActive());
         response.setCommentCount(commentCount);
+        response.setLikesCount(discussion.getLikesCount());
+        response.setIsLikedByCurrentUser(isLikedByCurrentUser);
         response.setCreatedAt(discussion.getCreatedAt());
         response.setUpdatedAt(discussion.getUpdatedAt());
         return response;

@@ -1,10 +1,15 @@
 package com.nexus.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "discussion_likes", uniqueConstraints = @UniqueConstraint(columnNames = { "discussion_id", "user_id" }))
+@Table(name = "discussion_likes", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"discussion_id", "user_id"}))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

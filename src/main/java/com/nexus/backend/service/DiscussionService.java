@@ -17,9 +17,17 @@ public interface DiscussionService {
     
     DiscussionResponse getDiscussionById(Long id);
     
+    DiscussionResponse getDiscussionById(Long id, Long userId);
+    
     List<DiscussionResponse> getAllDiscussions();
+    
+    List<DiscussionResponse> getAllDiscussions(Long userId);
     
     List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category);
     
+    List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category, Long userId);
+    
     List<DiscussionResponse> getMyDiscussions(Long userId);
+    
+    DiscussionResponse toggleLike(Long discussionId, Long userId);
 }

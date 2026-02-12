@@ -4,10 +4,12 @@ import com.nexus.backend.dto.request.CreateDiscussionRequest;
 import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
 import com.nexus.backend.entity.Discussion;
+import com.nexus.backend.entity.DiscussionLike;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.enums.DiscussionCategory;
 import com.nexus.backend.mapper.DiscussionMapper;
 import com.nexus.backend.repository.CommentRepository;
+import com.nexus.backend.repository.DiscussionLikeRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.service.DiscussionService;
@@ -25,6 +27,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final DiscussionRepository discussionRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final DiscussionLikeRepository discussionLikeRepository;
     private final DiscussionMapper discussionMapper;
     
     @Override
@@ -36,7 +39,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = discussionMapper.toEntity(request, user);
         Discussion saved = discussionRepository.save(discussion);
         
-        return discussionMapper.toResponse(saved, 0);
+        return discussionMapper.toResponse(saved, 0, false);
     }
     
     @Override
@@ -53,7 +56,8 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion updated = discussionRepository.save(discussion);
         
         Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
-        return discussionMapper.toResponse(updated, commentCount);
+        boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(id, userId);
+        return discussionMapper.toResponse(updated, commentCount, isLiked);
     }
     
     @Override
@@ -84,7 +88,17 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
         
         Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
-        return discussionMapper.toResponse(discussion, commentCount);
+        return discussionMapper.toResponse(discussion, commentCount, false);
+    }
+    
+    @Override
+    public DiscussionResponse getDiscussionById(Long id, Long userId) {
+        Discussion discussion = discussionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
+        
+        Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
+        boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(id, userId);
+        return discussionMapper.toResponse(discussion, commentCount, isLiked);
     }
     
     @Override
@@ -93,7 +107,19 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .stream()
                 .map(discussion -> {
                     Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    return discussionMapper.toResponse(discussion, commentCount);
+                    return discussionMapper.toResponse(discussion, commentCount, false);
+                })
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<DiscussionResponse> getAllDiscussions(Long userId) {
+        return discussionRepository.findByIsActiveTrueOrderByCreatedAtDesc()
+                .stream()
+                .map(discussion -> {
+                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
+                    boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussion.getId(), userId);
+                    return discussionMapper.toResponse(discussion, commentCount, isLiked);
                 })
                 .collect(Collectors.toList());
     }
@@ -104,7 +130,19 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .stream()
                 .map(discussion -> {
                     Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    return discussionMapper.toResponse(discussion, commentCount);
+                    return discussionMapper.toResponse(discussion, commentCount, false);
+                })
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category, Long userId) {
+        return discussionRepository.findByIsActiveTrueAndCategoryOrderByCreatedAtDesc(category)
+                .stream()
+                .map(discussion -> {
+                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
+                    boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussion.getId(), userId);
+                    return discussionMapper.toResponse(discussion, commentCount, isLiked);
                 })
                 .collect(Collectors.toList());
     }
@@ -115,8 +153,37 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .stream()
                 .map(discussion -> {
                     Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    return discussionMapper.toResponse(discussion, commentCount);
+                    boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussion.getId(), userId);
+                    return discussionMapper.toResponse(discussion, commentCount, isLiked);
                 })
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional
+    public DiscussionResponse toggleLike(Long discussionId, Long userId) {
+        Discussion discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussionId, userId);
+        
+        if (isLiked) {
+            discussionLikeRepository.deleteByDiscussionIdAndUserId(discussionId, userId);
+            discussion.setLikesCount(discussion.getLikesCount() - 1);
+        } else {
+            DiscussionLike like = new DiscussionLike();
+            like.setDiscussion(discussion);
+            like.setUser(user);
+            discussionLikeRepository.save(like);
+            discussion.setLikesCount(discussion.getLikesCount() + 1);
+        }
+        
+        discussionRepository.save(discussion);
+        
+        Integer commentCount = commentRepository.countByDiscussionId(discussionId).intValue();
+        return discussionMapper.toResponse(discussion, commentCount, !isLiked);
     }
 }
