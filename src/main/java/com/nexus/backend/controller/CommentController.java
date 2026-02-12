@@ -37,8 +37,22 @@ public class CommentController {
     
     @GetMapping("/discussion/{discussionId}")
     public ResponseEntity<List<CommentResponse>> getCommentsByDiscussion(
-            @PathVariable Long discussionId) {
-        List<CommentResponse> comments = commentService.getCommentsByDiscussion(discussionId);
+            @PathVariable Long discussionId,
+            @RequestHeader(value = "User-Id", required = false) Long userId) {
+        List<CommentResponse> comments;
+        if (userId != null) {
+            comments = commentService.getCommentsByDiscussion(discussionId, userId);
+        } else {
+            comments = commentService.getCommentsByDiscussion(discussionId);
+        }
         return ResponseEntity.ok(comments);
+    }
+    
+    @PostMapping("/{id}/like")
+    public ResponseEntity<CommentResponse> toggleLike(
+            @PathVariable Long id,
+            @RequestHeader("User-Id") Long userId) {
+        CommentResponse response = commentService.toggleLike(id, userId);
+        return ResponseEntity.ok(response);
     }
 }

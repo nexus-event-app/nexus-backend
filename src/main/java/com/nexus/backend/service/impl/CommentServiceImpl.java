@@ -3,9 +3,11 @@ package com.nexus.backend.service.impl;
 import com.nexus.backend.dto.request.CreateCommentRequest;
 import com.nexus.backend.dto.response.CommentResponse;
 import com.nexus.backend.entity.Comment;
+import com.nexus.backend.entity.CommentLike;
 import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.mapper.CommentMapper;
+import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
@@ -24,6 +26,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final DiscussionRepository discussionRepository;
     private final UserRepository userRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final CommentMapper commentMapper;
     
     @Override
@@ -38,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.toEntity(request, discussion, user);
         Comment saved = commentRepository.save(comment);
         
-        return commentMapper.toResponse(saved);
+        return commentMapper.toResponse(saved, false);
     }
     
     @Override
@@ -58,7 +61,45 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentResponse> getCommentsByDiscussion(Long discussionId) {
         return commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId)
                 .stream()
-                .map(commentMapper::toResponse)
+                .map(comment -> commentMapper.toResponse(comment, false))
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<CommentResponse> getCommentsByDiscussion(Long discussionId, Long userId) {
+        return commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId)
+                .stream()
+                .map(comment -> {
+                    boolean isLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
+                    return commentMapper.toResponse(comment, isLiked);
+                })
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional
+    public CommentResponse toggleLike(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comentario no encontrado"));
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        boolean isLiked = commentLikeRepository.existsByCommentIdAndUserId(commentId, userId);
+        
+        if (isLiked) {
+            commentLikeRepository.deleteByCommentIdAndUserId(commentId, userId);
+            comment.setLikesCount(comment.getLikesCount() - 1);
+        } else {
+            CommentLike like = new CommentLike();
+            like.setComment(comment);
+            like.setUser(user);
+            commentLikeRepository.save(like);
+            comment.setLikesCount(comment.getLikesCount() + 1);
+        }
+        
+        commentRepository.save(comment);
+        
+        return commentMapper.toResponse(comment, !isLiked);
     }
 }
