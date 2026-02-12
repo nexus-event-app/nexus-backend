@@ -15,16 +15,19 @@ public class CommentMapper {
         comment.setContent(request.getContent());
         comment.setDiscussion(discussion);
         comment.setAuthor(author);
+        comment.setLikesCount(0);
         return comment;
     }
     
-    public CommentResponse toResponse(Comment comment) {
+    public CommentResponse toResponse(Comment comment, Boolean isLikedByCurrentUser) {
         CommentResponse response = new CommentResponse();
         response.setId(comment.getId());
         response.setContent(comment.getContent());
         response.setDiscussionId(comment.getDiscussion().getId());
         response.setAuthorId(comment.getAuthor().getId());
         response.setAuthorName(comment.getAuthor().getName());
+        response.setLikesCount(comment.getLikesCount());
+        response.setIsLikedByCurrentUser(isLikedByCurrentUser);
         response.setCreatedAt(comment.getCreatedAt());
         response.setUpdatedAt(comment.getUpdatedAt());
         return response;

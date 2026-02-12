@@ -12,4 +12,8 @@ public interface CommentService {
     void deleteComment(Long id, Long userId);
     
     List<CommentResponse> getCommentsByDiscussion(Long discussionId);
+    
+    List<CommentResponse> getCommentsByDiscussion(Long discussionId, Long userId);
+    
+    CommentResponse toggleLike(Long commentId, Long userId);
 }
