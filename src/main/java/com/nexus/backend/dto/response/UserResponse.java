@@ -15,5 +15,6 @@ public class UserResponse {
     private String name;
     private String email;
     private User.Role role;
+    private String token;
     private LocalDateTime createdAt;
 }
