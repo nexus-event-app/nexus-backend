@@ -506,3 +506,7 @@ UPDATE DISCUSSIONS SET LIKES_COUNT = 0 WHERE LIKES_COUNT IS NULL [42122-232]
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]FROM * SELECT DISCUSSION_LIKES"
 Syntax error in SQL statement "[*]FROM * SELECT DISCUSSION_LIKES"; SQL statement:
 FROM * SELECT DISCUSSION_LIKES [42000-232]
+2026-02-12 18:03:11.829773+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Error de Sintaxis en sentencia SQL "[*]DISCUSSIONS"; se esperaba "DELETE, DROP"
+Syntax error in SQL statement "[*]DISCUSSIONS"; expected "DELETE, DROP"; SQL statement:
+DISCUSSIONS [42001-232]

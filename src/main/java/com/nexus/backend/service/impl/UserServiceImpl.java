@@ -6,6 +6,7 @@ import com.nexus.backend.dto.response.UserResponse;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.mapper.UserMapper;
 import com.nexus.backend.repository.UserRepository;
+import com.nexus.backend.security.JwtUtil;
 import com.nexus.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
     
     @Override
     @Transactional
@@ -29,10 +31,17 @@ public class UserServiceImpl implements UserService {
         
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        
         User savedUser = userRepository.save(user);
         
-        return userMapper.toResponse(savedUser);
+        String token = jwtUtil.generateToken(
+            savedUser.getEmail(),
+            savedUser.getRole().name(),
+            savedUser.getId()
+        );
+        
+        UserResponse response = userMapper.toResponse(savedUser);
+        response.setToken(token);
+        return response;
     }
     
     @Override
@@ -44,14 +53,21 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Credenciales inválidas");
         }
         
-        return userMapper.toResponse(user);
+        String token = jwtUtil.generateToken(
+            user.getEmail(),
+            user.getRole().name(),
+            user.getId()
+        );
+        
+        UserResponse response = userMapper.toResponse(user);
+        response.setToken(token);
+        return response;
     }
     
     @Override
     public UserResponse findByEmail(String email) {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
         return userMapper.toResponse(user);
     }
 }
