@@ -1,12 +1,9 @@
 package com.nexus.backend.enums;
 
 public enum NewsCategory {
-    FRONTEND,
-    BACKEND,
-    DEVOPS,
-    CARRERA,
-    RECURSOS,
-    HERRAMIENTAS,
+    DESARROLLO,
     ENTREVISTAS,
+    NETWORKING,
+    RECURSOS,
     GENERAL
 }
