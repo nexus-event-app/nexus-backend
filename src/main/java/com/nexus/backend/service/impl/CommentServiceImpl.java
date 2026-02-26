@@ -35,8 +35,10 @@ public class CommentServiceImpl implements CommentService {
         Discussion discussion = discussionRepository.findById(request.getDiscussionId())
                 .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
         
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId).orElse(null);
+        }
         
         Comment comment = commentMapper.toEntity(request, discussion, user);
         Comment saved = commentRepository.save(comment);
@@ -50,7 +52,18 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Comentario no encontrado"));
         
-        if (!comment.getAuthor().getId().equals(userId)) {
+        boolean isAdmin = false;
+        if (userId != null) {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                isAdmin = "ADMIN".equals(user.getRole().name());
+            }
+        }
+        
+        boolean isAuthor = comment.getAuthor() != null && userId != null 
+                && comment.getAuthor().getId().equals(userId);
+        
+        if (!isAuthor && !isAdmin) {
             throw new RuntimeException("No tienes permiso para eliminar este comentario");
         }
         

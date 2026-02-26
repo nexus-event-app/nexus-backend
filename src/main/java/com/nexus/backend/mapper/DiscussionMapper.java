@@ -32,21 +32,27 @@ public class DiscussionMapper {
             discussion.setCategory(request.getCategory());
         }
     }
+public DiscussionResponse toResponse(Discussion discussion, Integer commentCount, Boolean isLikedByCurrentUser) {
+    DiscussionResponse response = new DiscussionResponse();
+    response.setId(discussion.getId());
+    response.setTitle(discussion.getTitle());
+    response.setContent(discussion.getContent());
+    response.setCategory(discussion.getCategory());
     
-    public DiscussionResponse toResponse(Discussion discussion, Integer commentCount, Boolean isLikedByCurrentUser) {
-        DiscussionResponse response = new DiscussionResponse();
-        response.setId(discussion.getId());
-        response.setTitle(discussion.getTitle());
-        response.setContent(discussion.getContent());
-        response.setCategory(discussion.getCategory());
+    if (discussion.getAuthor() != null) {
         response.setAuthorId(discussion.getAuthor().getId());
         response.setAuthorName(discussion.getAuthor().getName());
-        response.setIsActive(discussion.getIsActive());
-        response.setCommentCount(commentCount);
-        response.setLikesCount(discussion.getLikesCount());
-        response.setIsLikedByCurrentUser(isLikedByCurrentUser);
-        response.setCreatedAt(discussion.getCreatedAt());
-        response.setUpdatedAt(discussion.getUpdatedAt());
-        return response;
+    } else {
+        response.setAuthorId(null);
+        response.setAuthorName("Anónimo");
     }
+    
+    response.setIsActive(discussion.getIsActive());
+    response.setCommentCount(commentCount);
+    response.setLikesCount(discussion.getLikesCount());
+    response.setIsLikedByCurrentUser(isLikedByCurrentUser);
+    response.setCreatedAt(discussion.getCreatedAt());
+    response.setUpdatedAt(discussion.getUpdatedAt());
+    return response;
+}
 }

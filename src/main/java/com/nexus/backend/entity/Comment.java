@@ -29,12 +29,12 @@ public class Comment {
     private Integer likesCount = 0;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "discussion_id", nullable = false)
+    @JoinColumn(name = "discussion_id", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Discussion discussion;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User author;
     
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)

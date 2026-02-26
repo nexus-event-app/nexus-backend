@@ -32,7 +32,7 @@ public class Discussion {
     private DiscussionCategory category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User author;
 
     @Column(nullable = false)

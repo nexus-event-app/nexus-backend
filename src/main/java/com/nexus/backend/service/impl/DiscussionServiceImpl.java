@@ -33,8 +33,10 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Override
     @Transactional
     public DiscussionResponse createDiscussion(CreateDiscussionRequest request, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        User user = null;
+        if (userId != null) {
+            user = userRepository.findById(userId).orElse(null);
+        }
         
         Discussion discussion = discussionMapper.toEntity(request, user);
         Discussion saved = discussionRepository.save(discussion);
@@ -48,7 +50,13 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = discussionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
         
-        if (!discussion.getAuthor().getId().equals(userId)) {
+        if (discussion.getAuthor() != null && userId != null) {
+            if (!discussion.getAuthor().getId().equals(userId)) {
+                throw new RuntimeException("No tienes permiso para editar esta discusión");
+            }
+        } else if (discussion.getAuthor() == null && userId == null) {
+    
+        } else {
             throw new RuntimeException("No tienes permiso para editar esta discusión");
         }
         
@@ -56,7 +64,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion updated = discussionRepository.save(discussion);
         
         Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
-        boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(id, userId);
+        boolean isLiked = userId != null && discussionLikeRepository.existsByDiscussionIdAndUserId(id, userId);
         return discussionMapper.toResponse(updated, commentCount, isLiked);
     }
     
@@ -66,11 +74,16 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = discussionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
         
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        boolean isAdmin = false;
+        if (userId != null) {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                isAdmin = "ADMIN".equals(user.getRole().name());
+            }
+        }
         
-        boolean isAuthor = discussion.getAuthor().getId().equals(userId);
-        boolean isAdmin = "ADMIN".equals(user.getRole());
+        boolean isAuthor = discussion.getAuthor() != null && userId != null 
+                && discussion.getAuthor().getId().equals(userId);
         
         if (!isAuthor && !isAdmin) {
             throw new RuntimeException("No tienes permiso para eliminar esta discusión");
