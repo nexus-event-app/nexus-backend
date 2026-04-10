@@ -12,6 +12,7 @@ import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.service.CommentService;
+import com.nexus.backend.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final CommentMapper commentMapper;
+    private final HtmlSanitizer htmlSanitizer;
     
     @Override
     @Transactional
@@ -39,6 +41,8 @@ public class CommentServiceImpl implements CommentService {
         if (userId != null) {
             user = userRepository.findById(userId).orElse(null);
         }
+        
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
         
         Comment comment = commentMapper.toEntity(request, discussion, user);
         Comment saved = commentRepository.save(comment);
