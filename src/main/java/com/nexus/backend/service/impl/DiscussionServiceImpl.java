@@ -13,6 +13,7 @@ import com.nexus.backend.repository.DiscussionLikeRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.service.DiscussionService;
+import com.nexus.backend.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final CommentRepository commentRepository;
     private final DiscussionLikeRepository discussionLikeRepository;
     private final DiscussionMapper discussionMapper;
+    private final HtmlSanitizer htmlSanitizer;
     
     @Override
     @Transactional
@@ -37,6 +39,9 @@ public class DiscussionServiceImpl implements DiscussionService {
         if (userId != null) {
             user = userRepository.findById(userId).orElse(null);
         }
+        
+        request.setTitle(htmlSanitizer.sanitize(request.getTitle()));
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
         
         Discussion discussion = discussionMapper.toEntity(request, user);
         Discussion saved = discussionRepository.save(discussion);
@@ -59,6 +64,9 @@ public class DiscussionServiceImpl implements DiscussionService {
         } else {
             throw new RuntimeException("No tienes permiso para editar esta discusión");
         }
+        
+        request.setTitle(htmlSanitizer.sanitize(request.getTitle()));
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
         
         discussionMapper.updateEntity(discussion, request);
         Discussion updated = discussionRepository.save(discussion);
