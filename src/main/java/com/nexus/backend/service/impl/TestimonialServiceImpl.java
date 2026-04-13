@@ -7,6 +7,7 @@ import com.nexus.backend.entity.Testimonial;
 import com.nexus.backend.mapper.TestimonialMapper;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.service.TestimonialService;
+import com.nexus.backend.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class TestimonialServiceImpl implements TestimonialService {
     
     private final TestimonialRepository testimonialRepository;
     private final TestimonialMapper testimonialMapper;
+    private final HtmlSanitizer htmlSanitizer;
     
     @Override
     @Transactional
@@ -28,6 +30,11 @@ public class TestimonialServiceImpl implements TestimonialService {
         if (!canCreateTestimonial(userIp)) {
             throw new RuntimeException("Solo puedes crear un testimonio cada 24 horas");
         }
+        
+        request.setName(htmlSanitizer.sanitize(request.getName()));
+        request.setRole(request.getRole() != null ? htmlSanitizer.sanitize(request.getRole()) : null);
+        request.setLocation(request.getLocation() != null ? htmlSanitizer.sanitize(request.getLocation()) : null);
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
         
         Testimonial testimonial = testimonialMapper.toEntity(request, userIp);
         Testimonial savedTestimonial = testimonialRepository.save(testimonial);
@@ -62,6 +69,11 @@ public class TestimonialServiceImpl implements TestimonialService {
     public TestimonialResponse updateTestimonial(Long id, UpdateTestimonialRequest request) {
         Testimonial testimonial = testimonialRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Testimonio no encontrado con ID: " + id));
+        
+        request.setName(htmlSanitizer.sanitize(request.getName()));
+        request.setRole(request.getRole() != null ? htmlSanitizer.sanitize(request.getRole()) : null);
+        request.setLocation(request.getLocation() != null ? htmlSanitizer.sanitize(request.getLocation()) : null);
+        request.setContent(htmlSanitizer.sanitize(request.getContent()));
         
         testimonialMapper.updateEntity(testimonial, request);
         Testimonial updatedTestimonial = testimonialRepository.save(testimonial);
