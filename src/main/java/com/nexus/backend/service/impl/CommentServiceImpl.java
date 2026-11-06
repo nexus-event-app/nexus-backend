@@ -15,6 +15,7 @@ import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
     private static final String DISCUSSION_NOT_FOUND = "Discusión no encontrada";
     private static final String COMMENT_NOT_FOUND = "Comentario no encontrado";
 
+    private final AccountService accountService;
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final DiscussionRepository discussionRepository;
@@ -60,6 +62,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentResponse createComment(CreateCommentRequest request, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
         Discussion discussion = findActiveDiscussion(request.getDiscussionId());
         User author = userRepository.findById(actor.getId())
                 .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));

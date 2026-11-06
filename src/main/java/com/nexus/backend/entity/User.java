@@ -46,6 +46,14 @@ public class User {
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean enabled = true;
 
+    /** Cuándo confirmó su email; null mientras no lo haya verificado. */
+    @Column(name = "email_verified_at")
+    private LocalDateTime emailVerifiedAt;
+
+    /** Último cambio de contraseña: los JWT emitidos antes dejan de ser válidos. */
+    @Column(name = "credentials_changed_at")
+    private LocalDateTime credentialsChangedAt;
+
     /** Cuándo aceptó el aviso legal y la política de privacidad al registrarse. */
     @Column(name = "terms_accepted_at")
     private LocalDateTime termsAcceptedAt;
@@ -70,5 +78,9 @@ public class User {
     public enum Role {
         USER,
         ADMIN
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerifiedAt != null;
     }
 }

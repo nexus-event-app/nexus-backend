@@ -13,6 +13,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Autentica la petición a partir del JWT si lo hay. Un token ausente, inválido o de una cuenta
@@ -41,10 +45,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void authenticate(HttpServletRequest request, String token) {
-        jwtUtil.extractEmailIfValid(token).ifPresent(email -> {
+        jwtUtil.parse(token).ifPresent(claims -> {
             try {
-                UserDetail userDetail = userDetailService.loadUserByUsername(email);
-                if (!userDetail.isEnabled()) {
+                UserDetail userDetail = userDetailService.loadUserByUsername(claims.email());
+                if (!userDetail.isEnabled() || issuedBeforeCredentialsChange(userDetail, claims)) {
                     return;
                 }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -55,5 +59,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // El usuario del token ya no existe: se trata como anónimo.
             }
         });
+    }
+
+    /** Tras cambiar la contraseña, los tokens emitidos antes dejan de valer (la fecha del JWT va en segundos). */
+    private static boolean issuedBeforeCredentialsChange(UserDetail userDetail, JwtUtil.TokenClaims claims) {
+        LocalDateTime changedAt = userDetail.getUser().getCredentialsChangedAt();
+        if (changedAt == null) {
+            return false;
+        }
+        Instant changed = changedAt.atZone(ZoneId.systemDefault()).toInstant().truncatedTo(ChronoUnit.SECONDS);
+        return claims.issuedAt().isBefore(changed);
     }
 }

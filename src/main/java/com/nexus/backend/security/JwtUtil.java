@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
@@ -66,15 +67,28 @@ public class JwtUtil {
                 .compact();
     }
 
+    /** Datos verificados de un token válido. */
+    public record TokenClaims(String email, Instant issuedAt) {
+    }
+
     /** Devuelve el email (subject) si el token es válido y no ha caducado; vacío en cualquier otro caso. */
     public Optional<String> extractEmailIfValid(String token) {
+        return parse(token).map(TokenClaims::email);
+    }
+
+    /** Email y fecha de emisión si el token es válido y no ha caducado; vacío en cualquier otro caso. */
+    public Optional<TokenClaims> parse(String token) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(signingKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            return Optional.ofNullable(claims.getSubject());
+            if (claims.getSubject() == null) {
+                return Optional.empty();
+            }
+            Instant issuedAt = claims.getIssuedAt() == null ? Instant.EPOCH : claims.getIssuedAt().toInstant();
+            return Optional.of(new TokenClaims(claims.getSubject(), issuedAt));
         } catch (JwtException | IllegalArgumentException ex) {
             return Optional.empty();
         }

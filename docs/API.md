@@ -29,11 +29,11 @@ Comunidad tech para perfiles junior en español:
 ```json
 { "status": 400, "error": "VALIDATION_ERROR", "message": "Datos no válidos", "fieldErrors": { "email": "El email debe ser válido" }, "timestamp": "2026-11-06T11:50:00", "path": "/api/auth/register" }
 ```
-Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CONFLICT` (409), `TOO_MANY_REQUESTS` (429), `INTERNAL_ERROR` (500). `fieldErrors` solo aparece en validación. Mensajes en español y sin detalles internos.
+Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `EMAIL_NOT_VERIFIED` (403, al publicar sin haber verificado el email), `NOT_FOUND` (404), `CONFLICT` (409), `TOO_MANY_REQUESTS` (429), `INTERNAL_ERROR` (500). `fieldErrors` solo aparece en validación. Mensajes en español y sin detalles internos.
 
 ## 3. DTOs de respuesta
 ### UserResponse
-`{ id, name, email, role: "USER"|"ADMIN", enabled: boolean, createdAt }`
+`{ id, name, email, role: "USER"|"ADMIN", enabled: boolean, emailVerified: boolean, createdAt }`
 ### AuthResponse
 `{ token, user: UserResponse }`
 ### NewsResponse
@@ -94,6 +94,9 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 | GET | `/sitemap.xml`, `/robots.txt`, `/uploads/**` | XML / texto / imágenes |
 | POST | `/api/auth/register` | 201 `AuthResponse` (rol USER) |
 | POST | `/api/auth/login` | `AuthResponse` (401 si credenciales inválidas o cuenta desactivada) |
+| POST | `/api/auth/forgot-password` | `{ email }` → 202 siempre, exista o no la cuenta; si existe y está activa, envía un enlace válido 1 hora |
+| POST | `/api/auth/reset-password` | `{ token, password }` → 204; 400 si el enlace no es válido, ya se usó o caducó. Invalida los JWT anteriores |
+| POST | `/api/auth/verify-email` | `{ token }` → 204; 400 si el enlace no es válido, ya se usó o caducó (48 horas) |
 
 En los GET de discusiones y comentarios, si llega un token válido se rellena `isLikedByCurrentUser`; si no hay token o es inválido se trata como anónimo (nunca error).
 
@@ -101,6 +104,7 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | Método | Ruta | Notas |
 |---|---|---|
 | GET | `/api/auth/me` | `UserResponse` |
+| POST | `/api/auth/resend-verification` | 202; envía un nuevo enlace de verificación e invalida el anterior. 400 si el email ya está verificado |
 | GET | `/api/discussions/mine?page&size` | `PageResponse<DiscussionResponse>` |
 | POST | `/api/discussions` | 201 `DiscussionResponse` |
 | PUT | `/api/discussions/{id}` | solo autor o ADMIN |
@@ -152,7 +156,7 @@ Los filtros y la paginación de listados van en la query de la URL (`?page=2&cat
 - `GET /api/discussions/mine` devuelve solo las discusiones activas del usuario.
 - `GET /api/admin/news` y `GET /api/admin/jobs` aceptan los mismos filtros que los listados públicos (`category`/`q` y `level`/`workMode`/`contractType`/`q`), incluyendo elementos inactivos y caducados.
 - `GET /api/testimonials` devuelve como máximo 100 testimonios; `/latest` devuelve 8.
-- Límites de peticiones por IP (POST): login 10 / 15 min, registro 5 / hora, crear discusión 10 / hora, crear comentario 30 / hora, crear testimonio 5 / hora. Al superarlos: 429 `TOO_MANY_REQUESTS` con cabecera `Retry-After` (segundos).
+- Límites de peticiones por IP (POST): login 10 / 15 min, registro 5 / hora, recuperar contraseña 5 / hora, restablecer contraseña 10 / hora, verificar email 20 / hora, reenviar verificación 5 / hora, crear discusión 10 / hora, crear comentario 30 / hora, crear testimonio 5 / hora. Al superarlos: 429 `TOO_MANY_REQUESTS` con cabecera `Retry-After` (segundos).
 - `GET /actuator/health` es público y es lo único que expone Actuator (`{"status":"UP"}`).
 - `isLikedByCurrentUser` se calcula con una única consulta por página; `commentCount` con una única consulta agrupada.
 - `/sitemap.xml` y `/robots.txt` se cachean 10 minutos en memoria; el sitemap incluye hasta 5000 URLs por tipo (noticias activas, ofertas vigentes, discusiones activas; sin contenido importado).

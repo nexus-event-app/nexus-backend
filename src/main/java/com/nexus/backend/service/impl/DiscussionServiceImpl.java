@@ -20,6 +20,7 @@ import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.repository.projection.DiscussionCommentCount;
 import com.nexus.backend.repository.spec.DiscussionSpecifications;
 import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.DiscussionService;
 import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     private static final String NOT_FOUND_MESSAGE = "Discusión no encontrada";
 
+    private final AccountService accountService;
     private final DiscussionRepository discussionRepository;
     private final DiscussionLikeRepository discussionLikeRepository;
     private final CommentRepository commentRepository;
@@ -88,6 +90,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Override
     @Transactional
     public DiscussionResponse createDiscussion(CreateDiscussionRequest request, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
         User author = loadUser(actor);
         Discussion saved = discussionRepository.save(discussionMapper.toEntity(request, author));
         return discussionMapper.toResponse(saved, 0, 0, false);

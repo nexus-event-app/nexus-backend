@@ -19,5 +19,6 @@ public class UserResponse {
     private String email;
     private User.Role role;
     private boolean enabled;
+    private boolean emailVerified;
     private LocalDateTime createdAt;
 }
