@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +38,7 @@ public class ImportSource {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 30)
     private ImportSourceType type;
 
@@ -44,6 +47,7 @@ public class ImportSource {
 
     /** Categoría asignada a las noticias importadas (solo fuentes de noticias). */
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "news_category", length = 30)
     private NewsCategory newsCategory;
 
@@ -72,6 +76,7 @@ public class ImportSource {
     private LocalDateTime lastRunAt;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "last_status", length = 20)
     private ImportStatus lastStatus;
 

@@ -12,6 +12,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -49,6 +51,7 @@ public class News {
     private String author;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "category", nullable = false, length = 30)
     private NewsCategory category = NewsCategory.GENERAL;
 

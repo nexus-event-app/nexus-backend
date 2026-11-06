@@ -14,6 +14,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -50,14 +52,17 @@ public class JobOffer {
     private String location;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "work_mode", nullable = false, length = 20)
     private WorkMode workMode;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "contract_type", nullable = false, length = 20)
     private ContractType contractType;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "level", nullable = false, length = 20)
     private JobLevel level;
 
