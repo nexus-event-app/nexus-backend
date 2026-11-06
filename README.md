@@ -26,6 +26,10 @@ Hay una plantilla completa en [`.env.example`](.env.example).
 | `SPRING_DATASOURCE_URL/USERNAME/PASSWORD` | PostgreSQL (perfil `prod`) | obligatorias en prod |
 | `FORWARD_HEADERS_STRATEGY` | `none` o `native` (detrás de un proxy de confianza) | `none` |
 | `UPLOAD_DIR` | Directorio de imágenes subidas | `./uploads` |
+| `MAIL_ENABLED` | Envía emails por SMTP. Con `false` se escriben en el log | `false` |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` | Servidor SMTP del proveedor (Brevo, Resend, Amazon SES...) | puerto `587` |
+| `MAIL_FROM` | Remitente, p. ej. `Primer Commit <hola@tu-dominio.com>` | `Primer Commit <no-reply@localhost>` |
+| `REQUIRE_VERIFIED_EMAIL` | Exige email verificado para publicar en el foro y enviar testimonios | `true` |
 | `IMPORT_ENABLED` | Activa la importación automática programada | `true` |
 | `IMPORT_CHECK_INTERVAL` | Cada cuánto se revisa qué fuentes toca ejecutar (ISO-8601) | `PT15M` |
 | `IMPORT_INITIAL_DELAY` | Espera tras arrancar antes de la primera revisión | `PT1M` |
@@ -112,6 +116,17 @@ src/main/java/com/nexus/backend
 | SEO / estáticos | `/sitemap.xml`, `/robots.txt`, `/uploads/news/{archivo}` |
 
 Todas las listas paginadas usan `page` (desde 0) y `size` (por defecto 12, máximo 50), y los errores siguen el formato JSON descrito en `docs/API.md`.
+
+## Cuentas: verificación de email y recuperación de contraseña
+
+- Al registrarse se envía un enlace de verificación (válido 48 horas). Hasta verificar, se puede iniciar sesión y leer, pero publicar debates, comentarios o testimonios responde 403 con el código `EMAIL_NOT_VERIFIED`.
+- «¿Has olvidado tu contraseña?» envía un enlace válido 1 hora y de un solo uso. La respuesta es siempre la misma, exista o no la cuenta, para no revelar qué emails están registrados. Al cambiar la contraseña, todos los JWT emitidos antes dejan de valer (`users.credentials_changed_at`).
+- Los tokens se generan con 256 bits aleatorios y en la base de datos solo se guarda su hash SHA-256 (`user_tokens`). Al emitir uno nuevo se invalidan los anteriores del mismo tipo, y los caducados se borran cada día.
+- Los emails se envían en segundo plano y solo después de confirmar la transacción.
+
+**En desarrollo** no hace falta ningún servicio de correo: con `MAIL_ENABLED=false` el email completo, con su enlace, aparece en la consola del backend entre líneas `===== EMAIL`. Copia el enlace en el navegador para probar el flujo.
+
+**En producción**, crea una cuenta en un proveedor SMTP, verifica tu dominio (registros SPF y DKIM que te indicará) y define `MAIL_ENABLED=true`, `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD` y `MAIL_FROM`.
 
 ## Importación automática de noticias y empleo
 

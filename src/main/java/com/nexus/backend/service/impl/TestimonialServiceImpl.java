@@ -12,6 +12,7 @@ import com.nexus.backend.mapper.TestimonialMapper;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.TestimonialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ public class TestimonialServiceImpl implements TestimonialService {
     private static final int PUBLISHED_LIMIT = 100;
     private static final int LATEST_LIMIT = 8;
 
+    private final AccountService accountService;
     private final TestimonialRepository testimonialRepository;
     private final UserRepository userRepository;
     private final TestimonialMapper testimonialMapper;
@@ -47,6 +49,7 @@ public class TestimonialServiceImpl implements TestimonialService {
     @Override
     @Transactional
     public TestimonialResponse createTestimonial(CreateTestimonialRequest request, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         if (testimonialRepository.existsByUserIdAndCreatedAtAfter(actor.getId(), since)) {
             throw new ConflictException("Solo puedes enviar un testimonio cada 24 horas");

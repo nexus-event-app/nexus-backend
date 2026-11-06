@@ -16,6 +16,7 @@ import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.repository.spec.UserSpecifications;
 import com.nexus.backend.security.JwtUtil;
 import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.UserService;
 import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AccountService accountService;
 
     @Override
     @Transactional
@@ -52,6 +54,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(request, passwordEncoder.encode(request.getPassword()));
         User saved = userRepository.save(user);
         log.info("Usuario registrado: id={}", saved.getId());
+        accountService.sendEmailVerification(saved);
         return buildAuthResponse(saved);
     }
 
