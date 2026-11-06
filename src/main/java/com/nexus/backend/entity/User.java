@@ -46,6 +46,10 @@ public class User {
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean enabled = true;
 
+    /** Cuándo aceptó el aviso legal y la política de privacidad al registrarse. */
+    @Column(name = "terms_accepted_at")
+    private LocalDateTime termsAcceptedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

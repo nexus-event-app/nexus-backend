@@ -5,6 +5,8 @@ import com.nexus.backend.dto.response.UserResponse;
 import com.nexus.backend.entity.User;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class UserMapper {
 
@@ -16,6 +18,7 @@ public class UserMapper {
         user.setPassword(encodedPassword);
         user.setRole(User.Role.USER);
         user.setEnabled(true);
+        user.setTermsAcceptedAt(LocalDateTime.now());
         return user;
     }
 
