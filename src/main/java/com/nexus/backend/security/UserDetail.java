@@ -16,6 +16,23 @@ public class UserDetail implements UserDetails {
         this.user = user;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public Long getId() {
+        return user.getId();
+    }
+
+    public boolean isAdmin() {
+        return user.getRole() == User.Role.ADMIN;
+    }
+
+    /** Un usuario puede gestionar un recurso si es su autor o si es ADMIN. */
+    public boolean canManage(Long ownerId) {
+        return isAdmin() || (ownerId != null && ownerId.equals(user.getId()));
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
@@ -48,10 +65,6 @@ public class UserDetail implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
-    }
-
-    public User getUser() {
-        return user;
+        return user.isEnabled();
     }
 }

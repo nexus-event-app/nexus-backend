@@ -4,6 +4,14 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Datos locales y secretos ###
+data/
+data-backup-*/
+uploads/
+.env
+*.log
+.DS_Store
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +39,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Eclipse ###
+bin/

@@ -6,117 +6,116 @@ import com.nexus.backend.entity.Comment;
 import com.nexus.backend.entity.CommentLike;
 import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.User;
+import com.nexus.backend.exception.ForbiddenOperationException;
+import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.CommentMapper;
 import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
+import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.CommentService;
-import com.nexus.backend.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
-    
+
+    private static final String DISCUSSION_NOT_FOUND = "Discusión no encontrada";
+    private static final String COMMENT_NOT_FOUND = "Comentario no encontrado";
+
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final DiscussionRepository discussionRepository;
     private final UserRepository userRepository;
-    private final CommentLikeRepository commentLikeRepository;
     private final CommentMapper commentMapper;
-    private final HtmlSanitizer htmlSanitizer;
-    
+
     @Override
-    @Transactional
-    public CommentResponse createComment(CreateCommentRequest request, Long userId) {
-        Discussion discussion = discussionRepository.findById(request.getDiscussionId())
-                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
-        
-        User user = null;
-        if (userId != null) {
-            user = userRepository.findById(userId).orElse(null);
+    @Transactional(readOnly = true)
+    public List<CommentResponse> getCommentsByDiscussion(Long discussionId, UserDetail viewer) {
+        findActiveDiscussion(discussionId);
+        List<Comment> comments = commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId);
+
+        Set<Long> likedIds = new HashSet<>();
+        if (viewer != null && !comments.isEmpty()) {
+            List<Long> ids = comments.stream().map(Comment::getId).toList();
+            likedIds.addAll(commentLikeRepository.findLikedCommentIds(viewer.getId(), ids));
         }
-        
-        request.setContent(htmlSanitizer.sanitize(request.getContent()));
-        
-        Comment comment = commentMapper.toEntity(request, discussion, user);
-        Comment saved = commentRepository.save(comment);
-        
-        return commentMapper.toResponse(saved, false);
+
+        return comments.stream()
+                .map(comment -> commentMapper.toResponse(comment, comment.getLikesCount(), likedIds.contains(comment.getId())))
+                .toList();
     }
-    
+
     @Override
     @Transactional
-    public void deleteComment(Long id, Long userId) {
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Comentario no encontrado"));
-        
-        boolean isAdmin = false;
-        if (userId != null) {
-            User user = userRepository.findById(userId).orElse(null);
-            if (user != null) {
-                isAdmin = "ADMIN".equals(user.getRole().name());
-            }
+    public CommentResponse createComment(CreateCommentRequest request, UserDetail actor) {
+        Discussion discussion = findActiveDiscussion(request.getDiscussionId());
+        User author = userRepository.findById(actor.getId())
+                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+
+        Comment saved = commentRepository.save(commentMapper.toEntity(request, discussion, author));
+        return commentMapper.toResponse(saved, 0, false);
+    }
+
+    @Override
+    @Transactional
+    public void deleteComment(Long id, UserDetail actor) {
+        Comment comment = findComment(id);
+        Long ownerId = comment.getAuthor() != null ? comment.getAuthor().getId() : null;
+        if (!actor.canManage(ownerId)) {
+            throw new ForbiddenOperationException("Solo el autor o un administrador puede eliminar el comentario");
         }
-        
-        boolean isAuthor = comment.getAuthor() != null && userId != null 
-                && comment.getAuthor().getId().equals(userId);
-        
-        if (!isAuthor && !isAdmin) {
-            throw new RuntimeException("No tienes permiso para eliminar este comentario");
-        }
-        
+
+        commentLikeRepository.deleteAllByCommentId(id);
         commentRepository.delete(comment);
+        log.info("Comentario id={} eliminado por usuario id={}", id, actor.getId());
     }
-    
-    @Override
-    public List<CommentResponse> getCommentsByDiscussion(Long discussionId) {
-        return commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId)
-                .stream()
-                .map(comment -> commentMapper.toResponse(comment, false))
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<CommentResponse> getCommentsByDiscussion(Long discussionId, Long userId) {
-        return commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId)
-                .stream()
-                .map(comment -> {
-                    boolean isLiked = commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId);
-                    return commentMapper.toResponse(comment, isLiked);
-                })
-                .collect(Collectors.toList());
-    }
-    
+
     @Override
     @Transactional
-    public CommentResponse toggleLike(Long commentId, Long userId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comentario no encontrado"));
-        
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        boolean isLiked = commentLikeRepository.existsByCommentIdAndUserId(commentId, userId);
-        
-        if (isLiked) {
-            commentLikeRepository.deleteByCommentIdAndUserId(commentId, userId);
-            comment.setLikesCount(comment.getLikesCount() - 1);
+    public CommentResponse toggleLike(Long id, UserDetail actor) {
+        Comment comment = findComment(id);
+        Optional<CommentLike> existing = commentLikeRepository.findByCommentIdAndUserId(id, actor.getId());
+
+        boolean liked;
+        if (existing.isPresent()) {
+            commentLikeRepository.delete(existing.get());
+            liked = false;
         } else {
             CommentLike like = new CommentLike();
             like.setComment(comment);
-            like.setUser(user);
+            like.setUser(userRepository.findById(actor.getId())
+                    .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado")));
             commentLikeRepository.save(like);
-            comment.setLikesCount(comment.getLikesCount() + 1);
+            liked = true;
         }
-        
-        commentRepository.save(comment);
-        
-        return commentMapper.toResponse(comment, !isLiked);
+
+        int likesCount = (int) commentLikeRepository.countByCommentId(id);
+        commentRepository.updateLikesCount(id, likesCount);
+        return commentMapper.toResponse(comment, likesCount, liked);
+    }
+
+    private Comment findComment(Long id) {
+        return commentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(COMMENT_NOT_FOUND));
+    }
+
+    private Discussion findActiveDiscussion(Long discussionId) {
+        Discussion discussion = discussionRepository.findById(discussionId)
+                .orElseThrow(() -> new ResourceNotFoundException(DISCUSSION_NOT_FOUND));
+        if (!Boolean.TRUE.equals(discussion.getIsActive())) {
+            throw new ResourceNotFoundException(DISCUSSION_NOT_FOUND);
+        }
+        return discussion;
     }
 }

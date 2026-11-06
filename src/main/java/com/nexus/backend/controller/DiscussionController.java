@@ -1,101 +1,83 @@
 package com.nexus.backend.controller;
 
-import lombok.RequiredArgsConstructor;
 import com.nexus.backend.dto.request.CreateDiscussionRequest;
 import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
+import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.enums.DiscussionCategory;
+import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.DiscussionService;
+import com.nexus.backend.util.Pagination;
 import jakarta.validation.Valid;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/discussions")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class DiscussionController {
 
     private final DiscussionService discussionService;
 
-    @PostMapping
-    public ResponseEntity<DiscussionResponse> createDiscussion(
-            @Valid @RequestBody CreateDiscussionRequest request,
-            @RequestHeader(value = "User-Id", required = false) Long userId) {
-        DiscussionResponse response = discussionService.createDiscussion(request, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @GetMapping
+    public ResponseEntity<PageResponse<DiscussionResponse>> getDiscussions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "" + Pagination.DEFAULT_SIZE) int size,
+            @RequestParam(required = false) DiscussionCategory category,
+            @RequestParam(required = false) String q,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.getDiscussions(category, q, page, size, principal));
     }
 
-@PutMapping("/{id}")
-public ResponseEntity<DiscussionResponse> updateDiscussion(
-        @PathVariable Long id,
-        @Valid @RequestBody UpdateDiscussionRequest request,
-        @RequestHeader(value = "User-Id", required = false) Long userId) {
-    DiscussionResponse response = discussionService.updateDiscussion(id, request, userId);
-    return ResponseEntity.ok(response);
-}
-
-@DeleteMapping("/{id}")
-public ResponseEntity<Void> deleteDiscussion(
-        @PathVariable Long id,
-        @RequestHeader(value = "User-Id", required = false) Long userId) {
-    discussionService.deleteDiscussion(id, userId);
-    return ResponseEntity.noContent().build();
-}
+    @GetMapping("/mine")
+    public ResponseEntity<PageResponse<DiscussionResponse>> getMyDiscussions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "" + Pagination.DEFAULT_SIZE) int size,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.getMyDiscussions(page, size, principal));
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<DiscussionResponse> getDiscussionById(
             @PathVariable Long id,
-            @RequestHeader(value = "User-Id", required = false) Long userId) {
-        DiscussionResponse response;
-        if (userId != null) {
-            response = discussionService.getDiscussionById(id, userId);
-        } else {
-            response = discussionService.getDiscussionById(id);
-        }
-        return ResponseEntity.ok(response);
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.getDiscussionById(id, principal));
     }
 
-    @GetMapping
-    public ResponseEntity<List<DiscussionResponse>> getAllDiscussions(
-            @RequestHeader(value = "User-Id", required = false) Long userId) {
-        List<DiscussionResponse> discussions;
-        if (userId != null) {
-            discussions = discussionService.getAllDiscussions(userId);
-        } else {
-            discussions = discussionService.getAllDiscussions();
-        }
-        return ResponseEntity.ok(discussions);
+    @PostMapping
+    public ResponseEntity<DiscussionResponse> createDiscussion(
+            @Valid @RequestBody CreateDiscussionRequest request,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(discussionService.createDiscussion(request, principal));
     }
 
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<DiscussionResponse>> getDiscussionsByCategory(
-            @PathVariable DiscussionCategory category,
-            @RequestHeader(value = "User-Id", required = false) Long userId) {
-        List<DiscussionResponse> discussions;
-        if (userId != null) {
-            discussions = discussionService.getDiscussionsByCategory(category, userId);
-        } else {
-            discussions = discussionService.getDiscussionsByCategory(category);
-        }
-        return ResponseEntity.ok(discussions);
+    @PutMapping("/{id}")
+    public ResponseEntity<DiscussionResponse> updateDiscussion(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateDiscussionRequest request,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.updateDiscussion(id, request, principal));
     }
 
-    @GetMapping("/my-discussions")
-    public ResponseEntity<List<DiscussionResponse>> getMyDiscussions(
-            @RequestHeader("User-Id") Long userId) {
-        List<DiscussionResponse> discussions = discussionService.getMyDiscussions(userId);
-        return ResponseEntity.ok(discussions);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDiscussion(@PathVariable Long id, @AuthenticationPrincipal UserDetail principal) {
+        discussionService.deleteDiscussion(id, principal);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/like")
-    public ResponseEntity<DiscussionResponse> toggleLike(
-            @PathVariable Long id,
-            @RequestHeader("User-Id") Long userId) {
-        DiscussionResponse response = discussionService.toggleLike(id, userId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<DiscussionResponse> toggleLike(@PathVariable Long id, @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.toggleLike(id, principal));
     }
 }
