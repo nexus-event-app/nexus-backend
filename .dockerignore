@@ -1,0 +1,14 @@
+target/
+.git/
+.gitignore
+.idea/
+.vscode/
+data/
+data-backup-*/
+uploads/
+.env
+*.log
+.DS_Store
+HELP.md
+docs/
+README.md

@@ -5,11 +5,14 @@ import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
 import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.User;
+import com.nexus.backend.util.SlugUtil;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DiscussionMapper {
-    
+
+    private static final String ANONYMOUS_NAME = "Anónimo";
+
     public Discussion toEntity(CreateDiscussionRequest request, User author) {
         Discussion discussion = new Discussion();
         discussion.setTitle(request.getTitle());
@@ -20,39 +23,29 @@ public class DiscussionMapper {
         discussion.setLikesCount(0);
         return discussion;
     }
-    
+
     public void updateEntity(Discussion discussion, UpdateDiscussionRequest request) {
-        if (request.getTitle() != null) {
-            discussion.setTitle(request.getTitle());
-        }
-        if (request.getContent() != null) {
-            discussion.setContent(request.getContent());
-        }
-        if (request.getCategory() != null) {
-            discussion.setCategory(request.getCategory());
-        }
+        discussion.setTitle(request.getTitle());
+        discussion.setContent(request.getContent());
+        discussion.setCategory(request.getCategory());
     }
-public DiscussionResponse toResponse(Discussion discussion, Integer commentCount, Boolean isLikedByCurrentUser) {
-    DiscussionResponse response = new DiscussionResponse();
-    response.setId(discussion.getId());
-    response.setTitle(discussion.getTitle());
-    response.setContent(discussion.getContent());
-    response.setCategory(discussion.getCategory());
-    
-    if (discussion.getAuthor() != null) {
-        response.setAuthorId(discussion.getAuthor().getId());
-        response.setAuthorName(discussion.getAuthor().getName());
-    } else {
-        response.setAuthorId(null);
-        response.setAuthorName("Anónimo");
+
+    public DiscussionResponse toResponse(Discussion discussion, int commentCount, int likesCount, boolean likedByCurrentUser) {
+        User author = discussion.getAuthor();
+        return DiscussionResponse.builder()
+                .id(discussion.getId())
+                .slug(SlugUtil.slugify(discussion.getTitle()))
+                .title(discussion.getTitle())
+                .content(discussion.getContent())
+                .category(discussion.getCategory())
+                .authorId(author != null ? author.getId() : null)
+                .authorName(author != null ? author.getName() : ANONYMOUS_NAME)
+                .isActive(discussion.getIsActive())
+                .commentCount(commentCount)
+                .likesCount(likesCount)
+                .isLikedByCurrentUser(likedByCurrentUser)
+                .createdAt(discussion.getCreatedAt())
+                .updatedAt(discussion.getUpdatedAt())
+                .build();
     }
-    
-    response.setIsActive(discussion.getIsActive());
-    response.setCommentCount(commentCount);
-    response.setLikesCount(discussion.getLikesCount());
-    response.setIsLikedByCurrentUser(isLikedByCurrentUser);
-    response.setCreatedAt(discussion.getCreatedAt());
-    response.setUpdatedAt(discussion.getUpdatedAt());
-    return response;
-}
 }

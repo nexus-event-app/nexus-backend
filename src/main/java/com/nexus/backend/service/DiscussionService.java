@@ -3,31 +3,27 @@ package com.nexus.backend.service;
 import com.nexus.backend.dto.request.CreateDiscussionRequest;
 import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
+import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.enums.DiscussionCategory;
-
-import java.util.List;
+import com.nexus.backend.security.UserDetail;
 
 public interface DiscussionService {
-    
-    DiscussionResponse createDiscussion(CreateDiscussionRequest request, Long userId);
-    
-    DiscussionResponse updateDiscussion(Long id, UpdateDiscussionRequest request, Long userId);
-    
-    void deleteDiscussion(Long id, Long userId);
-    
-    DiscussionResponse getDiscussionById(Long id);
-    
-    DiscussionResponse getDiscussionById(Long id, Long userId);
-    
-    List<DiscussionResponse> getAllDiscussions();
-    
-    List<DiscussionResponse> getAllDiscussions(Long userId);
-    
-    List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category);
-    
-    List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category, Long userId);
-    
-    List<DiscussionResponse> getMyDiscussions(Long userId);
-    
-    DiscussionResponse toggleLike(Long discussionId, Long userId);
+
+    /** {@code viewer} puede ser null (visitante anónimo). */
+    PageResponse<DiscussionResponse> getDiscussions(DiscussionCategory category, String text, int page, int size,
+                                                    UserDetail viewer);
+
+    DiscussionResponse getDiscussionById(Long id, UserDetail viewer);
+
+    PageResponse<DiscussionResponse> getMyDiscussions(int page, int size, UserDetail actor);
+
+    PageResponse<DiscussionResponse> getAllDiscussions(String text, int page, int size, UserDetail actor);
+
+    DiscussionResponse createDiscussion(CreateDiscussionRequest request, UserDetail actor);
+
+    DiscussionResponse updateDiscussion(Long id, UpdateDiscussionRequest request, UserDetail actor);
+
+    void deleteDiscussion(Long id, UserDetail actor);
+
+    DiscussionResponse toggleLike(Long id, UserDetail actor);
 }
