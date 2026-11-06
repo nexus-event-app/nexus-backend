@@ -27,6 +27,10 @@ Hay una plantilla completa en [`.env.example`](.env.example).
 | `FORWARD_HEADERS_STRATEGY` | `none` o `native` (detrás de un proxy de confianza) | `none` |
 | `UPLOAD_DIR` | Directorio de imágenes subidas | `./uploads` |
 | `JPA_DDL_AUTO` | Estrategia de esquema de Hibernate en prod | `update` |
+| `IMPORT_ENABLED` | Activa la importación automática programada | `true` |
+| `IMPORT_CHECK_INTERVAL` | Cada cuánto se revisa qué fuentes toca ejecutar (ISO-8601) | `PT15M` |
+| `IMPORT_INITIAL_DELAY` | Espera tras arrancar antes de la primera revisión | `PT1M` |
+| `IMPORT_SEED_DEFAULTS` | Crea las fuentes por defecto si no hay ninguna | `true` |
 
 ## Arranque en desarrollo
 
@@ -68,6 +72,7 @@ src/main/java/com/nexus/backend
 ├── entity/       entidades JPA con índices
 ├── enums/        categorías, modalidades, niveles
 ├── exception/    excepciones de dominio y GlobalExceptionHandler
+├── importer/     importación automática: proveedores, clasificador, cliente HTTP y planificador
 ├── mapper/       entidad <-> DTO
 ├── repository/   repositorios, specifications y proyecciones
 ├── security/     JWT, filtro y UserDetail
@@ -86,10 +91,32 @@ src/main/java/com/nexus/backend
 | Foro | `GET/POST /api/discussions`, `GET /api/discussions/mine`, `GET/PUT/DELETE /api/discussions/{id}`, `POST /api/discussions/{id}/like` |
 | Comentarios | `GET /api/comments/discussion/{id}`, `POST /api/comments`, `DELETE /api/comments/{id}`, `POST /api/comments/{id}/like` |
 | Testimonios | `GET /api/testimonials`, `/api/testimonials/latest`, `POST /api/testimonials` |
-| Admin (solo ADMIN) | `/api/admin/stats`, `news`, `jobs`, `discussions`, `testimonials`, `users`, `uploads/image` |
+| Admin (solo ADMIN) | `/api/admin/stats`, `news`, `jobs`, `discussions`, `testimonials`, `users`, `uploads/image`, `import-sources` |
 | SEO / estáticos | `/sitemap.xml`, `/robots.txt`, `/uploads/news/{archivo}` |
 
 Todas las listas paginadas usan `page` (desde 0) y `size` (por defecto 12, máximo 50), y los errores siguen el formato JSON descrito en `docs/API.md`.
+
+## Importación automática de noticias y empleo
+
+El paquete `importer/` consulta periódicamente fuentes externas y guarda lo nuevo como noticias u ofertas. Las fuentes se gestionan en el panel (`/admin/importacion`) o en `/api/admin/import-sources`.
+
+| Tipo | Qué importa | Intervalo mínimo |
+|---|---|---|
+| `RSS_NEWS` | Cualquier feed RSS 2.0 o Atom | 30 min |
+| `GETONBRD_JOBS` | API pública de [Get on Board](https://www.getonbrd.com) (empleo tech en español), por categoría | 2 h |
+| `REMOTIVE_JOBS` | API pública de [Remotive](https://remotive.com/api-documentation) (empleo en remoto) | 6 h (máximo 4 consultas al día según sus condiciones) |
+| `ARBEITNOW_JOBS` | API pública de [Arbeitnow](https://www.arbeitnow.com/blog/job-board-api) (Europa) | 1 h |
+
+Reglas que aplica en cada ejecución:
+
+- **Noticias:** solo se guarda un resumen en texto plano (máximo 600 caracteres), la imagen y el enlace al artículo original. Se descartan las de más de 14 días y, si la fuente tiene palabras clave, las que no contengan ninguna. Máximo 10 nuevas por fuente y ejecución.
+- **Empleo:** solo ofertas de prácticas o junior del sector tech (`JobClassifier`, con pistas de nivel en español, inglés, alemán y francés). Se descartan las de más de 30 días; las importadas caducan a los 30 días de publicarse y se borran 60 días después de caducar.
+- **Duplicados:** cada elemento tiene un `externalId` único. Si un admin borra algo importado, se guarda en `import_exclusions` y no vuelve a importarse.
+- **SEO y atribución:** lo importado sale marcado con su fuente y enlaza al original, no entra en el sitemap y el frontend lo publica con `noindex` y sin datos estructurados (Remotive prohíbe expresamente que sus ofertas acaben en Google Jobs).
+- **Seguridad:** solo URLs `http`/`https` públicas (se rechazan localhost y redes privadas, también en cada redirección), tiempo de espera de 25 s, respuestas de 8 MB como máximo, XML sin DOCTYPE y HTML convertido a texto plano con jsoup.
+- **Revisión manual:** con `autoPublish=false` lo importado queda oculto hasta que un admin lo publique.
+
+El planificador está pensado para una sola instancia. Si despliegas varias réplicas, deja `IMPORT_ENABLED=true` solo en una.
 
 ## Seguridad en breve
 

@@ -4,7 +4,7 @@ Referencia de la API REST tal y como está implementada en este backend (Spring 
 
 ## 0. Idea del producto (guía de todas las decisiones)
 Comunidad tech para perfiles junior en español:
-- Noticias tech diarias (más adelante se automatizarán desde fuentes externas; ahora CRUD manual de admin).
+- Noticias tech diarias: CRUD manual de admin más importación automática desde feeds RSS/Atom.
 - Ofertas de empleo relacionadas con la temática (junior/prácticas). Sustituye al módulo de "eventos".
 - Foro activo. Solo usuarios registrados pueden escribir. El admin tiene control absoluto (borrar, ocultar, bloquear usuarios).
 - Testimonios. Solo usuarios registrados; los moderan los admins antes de publicarse.
@@ -37,10 +37,12 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 ### AuthResponse
 `{ token, user: UserResponse }`
 ### NewsResponse
-`{ id, slug, title, content, sourceUrl, imageUrl, author, category, isActive, createdAt, updatedAt }`
+`{ id, slug, title, content, sourceUrl, imageUrl, author, category, source, imported, isActive, createdAt, updatedAt }`
+`source` es el nombre de la fuente de importación (o `null`); `imported` es `true` si la noticia se importó (su `content` es solo un resumen).
 `category`: `DESARROLLO | ENTREVISTAS | NETWORKING | RECURSOS | GENERAL`
 ### JobResponse
-`{ id, slug, title, company, description, location, workMode, contractType, level, tags: string[], applyUrl, source, isActive, publishedAt, expiresAt, createdAt, updatedAt }`
+`{ id, slug, title, company, description, location, workMode, contractType, level, tags: string[], applyUrl, source, imported, isActive, publishedAt, expiresAt, createdAt, updatedAt }`
+- `imported`: `true` si la oferta viene de una fuente externa (el frontend no la indexa ni la marca como JobPosting).
 - `workMode`: `REMOTE | HYBRID | ONSITE`
 - `contractType`: `FULL_TIME | PART_TIME | INTERNSHIP | FREELANCE | TEMPORARY`
 - `level`: `INTERN | JUNIOR | MID`
@@ -53,6 +55,11 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 `{ id, content, discussionId, authorId, authorName, likesCount, isLikedByCurrentUser, createdAt, updatedAt }`
 ### TestimonialResponse
 `{ id, name, role, location, content, isActive, isPending, isHighlighted, createdAt, updatedAt }`
+### ImportSourceResponse (admin)
+`{ id, name, type, url, newsCategory, autoPublish, active, remoteOnly, keywords, intervalMinutes, minIntervalMinutes, lastRunAt, lastStatus: "SUCCESS"|"FAILED"|null, lastMessage, lastImportedCount, running, createdAt }`
+`type`: `RSS_NEWS | GETONBRD_JOBS | REMOTIVE_JOBS | ARBEITNOW_JOBS`
+### ImportRunResponse (admin)
+`{ status, fetched, imported, message, source: ImportSourceResponse }`
 ### StatsResponse (admin)
 `{ users, news, jobs, discussions, comments, pendingTestimonials }` (todos enteros)
 
@@ -67,6 +74,7 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 - `CreateTestimonialRequest { name (2–100), role (≤100, opcional), location (≤100, opcional), content (50–300) }`
 - `UpdateTestimonialRequest { isActive, isPending, isHighlighted }` (todos opcionales; solo admin)
 - `UpdateUserStatusRequest { enabled: boolean }`
+- `ImportSourceRequest { name (2–100, único), type, url (http/https pública, ≤500), newsCategory (solo noticias, por defecto GENERAL), autoPublish (por defecto true), active (por defecto true), remoteOnly (solo empleo), keywords (≤500, separadas por comas), intervalMinutes (30–10080; si es menor que el mínimo del tipo se eleva a ese mínimo) }`. El `type` no se puede cambiar al editar.
 
 ## 5. Endpoints
 ### Públicos (sin sesión)
@@ -119,11 +127,15 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | PUT | `/api/admin/users/{id}/status` | `{enabled}`; un admin no puede desactivarse a sí mismo ni a otro ADMIN |
 | POST | `/api/admin/uploads/image` | multipart campo `file` → `{ imageUrl, fileName }` |
 | DELETE | `/api/admin/uploads/image/{fileName}` | 204 |
+| GET | `/api/admin/import-sources` | `ImportSourceResponse[]` ordenadas por nombre |
+| POST | `/api/admin/import-sources` | 201 `ImportSourceResponse`; 409 si el nombre ya existe |
+| PUT/DELETE | `/api/admin/import-sources/{id}` | borrar una fuente no borra lo ya importado |
+| POST | `/api/admin/import-sources/{id}/run` | ejecuta ahora → `ImportRunResponse`; 400 si se consultó hace menos del tiempo mínimo del tipo (Remotive 6 h, Get on Board y Arbeitnow 5 min, RSS 1 min) |
 
 Las imágenes se sirven en `/uploads/news/{fileName}`. El borrado de discusiones y comentarios por parte de un admin usa los mismos endpoints de usuario (`DELETE /api/discussions/{id}`, `DELETE /api/comments/{id}`).
 
 ## 6. Rutas del frontend (todas en español)
-`/` · `/noticias` · `/noticias/:idSlug` · `/empleo` · `/empleo/:idSlug` · `/foro` · `/foro/nueva` · `/foro/:idSlug` · `/testimonios` · `/login` · `/registro` · `/admin` · `/admin/noticias` · `/admin/empleo` · `/admin/foro` · `/admin/testimonios` · `/admin/usuarios` · `*` → página 404 real (no redirigir a la home).
+`/` · `/noticias` · `/noticias/:idSlug` · `/empleo` · `/empleo/:idSlug` · `/foro` · `/foro/nueva` · `/foro/:idSlug` · `/testimonios` · `/login` · `/registro` · `/admin` · `/admin/noticias` · `/admin/empleo` · `/admin/foro` · `/admin/testimonios` · `/admin/usuarios` · `/admin/importacion` · `*` → página 404 real (no redirigir a la home).
 Las páginas de admin, login y registro llevan `noindex`.
 Los filtros y la paginación de listados van en la query de la URL (`?page=2&categoria=...`) para que sean enlazables y rastreables.
 
@@ -143,5 +155,5 @@ Los filtros y la paginación de listados van en la query de la URL (`?page=2&cat
 - Límites de peticiones por IP (POST): login 10 / 15 min, registro 5 / hora, crear discusión 10 / hora, crear comentario 30 / hora, crear testimonio 5 / hora. Al superarlos: 429 `TOO_MANY_REQUESTS` con cabecera `Retry-After` (segundos).
 - `GET /actuator/health` es público y es lo único que expone Actuator (`{"status":"UP"}`).
 - `isLikedByCurrentUser` se calcula con una única consulta por página; `commentCount` con una única consulta agrupada.
-- `/sitemap.xml` y `/robots.txt` se cachean 10 minutos en memoria; el sitemap incluye hasta 5000 URLs por tipo (noticias activas, ofertas vigentes, discusiones activas).
-
+- `/sitemap.xml` y `/robots.txt` se cachean 10 minutos en memoria; el sitemap incluye hasta 5000 URLs por tipo (noticias activas, ofertas vigentes, discusiones activas; sin contenido importado).
+- `/sitemap.xml` excluye noticias y ofertas importadas (`externalId` no nulo): son resúmenes de contenido ajeno.

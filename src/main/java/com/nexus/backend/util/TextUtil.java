@@ -40,4 +40,20 @@ public final class TextUtil {
         String cleaned = clean(value);
         return cleaned == null || cleaned.isEmpty() ? null : cleaned;
     }
+
+    /**
+     * Recorta el texto a {@code maxLength} caracteres como máximo, por el último espacio si lo hay,
+     * y añade «…» cuando se ha recortado.
+     */
+    public static String truncate(String value, int maxLength) {
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        String cut = value.substring(0, maxLength - 1);
+        int lastSpace = cut.lastIndexOf(' ');
+        if (lastSpace > maxLength / 2) {
+            cut = cut.substring(0, lastSpace);
+        }
+        return cut.stripTrailing() + "…";
+    }
 }

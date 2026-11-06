@@ -4,10 +4,12 @@ import com.nexus.backend.dto.request.CreateNewsRequest;
 import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.dto.response.NewsResponse;
 import com.nexus.backend.dto.response.PageResponse;
+import com.nexus.backend.entity.ImportExclusion;
 import com.nexus.backend.entity.News;
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mapper.NewsMapper;
+import com.nexus.backend.repository.ImportExclusionRepository;
 import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.repository.spec.NewsSpecifications;
 import com.nexus.backend.service.NewsService;
@@ -26,6 +28,7 @@ public class NewsServiceImpl implements NewsService {
     private static final String NOT_FOUND_MESSAGE = "Noticia no encontrada";
 
     private final NewsRepository newsRepository;
+    private final ImportExclusionRepository importExclusionRepository;
     private final NewsMapper newsMapper;
 
     @Override
@@ -83,7 +86,11 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional
     public void deleteNews(Long id) {
-        newsRepository.delete(findById(id));
+        News news = findById(id);
+        if (news.getExternalId() != null) {
+            importExclusionRepository.save(new ImportExclusion(news.getExternalId()));
+        }
+        newsRepository.delete(news);
     }
 
     private News findById(Long id) {

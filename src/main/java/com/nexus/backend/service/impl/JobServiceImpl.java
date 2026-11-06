@@ -4,12 +4,14 @@ import com.nexus.backend.dto.request.CreateJobRequest;
 import com.nexus.backend.dto.request.UpdateJobRequest;
 import com.nexus.backend.dto.response.JobResponse;
 import com.nexus.backend.dto.response.PageResponse;
+import com.nexus.backend.entity.ImportExclusion;
 import com.nexus.backend.entity.JobOffer;
 import com.nexus.backend.enums.ContractType;
 import com.nexus.backend.enums.JobLevel;
 import com.nexus.backend.enums.WorkMode;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mapper.JobMapper;
+import com.nexus.backend.repository.ImportExclusionRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.spec.JobSpecifications;
 import com.nexus.backend.service.JobService;
@@ -29,6 +31,7 @@ public class JobServiceImpl implements JobService {
     private static final String NOT_FOUND_MESSAGE = "Oferta de empleo no encontrada";
 
     private final JobOfferRepository jobOfferRepository;
+    private final ImportExclusionRepository importExclusionRepository;
     private final JobMapper jobMapper;
 
     @Override
@@ -90,7 +93,11 @@ public class JobServiceImpl implements JobService {
     @Override
     @Transactional
     public void deleteJob(Long id) {
-        jobOfferRepository.delete(findById(id));
+        JobOffer job = findById(id);
+        if (job.getExternalId() != null) {
+            importExclusionRepository.save(new ImportExclusion(job.getExternalId()));
+        }
+        jobOfferRepository.delete(job);
     }
 
     private JobOffer findById(Long id) {

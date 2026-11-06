@@ -1,0 +1,1067 @@
+{
+ "data": [
+  {
+   "id": "practica-profesional-ingenieria-zerviz-technologies-santiago",
+   "type": "job",
+   "attributes": {
+    "title": "Práctica Profesional – Ingeniería",
+    "description_headline": "Requisitos:",
+    "description": "<ul><li>Ser estudiante de Ingeniería en Informática, Ingeniería en Computación o carrera afín.</li><li>Contar con los requisitos académicos necesarios para realizar la práctica profesional.</li><li>Tener conocimientos básicos de informática y fundamentos tecnológicos acordes con su formación.</li><li>Mostrar interés por desarrollarse en alguna de las siguientes áreas: Desarrollo, Infraestructura, ",
+    "projects": "<p>En Zerviz estamos buscando estudiantes de Ingeniería en Informática o carreras afines que quieran realizar su práctica profesional y dar sus primeros pasos en el mundo laboral, poniendo en práctica sus conocimientos y adquiriendo experiencia en proyectos tecnológicos.</p><p>La persona seleccionada se integrará a una de nuestras áreas tecnológicas, pudiendo desarrollarse en Desarrollo, Infraestr",
+    "functions_headline": "Principales funciones:",
+    "functions": "<p>La persona seleccionada se integrará a una de nuestras áreas tecnológicas, pudiendo desarrollarse en Desarrollo, Infraestructura, Ciberseguridad o Cloud, según su perfil, intereses y los requerimientos del equipo. Tendrá la oportunidad de aprender junto a profesionales con experiencia, participar en proyectos reales y fortalecer sus habilidades técnicas en un entorno colaborativo.</p><p><strong",
+    "benefits_headline": "¿Qué ofrecemos?",
+    "benefits": "<p>La oportunidad de realizar tu práctica profesional en un entorno tecnológico, colaborar con profesionales de distintas especialidades y adquirir experiencia práctica en el área en la que te incorpores. Podrás aplicar tus conocimientos, desarrollar nuevas habilidades y conocer de cerca los desafíos de los proyectos tecnológicos.</p><p>Si buscas una oportunidad para aprender, aportar tus ideas y ",
+    "desirable_headline": "",
+    "desirable": "",
+    "remote": false,
+    "remote_modality": "no_remote",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "lang_not_specified",
+    "category_name": "Programming",
+    "perks": [
+     "computer_provided",
+     "informal_dresscode",
+     "vacation_on_birthday"
+    ],
+    "min_salary": 300,
+    "max_salary": 300,
+    "published_at": 1793193335,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 58,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 4,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 2,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "computer-science",
+       "type": "tag",
+       "attributes": {
+        "name": "Computer Science",
+        "keywords": "Computing Science, Computer Science Foundations, Computer Science Fundamentals, Computational Science, Computer Science Algorithms, Computer Science Theory, Computer Science Principles"
+       }
+      },
+      {
+       "id": "information-technology",
+       "type": "tag",
+       "attributes": {
+        "name": "Information Technology",
+        "keywords": null
+       }
+      },
+      {
+       "id": "software-development",
+       "type": "tag",
+       "attributes": {
+        "name": "Software Development",
+        "keywords": "Software Development Basics, Software Development Fundamentals, Software Development Practices, Software Development Process, Software Development Projects, Software Training, Software Development Training"
+       }
+      },
+      {
+       "id": "it-infrastructure",
+       "type": "tag",
+       "attributes": {
+        "name": "IT Infrastructure",
+        "keywords": null
+       }
+      },
+      {
+       "id": "security-engineer",
+       "type": "tag",
+       "attributes": {
+        "name": "Cybersecurity",
+        "keywords": "Security Engineer, InfoSec, Seguridad, Ethical Hacking, Ethical Hacker, ciberseguridad, Pentesting, pentest, CSIRT, Cybersec, SIEM, Blue Team, DevSecOps, SOC, cyberark, EDR/XDR, CASB, DLP, SOAR, CSPM, SASE, 27001, NSE, Cyber Security"
+       }
+      },
+      {
+       "id": "cloud-computing",
+       "type": "tag",
+       "attributes": {
+        "name": "Cloud Computing",
+        "keywords": "Azure, Heroku, Google App Engine, Linode, Openstack, GCP, AWS, Amazon Web Services, Huawei cloud, Dynatrace, Google Cloud Platform, DigitalOcean, Cloud Computing Platforms, Cloud Technologies, Cloud Technology"
+       }
+      },
+      {
+       "id": "technical-documentation",
+       "type": "tag",
+       "attributes": {
+        "name": "Technical Documentation",
+        "keywords": "Technical Reports, Technical Sheets, Technical Stories"
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "zerviz",
+      "type": "company",
+      "attributes": {
+       "name": "Zerviz Technologies"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/practica-profesional-ingenieria-zerviz-technologies-santiago"
+   }
+  },
+  {
+   "id": "junior-backend-engineer-santiago-krunchbox-santiago",
+   "type": "job",
+   "attributes": {
+    "title": "Junior Back-end Engineer Santiago",
+    "description_headline": "Description",
+    "description": "<p>We are looking for a Junior Backend Engineer with a strong foundation in Python and an interest in building modern, data-intensive software systems. You may be a recent graduate with strong practical experience or have approximately 1–3 years of professional software development experience.</p><p>You should be comfortable writing Python and have some experience building APIs using FastAPI, Djan",
+    "projects": "<p>Krunchbox is a retail analytics platform used by global consumer brands to transform point-of-sale data into actionable insights. Our platform ingests and processes large volumes of retail data from retailers across North America and Australia, helping brands understand sales performance, optimize inventory, and make smarter supply chain decisions.</p><p>We are modernizing our platform architec",
+    "functions_headline": "Functions",
+    "functions": "<ul><li>Develop and maintain backend services using Python and FastAPI.</li><li>Help build and improve data ingestion and processing pipelines that power analytics for global consumer brands.</li><li>Build and maintain API services that support the Krunchbox platform.</li><li>Work with large datasets and help improve system performance, reliability, and scalability.</li><li>Contribute to cloud inf",
+    "benefits_headline": "Benefits",
+    "benefits": "<ul><li>Competitive compensation package.</li><li>Comprehensive health and benefits coverage.</li><li>A predominantly in-person, collaborative work environment in Santiago that encourages learning, fast iteration, and real-time problem solving.</li><li>Mentorship and the opportunity to learn from experienced engineers working on complex, real-world systems.</li><li>Exposure to large-scale retail d",
+    "desirable_headline": "Desirable",
+    "desirable": "<p>Nice-to-have skills include:</p><ul><li>Experience with FastAPI or another Python web framework.</li><li>Familiarity with SQL and relational databases.</li><li>Exposure to cloud platforms such as AWS, Azure, or GCP.</li><li>Experience working with ETL/ELT processes or data pipelines.</li><li>Familiarity with analytics databases such as ClickHouse, Snowflake, BigQuery, or Redshift.</li><li>Expos",
+    "remote": false,
+    "remote_modality": "hybrid",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "en",
+    "category_name": "Programming",
+    "perks": [
+     "remote_partial",
+     "informal_dresscode",
+     "beverages_and_snacks"
+    ],
+    "min_salary": 1400,
+    "max_salary": 2000,
+    "published_at": 1793140634,
+    "response_time_in_days": {
+     "min": 0,
+     "max": 2
+    },
+    "applications_count": 230,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 2,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "python",
+       "type": "tag",
+       "attributes": {
+        "name": "Python",
+        "keywords": "Django, Jython, Cheetah, Flask, Jinja2, bottle, itty, NumPy, SciPy, phyton, pyton, Pytohn, Python 2.7, Python 2, Python 3.10, Python 3, Pyhton, Python Automation, Python Script, Python Programming, Python Scripting, Python Testing"
+       }
+      },
+      {
+       "id": "git",
+       "type": "tag",
+       "attributes": {
+        "name": "Git",
+        "keywords": ""
+       }
+      },
+      {
+       "id": "backend-development",
+       "type": "tag",
+       "attributes": {
+        "name": "Backend Development",
+        "keywords": null
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "krunchbox",
+      "type": "company",
+      "attributes": {
+       "name": "Krunchbox"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/junior-backend-engineer-santiago-krunchbox-santiago"
+   }
+  },
+  {
+   "id": "fullstack-developer-tcit-santiago",
+   "type": "job",
+   "attributes": {
+    "title": "Full-Stack Developer",
+    "description_headline": "Requerimientos del cargo",
+    "description": "<p>Ingeniería en Informática, Ingeniería Civil Informática, Ingeniería en Software o carrera afín.</p><p>Experiencia en desarrollo de software.</p><p>HTML, CSS, JavaScript.</p><p>Fundamentos de React y Node.js</p><p>Bases de datos SQL básicas.</p><p>Git y control de versiones</p><p>Conceptos de testing.</p><p>Metodologías ágiles.</p><p>Consumo de APIs.</p>",
+    "projects": "<div>En TCIT lideramos proyectos de desarrollo de software en modalidad cloud para clientes en diversos rubros, con foco en soluciones de calidad, sostenibles e innovadoras. Trabajamos con metodologías ágiles y tecnologías de última generación, y solemos colaborar con socios en proyectos internacionales, incluyendo Canadá. Buscamos ampliar nuestro equipo con profesionales que compartan nuestra mis",
+    "functions_headline": "Funciones del cargo",
+    "functions": "<p>Desarrollar y mantener funcionalidades de software de baja y mediana complejidad, contribuyendo al desarrollo de productos tecnológicos mediante la aplicación de buenas prácticas de programación y el aprendizaje continuo.</p><p>Desarrollar funcionalidades de software de acuerdo con los requerimientos definidos</p><p>Corregir errores e incidencias identificadas en las aplicaciones.</p><p>Realiza",
+    "benefits_headline": "Condiciones",
+    "benefits": "",
+    "desirable_headline": "Opcionales",
+    "desirable": "<p>Deseable experiencia en proyectos</p>",
+    "remote": false,
+    "remote_modality": "hybrid",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "lang_not_specified",
+    "category_name": "Programming",
+    "perks": [
+     "health_coverage",
+     "computer_provided",
+     "informal_dresscode",
+     "beverages_and_snacks"
+    ],
+    "min_salary": null,
+    "max_salary": null,
+    "published_at": 1793024551,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 354,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 2,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "html5",
+       "type": "tag",
+       "attributes": {
+        "name": "HTML",
+        "keywords": "XHTML, HTML5, HTML5 APIs, HTML5 Animation, HTML5 Boilerplate, HTML5 Canvas, HTML4, HTML/CSS, HTML Custom Elements, HTML Parsing"
+       }
+      },
+      {
+       "id": "css",
+       "type": "tag",
+       "attributes": {
+        "name": "CSS",
+        "keywords": "Bootstrap, OOCSS, CSS3, Sass, Bulma, Flexbox, UI Kit, Materialize, Tailwind, CSS 3, CSS2, CSS 2, CSS4, CSS3 Frameworks, CSS SASS, CSS/SCSS, CSS/SASS"
+       }
+      },
+      {
+       "id": "javascript",
+       "type": "tag",
+       "attributes": {
+        "name": "JavaScript",
+        "keywords": "EcmaScript, ES6, ES8, Java Script, React, Vue, Angular, Backbone, Marionette, Ember, Node, Node.js, Nodejs, JS, JavaScript Vanilla, JScript.net"
+       }
+      },
+      {
+       "id": "react",
+       "type": "tag",
+       "attributes": {
+        "name": "React",
+        "keywords": "ReactJS, React-Native, GatsbyJS, react.js, React JS, React.ts, React Web, React 18, React ES6, React Community, React Programming, React.js"
+       }
+      },
+      {
+       "id": "node-js",
+       "type": "tag",
+       "attributes": {
+        "name": "Node.js",
+        "keywords": "NodeJS, Node, Jade, Express, Sails.js, Koa, Express.js, MERN, Node Frameworks, Node WebKit, NW.js"
+       }
+      },
+      {
+       "id": "sql",
+       "type": "tag",
+       "attributes": {
+        "name": "SQL",
+        "keywords": "PL SQL, SQLServer, SQL server, SPSQL, SP SQL, SQL Coding, SQL DB2, SQL Oracle, SQL RDMS, SQL400"
+       }
+      },
+      {
+       "id": "git",
+       "type": "tag",
+       "attributes": {
+        "name": "Git",
+        "keywords": ""
+       }
+      },
+      {
+       "id": "api-consumption",
+       "type": "tag",
+       "attributes": {
+        "name": "API Consumption",
+        "keywords": null
+       }
+      },
+      {
+       "id": "testing",
+       "type": "tag",
+       "attributes": {
+        "name": "Testing",
+        "keywords": "Agile Testing, Test Design, Test Cases, Test Documentation, Testing Fundamentals, Manual Testing, Functional Testing, TDD"
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "tcit",
+      "type": "company",
+      "attributes": {
+       "name": "TCIT"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/fullstack-developer-tcit-santiago"
+   }
+  },
+  {
+   "id": "junior-integrations-developer-inversiones-vertice-limitada-santiago",
+   "type": "job",
+   "attributes": {
+    "title": "Junior Integrations Developer",
+    "description_headline": "Requisitos",
+    "description": "<p>Se requiere:</p><ul><li>Al menos una experiencia real integrando el ERP de una empresa con otro sistema o plataforma.</li><li>Uso habitual de asistentes de código para programar (Claude Code, Codex, Cursor u otro).</li><li>Experiencia con TypeScript.</li><li>Inglés avanzado para comunicarse con equipos técnicos en Estados Unidos.</li></ul>",
+    "projects": "<p>Inversiones Vertice Limitada es una empresa de innovación dedicada al desarrollo de productos de fiesta para el mercado nacional y también distribuidores en varios países. Actualmente estamos construyendo agentes de IA para el comercio de productos personalizados, conectados con los sistemas de gestión de proveedores y plataformas de terceros. Nuestro equipo está enfocado en entregar soluciones",
+    "functions_headline": "Funciones del cargo",
+    "functions": "<p>La persona se integrará al equipo de IA, trabajando junto a los desarrolladores de la empresa, y en contacto con equipos técnicos de clientes y proveedores en Estados Unidos. Sus principales funciones serán:</p><ul><li>Integrar agentes de IA con sistemas de gestión (ERP) y plataformas de terceros, mediante APIs y servicios web (REST, SOAP/XML).</li><li>Automatizar procesos en sistemas que no of",
+    "benefits_headline": "Condiciones",
+    "benefits": "<p>Formarás parte de un equipo de IA con visión de proyección internacional, trabajando en un rol totalmente presencial y clave para conectar agentes de inteligencia artificial con los sistemas de clientes y proveedores en Estados Unidos.</p><p>Te integrarás directamente en proyectos de integración de sistemas, automatización de procesos y agentes de IA, con oportunidades reales de aprendizaje y c",
+    "desirable_headline": "Habilidades deseables",
+    "desirable": "<p>Se valorará:</p><ul><li>Experiencia con Vercel AI SDK o con el desarrollo de agentes de IA.</li><li>Integraciones mediante servicios web SOAP/XML.</li><li>Automatización de navegador o RPA (Playwright, Selenium u otros).</li><li>Experiencia con ERP usados en Estados Unidos, como NetSuite, Sage, SAP u otros.</li><li>Conocimientos en C#/.NET.</li></ul>",
+    "remote": false,
+    "remote_modality": "no_remote",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "en",
+    "category_name": "Programming",
+    "perks": [],
+    "min_salary": 1000,
+    "max_salary": 1400,
+    "published_at": 1792443768,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 103,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 2,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "erp-systems",
+       "type": "tag",
+       "attributes": {
+        "name": "ERP Systems",
+        "keywords": null
+       }
+      },
+      {
+       "id": "rest",
+       "type": "tag",
+       "attributes": {
+        "name": "REST API",
+        "keywords": "API REST, RestAPI, REST APIs, RESTful API Design, RESTful API Integration, RESTful API, RESTClient, Rest Client, REST API Client, REST API Development, RESP API, RESTless APIs, APIs REST, API Rest, REST, RESTful Services, RESTful Service, Restful"
+       }
+      },
+      {
+       "id": "soap",
+       "type": "tag",
+       "attributes": {
+        "name": "SOAP",
+        "keywords": "SOAP, SOAP APIs, SOAP API, SOAP Protocol, SOAP REST, SOAP 1.1, SOAP 1.2, SOAP Integration, SOAP Services, SOAP Webservices, SOAP XML, SOAP Web Service"
+       }
+      },
+      {
+       "id": "automatizacion",
+       "type": "tag",
+       "attributes": {
+        "name": "Automation",
+        "keywords": "RPA, Rocketbot, UiPath, KOFAX, Automations, Automation Processes, Automation Scripting, Automation Practices, Automatización Cognitiva, Automatización de Pruebas, Automatization, Automatización, Automation Platforms"
+       }
+      },
+      {
+       "id": "typescript",
+       "type": "tag",
+       "attributes": {
+        "name": "TypeScript",
+        "keywords": "Typesafe"
+       }
+      },
+      {
+       "id": "api-integration",
+       "type": "tag",
+       "attributes": {
+        "name": "API Integration",
+        "keywords": ""
+       }
+      },
+      {
+       "id": "error-handling",
+       "type": "tag",
+       "attributes": {
+        "name": "Error Handling",
+        "keywords": null
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "inversiones-vertice-limitada",
+      "type": "company",
+      "attributes": {
+       "name": "Inversiones Vertice Limitada"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/junior-integrations-developer-inversiones-vertice-limitada-santiago"
+   }
+  },
+  {
+   "id": "software-engineer-examedi-santiago",
+   "type": "job",
+   "attributes": {
+    "title": "Software Engineer",
+    "description_headline": "Qué buscamos",
+    "description": "<ul><li><p>Ingeniería Civil en Computación (o carrera afín), con 0–2 años de experiencia.</p></li><li><p>Conocimiento en Django y/o React/TS.</p></li><li><p>Manejo de git y flujos de trabajo colaborativos.</p></li><li><p>Usas AI (Cursor, Claude Code, Chat GPT) para moverte más rápido, sin dejar de entender el código que subes.</p></li><li><p>Curiosidad, rapidez para aprender y nada de miedo a cues",
+    "projects": "<p>En Examedi llevamos la salud a la casa de las personas: exámenes y atenciones médicas a domicilio en Chile (examedi.cl) y México (examedi.com.mx), y ahora tratamientos médicos a domicilio con nuestra nueva línea, <strong>Bruno</strong> (heybruno.cl).</p><p>Somos parte de Y Combinator (S21) y líderes en salud a domicilio en Chile y México: más de <strong>1.000.000 de atenciones realizadas</stron",
+    "functions_headline": "Qué vas a hacer",
+    "functions": "<ul><li><p><strong>Llevar features de la idea a producción.</strong> Tomas un problema, lo entiendes, planteas una solución, la implementas y la ves usada por miles de pacientes.</p></li><li><p><strong>Ser parte de cómo evoluciona el producto.</strong> Propones cambios que mejoren su adopción y la experiencia de uso. No esperamos que solo ejecutes tickets.</p></li><li><p><strong>Trabajar con Djang",
+    "benefits_headline": "Qué ofrecemos",
+    "benefits": "<ul><li>Sueldo líquido hasta $2.0MM según tu nivel de experiencia</li><li><strong>4 semanas de vacaciones</strong> 🌴</li><li>Seguro complementario de salud y dental.</li><li>Formato híbrido flexible: normalmente vamos 2–3 veces por semana a la oficina en Vitacura.</li><li>Almuerzo con extra proteína en la oficina 💪</li></ul>",
+    "desirable_headline": "Por qué trabajar en Examedi",
+    "desirable": "<ul><li><strong>Compensación atractiva, un equipo talentoso y unido, en un ambiente sano y justo.</strong> La vara es alta, el trato es directo y las reglas son claras para todos.</li><li><strong>Aprendes haciendo.</strong> Tu código opera en dos países y en una línea de negocio nueva. Desde el primer día trabajas en problemas reales de producto, operación y escala, no en tareas de práctica.</li><",
+    "remote": false,
+    "remote_modality": "hybrid",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "es",
+    "category_name": "Programming",
+    "perks": [
+     "remote_partial",
+     "health_coverage",
+     "computer_provided",
+     "informal_dresscode",
+     "vacation_over_legal",
+     "beverages_and_snacks"
+    ],
+    "min_salary": 1600,
+    "max_salary": 2400,
+    "published_at": 1792087124,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 596,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 2,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "django",
+       "type": "tag",
+       "attributes": {
+        "name": "Django",
+        "keywords": "Django Framework, Django CMS, Django ORM, Django Grappelli, Django Integration, Django Rest, Django Rest Framework, Django Template Engine, Django Templates, Python Django"
+       }
+      },
+      {
+       "id": "react",
+       "type": "tag",
+       "attributes": {
+        "name": "React",
+        "keywords": "ReactJS, React-Native, GatsbyJS, react.js, React JS, React.ts, React Web, React 18, React ES6, React Community, React Programming, React.js"
+       }
+      },
+      {
+       "id": "typescript",
+       "type": "tag",
+       "attributes": {
+        "name": "TypeScript",
+        "keywords": "Typesafe"
+       }
+      },
+      {
+       "id": "git",
+       "type": "tag",
+       "attributes": {
+        "name": "Git",
+        "keywords": ""
+       }
+      },
+      {
+       "id": "software-development",
+       "type": "tag",
+       "attributes": {
+        "name": "Software Development",
+        "keywords": "Software Development Basics, Software Development Fundamentals, Software Development Practices, Software Development Process, Software Development Projects, Software Training, Software Development Training"
+       }
+      },
+      {
+       "id": "ai-coding-tools",
+       "type": "tag",
+       "attributes": {
+        "name": "AI Coding Tools",
+        "keywords": null
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "examedi",
+      "type": "company",
+      "attributes": {
+       "name": "Examedi"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/software-engineer-examedi-santiago"
+   }
+  },
+  {
+   "id": "semi-senior-full-stack-java-developer-qa-ai-bilingue-23people-santiago",
+   "type": "job",
+   "attributes": {
+    "title": "Semi Senior Full-Stack Java Developer (QA & AI) Bilingüe",
+    "description_headline": "Skills excluyentes",
+    "description": "<ul><li>Experiencia comprobable con Java y Spring Boot en proyectos reales.</li><li>Experiencia práctica trabajando con Angular.</li><li>Capacidad para realizar pruebas unitarias, de integración y de API en aplicaciones Java.</li><li>Uso diario de asistentes de programación basados en IA, como GitHub Copilot o similar.</li><li>Inglés fluido (Nivel B2+): Nivel suficiente para trabajar y comunicarse",
+    "projects": "<div>Equifax es mucho más que una empresa de informes; es una compañía global líder en datos, analítica y tecnología con presencia en 24 países. En Chile, operan desde 1979 entregando soluciones críticas de ciberseguridad, identidad y riesgo a más de 14.000 empresas.</div><div>El Hub Tecnológico (SDC) Lo que hace única a esta oportunidad es que Chile alberga el Santiago Development Center (SDC). E",
+    "functions_headline": "Funciones del cargo",
+    "functions": "<p>El Semi Senior Full Stack Developer se integrará al equipo \"Credit Health\", participando en todo el ciclo de vida del desarrollo, desde el diseño hasta la puesta en producción. Construirá soluciones end-to-end utilizando Java, Spring Boot y Angular, apoyándose en IA y siendo guiado por su líder. Automatizará pruebas para asegurar la calidad de cada entrega y colaborará diariamente con el equipo",
+    "benefits_headline": "Beneficios",
+    "benefits": "<ul><li><strong>Seguro complementario</strong>: Seguro de salud, vida y dental, para que estés protegido.</li><li><strong>Curso de inglés</strong>: En nuestro programa de formación en el idioma, ofrecemos dos modalidades para adaptarnos a tus necesidades y objetivos, con profesores nativos.</li><li><strong>Reembolso de certificaciones internacionales</strong>: Apoyamos el crecimiento profesional, ",
+    "desirable_headline": "Skills deseables",
+    "desirable": "<ul><li>Automatización de pruebas de interfaz de usuario (UI) con Playwright, Selenium o Cypress.</li><li>Experiencia ejecutando pruebas de regresión y pruebas de humo (\"smoke testing\").</li><li>Experiencia aportando valor de principio a fin (end-to-end) mediante el uso de IA en áreas Dev, QE y SRE.</li><li>Experiencia en metodologías SRE y creación de frameworks de pruebas desde cero.</li></ul><p",
+    "remote": false,
+    "remote_modality": "hybrid",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "lang_not_specified",
+    "category_name": "Programming",
+    "perks": [],
+    "min_salary": 2800,
+    "max_salary": 3000,
+    "published_at": 1793880339,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 17,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 3,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "java",
+       "type": "tag",
+       "attributes": {
+        "name": "Java",
+        "keywords": "RxJava, Kafka, Spring Boot, Mockito, Java (Backend), Java 8+, Java 11, Java 17, Java 21, Java SE"
+       }
+      },
+      {
+       "id": "spring-boot",
+       "type": "tag",
+       "attributes": {
+        "name": "Spring Boot",
+        "keywords": "Springboot, SpringBoot, Spring Boot Test, Java Spring Boot"
+       }
+      },
+      {
+       "id": "angularjs",
+       "type": "tag",
+       "attributes": {
+        "name": "Angular",
+        "keywords": "Angular, Angular.js, Angular 1, AngularUI, AngularJS, Angular 11, Angular 12"
+       }
+      },
+      {
+       "id": "unit-testing",
+       "type": "tag",
+       "attributes": {
+        "name": "Unit Testing",
+        "keywords": "Unit Test Automation, Unit Test Scripts, Unit Test"
+       }
+      },
+      {
+       "id": "integration-testing",
+       "type": "tag",
+       "attributes": {
+        "name": "Integration Testing",
+        "keywords": "Integration Tests, Installation Testing, Integrated Testing, Integrity, Integrity Testing, Interaction Testing, Interface Testing"
+       }
+      },
+      {
+       "id": "api-testing",
+       "type": "tag",
+       "attributes": {
+        "name": "API Testing",
+        "keywords": "API Simulation, API Mocking"
+       }
+      },
+      {
+       "id": "test-automation",
+       "type": "tag",
+       "attributes": {
+        "name": "Test Automation",
+        "keywords": "Testing Automation, Test Automation Scripts, Test Automation Scripting, Test Automation Design, Test Automation Framework, Test Automation Strategy, TestComplete"
+       }
+      },
+      {
+       "id": "english-intermediate-bca0",
+       "type": "tag",
+       "attributes": {
+        "name": "English (Intermediate)",
+        "keywords": "English Intermediate, English Upper Intermediate, English B1, English B1+, English B1-B2, English B2, English B2+, English B2/C1"
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "23people-cl",
+      "type": "company",
+      "attributes": {
+       "name": "23people"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/semi-senior-full-stack-java-developer-qa-ai-bilingue-23people-santiago"
+   }
+  },
+  {
+   "id": "lider-tecnico-3it-santiago-179f",
+   "type": "job",
+   "attributes": {
+    "title": "Líder Técnico",
+    "description_headline": " Lo que necesitamos para este rol ",
+    "description": "<ul><li>Formación en Ingeniería en Informática o carreras afines.</li><li>Al menos 6 años de experiencia, con uso reciente de las tecnologías solicitadas.</li><li>Manejo de MongoDB para trabajar con bases de datos NoSQL orientadas a documentos.</li><li>Experiencia con Go y Node.js para desarrollar servicios backend, APIs e integraciones.</li><li>Uso de Microsoft Azure Application Insights para mon",
+    "projects": "<p>El principal desafío será guiar al equipo en la implementación de soluciones que respondan a las necesidades del proyecto, asegurando buenas prácticas de diseño y desarrollo de software. Participarás en las decisiones técnicas, la revisión de código y la resolución de bloqueos para mantener la calidad y el avance del trabajo.</p>",
+    "functions_headline": "¿Dónde y cómo trabajarás?",
+    "functions": "<ul><li>Área: 3IT</li><li>Tiempo del proyecto: 3 meses inicialmente</li><li>Ubicación: Santiago, Región Metropolitana</li><li>Modalidad: híbrida, con asistencia presencial según requerimiento</li></ul>",
+    "benefits_headline": "¿Por qué trabajar con nosotros?",
+    "benefits": "<p>Ser parte de 3IT significa tener la oportunidad de aportar desde tu experiencia, colaborar con equipos diversos y participar en iniciativas que contribuyen al crecimiento y evolución de la organización. Encontrarás un entorno donde podrás seguir desarrollando tus capacidades, compartir lo que sabes y crecer en una cultura basada en la confianza, la colaboración y el aprendizaje continuo.</p><p>",
+    "desirable_headline": "Beneficios tritianos",
+    "desirable": "<p>🏥 Cuidamos tu salud: seguro de vida y complementario de salud MetLife, con cobertura ampliada y dental para ti y tus cargas legales.<br>📚 Sigue aprendiendo: acceso a Udemy Business, formación continua y oportunidades para fortalecer tus competencias técnicas y profesionales.<br>🎂 Tiempo para ti: hasta 2 días administrativos al año, medio día libre por tu cumpleaños y beneficios adicionales asoc",
+    "remote": false,
+    "remote_modality": "hybrid",
+    "remote_zone": null,
+    "countries": [
+     "Chile"
+    ],
+    "lang": "lang_not_specified",
+    "category_name": "Programming",
+    "perks": [],
+    "min_salary": 2200,
+    "max_salary": 2800,
+    "published_at": 1793802407,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 20,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": [
+      {
+       "id": 1,
+       "type": "location_city"
+      }
+     ]
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 4,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "go",
+       "type": "tag",
+       "attributes": {
+        "name": "Go",
+        "keywords": "Golang, Go Chi, Echo, Gin, Godep, Go, Go Frameworks, Go Modules, Go High Level, GoInstant"
+       }
+      },
+      {
+       "id": "node-js",
+       "type": "tag",
+       "attributes": {
+        "name": "Node.js",
+        "keywords": "NodeJS, Node, Jade, Express, Sails.js, Koa, Express.js, MERN, Node Frameworks, Node WebKit, NW.js"
+       }
+      },
+      {
+       "id": "mongodb",
+       "type": "tag",
+       "attributes": {
+        "name": "MongoDB",
+        "keywords": "Mongo, MERN, Mongo Atlas, MongoDB Atlas, MongoDB Realm, MongoDB Stitch, Mongo API, Mongo Aggregate, Mongoose ORM, Mongoengine, Mongoose, MongooseOS"
+       }
+      },
+      {
+       "id": "azure",
+       "type": "tag",
+       "attributes": {
+        "name": "Azure",
+        "keywords": "Azure Administration, Windows CE, Windows Azure, Azure Cloud, Cloud Azure, Microsoft Azure Services, Microsoft Azure Administrator, Microsoft Azure Certification, Microsoft Azure CI/CD, Microsoft Azure DevOps, Microsoft Azure"
+       }
+      },
+      {
+       "id": "azure-devops",
+       "type": "tag",
+       "attributes": {
+        "name": "Azure DevOps",
+        "keywords": "Azure DevOps Pipelines, AzDO, Azure Deploy, Azure DevTest Labs, Azure Boards, Azure Repos"
+       }
+      },
+      {
+       "id": "api-management",
+       "type": "tag",
+       "attributes": {
+        "name": "API Management",
+        "keywords": ""
+       }
+      },
+      {
+       "id": "openapi",
+       "type": "tag",
+       "attributes": {
+        "name": "OpenAPI",
+        "keywords": "Open API, OpenAPI Specification, OpenAPI 2.0, OpenAPI 3, OpenAPI 3.0, Open App 3.0"
+       }
+      },
+      {
+       "id": "ci-cd",
+       "type": "tag",
+       "attributes": {
+        "name": "CI/CD",
+        "keywords": "CI/CD, CD/CI, CDCI, CICD, DevOps, Continuous Delivery, Continuous Integration, CI, CI/CD Tools"
+       }
+      },
+      {
+       "id": "git-flow",
+       "type": "tag",
+       "attributes": {
+        "name": "Git Flow",
+        "keywords": "Git Flows"
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "3it-cl",
+      "type": "company",
+      "attributes": {
+       "name": "3IT"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/lider-tecnico-3it-santiago-179f"
+   }
+  },
+  {
+   "id": "founding-gtm-engineer-hostop-remote",
+   "type": "job",
+   "attributes": {
+    "title": "Founding GTM Engineer",
+    "description_headline": "Qualifications and requirements",
+    "description": "<ul><li>5+ years in outbound, SDR/BDR, growth or GTM roles at early-stage B2B SaaS (seed to Series B), with booked-meeting results you can show in numbers.</li><li>You’ve built outbound from zero at least once: lists, sending infrastructure, copy, sequences and reporting.</li><li>Hands-on with modern outbound tools such as Clay, Apollo, Instantly, Smartlead or HeyReach, plus LinkedIn Sales Navigat",
+    "projects": "<p>HostOp is the AI operating system for short-term rental operators with 10 to 500 listings. One platform replaces the pile of disconnected tools they run on: guest check-in, ID verification, damage waivers, upsells, payments and financials, with AI guest messaging next.</p><p>We’re founder-led and bootstrapped. Our founder scaled his own rental arbitrage business to 400+ units in four years with",
+    "functions_headline": "Job functions",
+    "functions": "<p>Full-time, all-day role. There’s always another list to build, message to test, automation to ship or lead to book. <strong>You own one number: qualified demos booked and held for the founder every week.</strong></p><p><strong>What you’ll do</strong></p><ul><li>Define and sharpen our ideal customer: short-term rental operators with 10 to 500 listings. Build, enrich and score target lists.</li><",
+    "benefits_headline": "Conditions",
+    "benefits": "<ul><li>Full-time, 100% remote from Latin America</li><li><strong>$4,500–$6,000 USD per month base</strong>, plus uncapped bonuses for every qualified demo held and every demo that becomes a paying customer</li><li>Report directly to the Founder &amp; CEO, with real ownership from day one</li><li>Start as soon as possible</li></ul>",
+    "desirable_headline": "Desirable skills",
+    "desirable": "<ul><li>Experience selling to short-term rental, vacation rental, hospitality or proptech companies</li><li>Familiarity with property management systems such as Guesty, Hostaway, Hospitable or OwnerRez</li><li>Ghostwriting founder content on LinkedIn that grew an audience</li><li>Video or Loom-based outreach</li><li>Spanish or Portuguese</li><li>Experience hiring or managing SDRs</li></ul>",
+    "remote": true,
+    "remote_modality": "fully_remote",
+    "remote_zone": null,
+    "countries": [
+     "Remote"
+    ],
+    "lang": "en",
+    "category_name": "Programming",
+    "perks": [
+     "remote_full",
+     "flexible_hours"
+    ],
+    "min_salary": 4500,
+    "max_salary": 6000,
+    "published_at": 1793720805,
+    "response_time_in_days": {
+     "min": null,
+     "max": null
+    },
+    "applications_count": 34,
+    "location_regions": {
+     "data": []
+    },
+    "location_tenants": {
+     "data": []
+    },
+    "location_cities": {
+     "data": []
+    },
+    "modality": {
+     "data": {
+      "id": 1,
+      "type": "modality"
+     }
+    },
+    "seniority": {
+     "data": {
+      "id": 4,
+      "type": "seniority"
+     }
+    },
+    "tags": {
+     "data": [
+      {
+       "id": "outbound-sales",
+       "type": "tag",
+       "attributes": {
+        "name": "Outbound Sales",
+        "keywords": null
+       }
+      },
+      {
+       "id": "b2b-saas",
+       "type": "tag",
+       "attributes": {
+        "name": "B2B SaaS",
+        "keywords": "B2B SaaS Marketing, B2B SaaS Operations, B2B SaaS Sales, B2B2C SaaS, B2B Solutions"
+       }
+      },
+      {
+       "id": "email-deliverability",
+       "type": "tag",
+       "attributes": {
+        "name": "Email Deliverability",
+        "keywords": null
+       }
+      },
+      {
+       "id": "linkedin-sales-navigator",
+       "type": "tag",
+       "attributes": {
+        "name": "LinkedIn Sales Navigator",
+        "keywords": "LinkedIn Sales"
+       }
+      },
+      {
+       "id": "n8n",
+       "type": "tag",
+       "attributes": {
+        "name": "N8n",
+        "keywords": null
+       }
+      },
+      {
+       "id": "api-integration",
+       "type": "tag",
+       "attributes": {
+        "name": "API Integration",
+        "keywords": ""
+       }
+      }
+     ]
+    },
+    "company": {
+     "data": {
+      "id": "hostop",
+      "type": "company",
+      "attributes": {
+       "name": "Hostop"
+      }
+     }
+    }
+   },
+   "links": {
+    "public_url": "https://www.getonbrd.com/jobs/founding-gtm-engineer-hostop-remote"
+   }
+  }
+ ],
+ "meta": {
+  "page": 1,
+  "per_page": 100,
+  "total_pages": 1
+ }
+}

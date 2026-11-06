@@ -1,0 +1,129 @@
+{
+ "00-warning": "fixture",
+ "job-count": 5,
+ "jobs": [
+  {
+   "id": 1185979,
+   "url": "https://remotive.com/remote-jobs/writing/freelance-writer-1185979",
+   "title": "Freelance Writer",
+   "company_name": "IAPWE",
+   "company_logo": "https://remotive.com/job/1185979/logo",
+   "category": "Writing",
+   "tags": [
+    "REST"
+   ],
+   "job_type": "freelance",
+   "publication_date": "2026-11-04T16:53:35",
+   "candidate_required_location": "Worldwide",
+   "salary": "$50-$75 /hour",
+   "description": "<p class=\"p1\" style=\"font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal; line-height: normal; color: #000000;\">Our organization is seeking content writers to create articles and blog posts on a variety of topics.</p>\n<p class=\"p1\" style=\"font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal; line-height: normal; color: #000000;\"> </p>\n<p class=\"p1\" style=\"font-variant-numeric: normal; font-variant-east-asian: normal; font-stretch: normal; line-height: normal; color: #000000;\">The rate of pay is $20 per 100 words (this comes out to ",
+   "company_logo_url": "https://remotive.com/job/1185979/logo"
+  },
+  {
+   "id": 2091166,
+   "url": "https://remotive.com/remote-jobs/all-others/content-reviewer-united-states-2091166",
+   "title": "Content Reviewer - United States",
+   "company_name": "TELUS Digital",
+   "company_logo": "https://remotive.com/job/2091166/logo",
+   "category": "All others",
+   "tags": [
+    "android",
+    "ios",
+    "social media",
+    "AI/ML"
+   ],
+   "job_type": "part_time",
+   "publication_date": "2026-11-04T13:39:06",
+   "candidate_required_location": "USA",
+   "salary": "$14/hour",
+   "description": "<p class=\"figma-padding-bottom-32 tw-border-b tw-border-[#E3E6E8]\" style=\"border-width: 0px 0px 1px; border-color: #e3e6e8; --tw-shadow: 0 0 #0000; --tw-ring-offset-width: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / .5); --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-border-spacing-x: 0; --tw-border-spacing-y: 0; --tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-scroll-snap-strictness: proximity; --tw-shadow-colored: 0 0 #0000; --tw-border-opacity: 1; padding-bottom: 3",
+   "company_logo_url": "https://remotive.com/job/2091166/logo"
+  },
+  {
+   "id": 1749306,
+   "url": "https://remotive.com/remote-jobs/writing/freelance-copywriter-1749306",
+   "title": "Freelance Copywriter",
+   "company_name": "Coalition Technologies ",
+   "company_logo": "https://remotive.com/job/1749306/logo",
+   "category": "Writing",
+   "tags": [
+    "accounting",
+    "excel",
+    "research",
+    "data analysis",
+    "bookkeeping",
+    "google sheets",
+    "quickbooks",
+    "data entry",
+    "insurance",
+    "G Suite"
+   ],
+   "job_type": "freelance",
+   "publication_date": "2026-11-02T20:01:00",
+   "candidate_required_location": "Worldwide",
+   "salary": "$20k -$35k",
+   "description": "<p>CT Marketing Agency is seeking skilled Freelance Copywriters to write high-quality, SEO-driven content for eCommerce and lead generation websites. This is a freelance, project-based writing role.</p>\n<p> </p>\n<p>The ideal candidate has excellent English writing skills, strong research ability, and experience writing content that follows detailed, client-specific guidelines. Projects commonly include category pages, product descriptions, blog posts, SEO landing pages, and website copy.</p>\n<p> </p>\n<div class=\"h3\"><strong>About the Role</strong></div>\n<p>Our client base is constantly evolvin",
+   "company_logo_url": "https://remotive.com/job/1749306/logo"
+  },
+  {
+   "id": 2091165,
+   "url": "https://remotive.com/remote-jobs/software-development/full-stack-developer-2091165",
+   "title": "Full-Stack Developer",
+   "company_name": "Fluence International, Inc.",
+   "company_logo": "https://remotive.com/job/2091165/logo",
+   "category": "Software Development",
+   "tags": [
+    "admin",
+    "api",
+    "AWS",
+    "backend",
+    "cloud",
+    "docker",
+    "frontend",
+    "fullstack",
+    "javascript",
+    "react",
+    "security",
+    "UI/UX",
+    "AI/ML",
+    "automation",
+    "documentation",
+    "healthcare",
+    "Typescript ",
+    "web applications",
+    "SOLID",
+    "JSON",
+    "serverless",
+    "next.js",
+    "github",
+    "REST",
+    "mental health",
+    "BaaS",
+    "datadog"
+   ],
+   "job_type": "contract",
+   "publication_date": "2026-10-29T18:22:41",
+   "candidate_required_location": "Worldwide",
+   "salary": "$3.5k–$5k/month",
+   "description": "<p dir=\"ltr\" style=\"line-height: 1.3800000000000001; margin-top: 12pt; margin-bottom: 12pt;\"><span style=\"color: #000000; background-color: transparent; font-weight: 400; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;\">We’re looking for a pragmatic, security-minded Full-Stack Developer to help build and scale Fluence’s B2B products used by clinicians, researchers, and organizations in psychedelic-assisted therapy and mental health. You’ll work closely with and report to our Senior AI &amp; Design Lead to turn product requiremen"
+  },
+  {
+   "id": 999001,
+   "url": "https://remotive.com/remote-jobs/software-dev/junior-frontend-developer-999001",
+   "title": "Junior Frontend Developer (React)",
+   "company_name": "Acme Remote",
+   "company_logo": "https://remotive.com/job/1185979/logo",
+   "category": "Writing",
+   "tags": [
+    "react",
+    "javascript"
+   ],
+   "job_type": "full_time",
+   "publication_date": "2026-11-05T10:00:00",
+   "candidate_required_location": "Europe",
+   "salary": "$50-$75 /hour",
+   "description": "<p>Buscamos una persona <strong>junior</strong>.</p><ul><li>React</li><li>CSS &amp; HTML</li></ul>",
+   "company_logo_url": "https://remotive.com/job/1185979/logo"
+  }
+ ]
+}

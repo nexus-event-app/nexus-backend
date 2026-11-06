@@ -35,6 +35,8 @@ public class NewsMapper {
                 .imageUrl(news.getImageUrl())
                 .author(news.getAuthor())
                 .category(news.getCategory())
+                .source(news.getSource())
+                .imported(news.getExternalId() != null)
                 .isActive(news.getIsActive())
                 .createdAt(news.getCreatedAt())
                 .updatedAt(news.getUpdatedAt())
