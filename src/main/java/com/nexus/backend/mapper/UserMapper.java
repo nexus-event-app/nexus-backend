@@ -5,26 +5,32 @@ import com.nexus.backend.dto.response.UserResponse;
 import com.nexus.backend.entity.User;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class UserMapper {
-    
-    public User toEntity(RegisterRequest request) {
+
+    /** El registro público siempre crea usuarios con rol USER. */
+    public User toEntity(RegisterRequest request, String encodedPassword) {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword()); 
-        user.setRole(User.Role.ADMIN);
+        user.setPassword(encodedPassword);
+        user.setRole(User.Role.USER);
+        user.setEnabled(true);
+        user.setTermsAcceptedAt(LocalDateTime.now());
         return user;
     }
-    
+
     public UserResponse toResponse(User user) {
-        return new UserResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole(),
-            null,
-            user.getCreatedAt()
-        );
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole())
+                .enabled(user.isEnabled())
+                .emailVerified(user.isEmailVerified())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 }

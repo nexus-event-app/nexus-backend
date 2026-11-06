@@ -1,20 +1,38 @@
 package com.nexus.backend.entity;
 
 import com.nexus.backend.enums.DiscussionCategory;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "discussions")
-@Data
+@Table(name = "discussions", indexes = {
+        @Index(name = "idx_discussions_created_at", columnList = "created_at"),
+        @Index(name = "idx_discussions_category", columnList = "category"),
+        @Index(name = "idx_discussions_is_active", columnList = "is_active"),
+        @Index(name = "idx_discussions_author", columnList = "user_id")
+})
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Discussion {
 
     @Id
@@ -28,24 +46,19 @@ public class Discussion {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "category", nullable = false, length = 30)
     private DiscussionCategory category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = true)
+    @JoinColumn(name = "user_id")
     private User author;
 
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    @Column(nullable = false)
+    @Column(name = "likes_count", nullable = false)
     private Integer likesCount = 0;
-
-    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DiscussionLike> likes = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -56,7 +69,7 @@ public class Discussion {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate

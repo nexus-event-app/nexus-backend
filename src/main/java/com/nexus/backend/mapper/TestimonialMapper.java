@@ -1,51 +1,40 @@
 package com.nexus.backend.mapper;
 
 import com.nexus.backend.dto.request.CreateTestimonialRequest;
-import com.nexus.backend.dto.request.UpdateTestimonialRequest;
 import com.nexus.backend.dto.response.TestimonialResponse;
 import com.nexus.backend.entity.Testimonial;
+import com.nexus.backend.entity.User;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TestimonialMapper {
-    
-    public Testimonial toEntity(CreateTestimonialRequest request, String userIp) {
+
+    /** Los testimonios nacen pendientes de moderación y sin publicar. */
+    public Testimonial toEntity(CreateTestimonialRequest request, User user) {
         Testimonial testimonial = new Testimonial();
         testimonial.setName(request.getName());
         testimonial.setRole(request.getRole());
         testimonial.setLocation(request.getLocation());
         testimonial.setContent(request.getContent());
-        testimonial.setUserIp(userIp);
-        testimonial.setIsActive(true);
-        testimonial.setIsPending(false);
+        testimonial.setUser(user);
+        testimonial.setIsPending(true);
+        testimonial.setIsActive(false);
         testimonial.setIsHighlighted(false);
         return testimonial;
     }
-    
-    public void updateEntity(Testimonial testimonial, UpdateTestimonialRequest request) {
-        if (request.getIsActive() != null) {
-            testimonial.setIsActive(request.getIsActive());
-        }
-        if (request.getIsPending() != null) {
-            testimonial.setIsPending(request.getIsPending());
-        }
-        if (request.getIsHighlighted() != null) {
-            testimonial.setIsHighlighted(request.getIsHighlighted());
-        }
-    }
-    
+
     public TestimonialResponse toResponse(Testimonial testimonial) {
-        return new TestimonialResponse(
-            testimonial.getId(),
-            testimonial.getName(),
-            testimonial.getRole(),
-            testimonial.getLocation(),
-            testimonial.getContent(),
-            testimonial.getIsActive(),
-            testimonial.getIsPending(),
-            testimonial.getIsHighlighted(),
-            testimonial.getCreatedAt(),
-            testimonial.getUpdatedAt()
-        );
+        return TestimonialResponse.builder()
+                .id(testimonial.getId())
+                .name(testimonial.getName())
+                .role(testimonial.getRole())
+                .location(testimonial.getLocation())
+                .content(testimonial.getContent())
+                .isActive(testimonial.getIsActive())
+                .isPending(testimonial.getIsPending())
+                .isHighlighted(testimonial.getIsHighlighted())
+                .createdAt(testimonial.getCreatedAt())
+                .updatedAt(testimonial.getUpdatedAt())
+                .build();
     }
 }

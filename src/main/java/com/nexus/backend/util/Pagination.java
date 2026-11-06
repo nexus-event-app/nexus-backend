@@ -1,0 +1,29 @@
+package com.nexus.backend.util;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
+public final class Pagination {
+
+    public static final int DEFAULT_SIZE = 12;
+    public static final int MAX_SIZE = 50;
+    public static final int DEFAULT_LATEST = 3;
+    public static final int MAX_LATEST = 12;
+
+    private Pagination() {
+    }
+
+    /** Página 0-based ordenada por más reciente primero, con tamaño limitado a {@value #MAX_SIZE}. */
+    public static Pageable newestFirst(int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_SIZE);
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
+        return PageRequest.of(safePage, safeSize, sort);
+    }
+
+    public static Pageable latest(int limit) {
+        int safeLimit = Math.min(Math.max(limit, 1), MAX_LATEST);
+        return newestFirst(0, safeLimit);
+    }
+}

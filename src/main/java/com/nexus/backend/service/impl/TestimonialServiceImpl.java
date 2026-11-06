@@ -4,93 +4,105 @@ import com.nexus.backend.dto.request.CreateTestimonialRequest;
 import com.nexus.backend.dto.request.UpdateTestimonialRequest;
 import com.nexus.backend.dto.response.TestimonialResponse;
 import com.nexus.backend.entity.Testimonial;
+import com.nexus.backend.entity.User;
+import com.nexus.backend.exception.ConflictException;
+import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.TestimonialMapper;
 import com.nexus.backend.repository.TestimonialRepository;
+import com.nexus.backend.repository.UserRepository;
+import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.TestimonialService;
-import com.nexus.backend.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TestimonialServiceImpl implements TestimonialService {
-    
+
+    private static final int PUBLISHED_LIMIT = 100;
+    private static final int LATEST_LIMIT = 8;
+
+    private final AccountService accountService;
     private final TestimonialRepository testimonialRepository;
+    private final UserRepository userRepository;
     private final TestimonialMapper testimonialMapper;
-    private final HtmlSanitizer htmlSanitizer;
-    
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TestimonialResponse> getPublishedTestimonials() {
+        return findPublished(PUBLISHED_LIMIT);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TestimonialResponse> getLatestTestimonials() {
+        return findPublished(LATEST_LIMIT);
+    }
+
     @Override
     @Transactional
-    public TestimonialResponse createTestimonial(CreateTestimonialRequest request, String userIp) {
-        if (!canCreateTestimonial(userIp)) {
-            throw new RuntimeException("Solo puedes crear un testimonio cada 24 horas");
+    public TestimonialResponse createTestimonial(CreateTestimonialRequest request, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
+        LocalDateTime since = LocalDateTime.now().minusHours(24);
+        if (testimonialRepository.existsByUserIdAndCreatedAtAfter(actor.getId(), since)) {
+            throw new ConflictException("Solo puedes enviar un testimonio cada 24 horas");
         }
-        
-        request.setName(htmlSanitizer.sanitize(request.getName()));
-        request.setRole(request.getRole() != null ? htmlSanitizer.sanitize(request.getRole()) : null);
-        request.setLocation(request.getLocation() != null ? htmlSanitizer.sanitize(request.getLocation()) : null);
-        request.setContent(htmlSanitizer.sanitize(request.getContent()));
-        
-        Testimonial testimonial = testimonialMapper.toEntity(request, userIp);
-        Testimonial savedTestimonial = testimonialRepository.save(testimonial);
-        return testimonialMapper.toResponse(savedTestimonial);
+
+        User user = userRepository.findById(actor.getId())
+                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+        Testimonial saved = testimonialRepository.save(testimonialMapper.toEntity(request, user));
+        return testimonialMapper.toResponse(saved);
     }
-    
+
     @Override
-    public List<TestimonialResponse> getAllActiveTestimonials() {
-        return testimonialRepository.findByIsActiveTrueOrderByIsHighlightedDescCreatedAtDesc()
-            .stream()
-            .map(testimonialMapper::toResponse)
-            .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<TestimonialResponse> getAllTestimonials() {
+        return testimonialRepository.findAllForModeration().stream()
+                .map(testimonialMapper::toResponse)
+                .toList();
     }
-    
-    @Override
-    public List<TestimonialResponse> getLatestTestimonials() {
-        return testimonialRepository.findTop8ByIsActiveTrueOrderByIsHighlightedDescCreatedAtDesc()
-            .stream()
-            .map(testimonialMapper::toResponse)
-            .collect(Collectors.toList());
-    }
-    
-    @Override
-    public TestimonialResponse getTestimonialById(Long id) {
-        Testimonial testimonial = testimonialRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Testimonio no encontrado con ID: " + id));
-        return testimonialMapper.toResponse(testimonial);
-    }
-    
+
     @Override
     @Transactional
     public TestimonialResponse updateTestimonial(Long id, UpdateTestimonialRequest request) {
-        Testimonial testimonial = testimonialRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Testimonio no encontrado con ID: " + id));
-        
-        request.setName(htmlSanitizer.sanitize(request.getName()));
-        request.setRole(request.getRole() != null ? htmlSanitizer.sanitize(request.getRole()) : null);
-        request.setLocation(request.getLocation() != null ? htmlSanitizer.sanitize(request.getLocation()) : null);
-        request.setContent(htmlSanitizer.sanitize(request.getContent()));
-        
-        testimonialMapper.updateEntity(testimonial, request);
-        Testimonial updatedTestimonial = testimonialRepository.save(testimonial);
-        return testimonialMapper.toResponse(updatedTestimonial);
+        Testimonial testimonial = findById(id);
+
+        if (request.getIsActive() != null) {
+            testimonial.setIsActive(request.getIsActive());
+            if (request.getIsActive() && request.getIsPending() == null) {
+                testimonial.setIsPending(false);
+            }
+        }
+        if (request.getIsPending() != null) {
+            testimonial.setIsPending(request.getIsPending());
+        }
+        if (request.getIsHighlighted() != null) {
+            testimonial.setIsHighlighted(request.getIsHighlighted());
+        }
+        return testimonialMapper.toResponse(testimonialRepository.save(testimonial));
     }
-    
+
     @Override
     @Transactional
     public void deleteTestimonial(Long id) {
-        Testimonial testimonial = testimonialRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Testimonio no encontrado con ID: " + id));
-        testimonialRepository.delete(testimonial);
+        testimonialRepository.delete(findById(id));
     }
-    
-    @Override
-    public boolean canCreateTestimonial(String userIp) {
-        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
-        return !testimonialRepository.existsByUserIpAndCreatedAtAfter(userIp, twentyFourHoursAgo);
+
+    private List<TestimonialResponse> findPublished(int limit) {
+        return testimonialRepository.findPublished(PageRequest.of(0, limit)).stream()
+                .map(testimonialMapper::toResponse)
+                .toList();
+    }
+
+    private Testimonial findById(Long id) {
+        return testimonialRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Testimonio no encontrado"));
     }
 }

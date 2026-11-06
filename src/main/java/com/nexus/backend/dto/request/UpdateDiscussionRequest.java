@@ -1,22 +1,14 @@
 package com.nexus.backend.dto.request;
 
-import com.nexus.backend.enums.DiscussionCategory;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class UpdateDiscussionRequest {
-    
-    @Size(max = 200, message = "El título no puede superar 200 caracteres")
-    private String title;
-    
-    private String content;
-    
-    private DiscussionCategory category;
-    
+public class UpdateDiscussionRequest extends CreateDiscussionRequest {
+
+    /** Solo se tiene en cuenta si quien edita es ADMIN (permite ocultar o restaurar una discusión). */
     private Boolean isActive;
 }

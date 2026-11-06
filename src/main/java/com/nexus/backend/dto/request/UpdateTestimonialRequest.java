@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateTestimonialRequest {
-    
+
     private Boolean isActive;
     private Boolean isPending;
     private Boolean isHighlighted;

@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CommentMapper {
-    
+
+    private static final String ANONYMOUS_NAME = "Anónimo";
+
     public Comment toEntity(CreateCommentRequest request, Discussion discussion, User author) {
         Comment comment = new Comment();
         comment.setContent(request.getContent());
@@ -18,25 +20,19 @@ public class CommentMapper {
         comment.setLikesCount(0);
         return comment;
     }
-    
-public CommentResponse toResponse(Comment comment, Boolean isLikedByCurrentUser) {
-    CommentResponse response = new CommentResponse();
-    response.setId(comment.getId());
-    response.setContent(comment.getContent());
-    response.setDiscussionId(comment.getDiscussion().getId());
-    
-    if (comment.getAuthor() != null) {
-        response.setAuthorId(comment.getAuthor().getId());
-        response.setAuthorName(comment.getAuthor().getName());
-    } else {
-        response.setAuthorId(null);
-        response.setAuthorName("Anónimo");
+
+    public CommentResponse toResponse(Comment comment, int likesCount, boolean likedByCurrentUser) {
+        User author = comment.getAuthor();
+        return CommentResponse.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .discussionId(comment.getDiscussion().getId())
+                .authorId(author != null ? author.getId() : null)
+                .authorName(author != null ? author.getName() : ANONYMOUS_NAME)
+                .likesCount(likesCount)
+                .isLikedByCurrentUser(likedByCurrentUser)
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .build();
     }
-    
-    response.setLikesCount(comment.getLikesCount());
-    response.setIsLikedByCurrentUser(isLikedByCurrentUser);
-    response.setCreatedAt(comment.getCreatedAt());
-    response.setUpdatedAt(comment.getUpdatedAt());
-    return response;
-}
 }

@@ -1,67 +1,44 @@
 package com.nexus.backend.controller;
 
-import com.nexus.backend.dto.request.CreateNewsRequest;
-import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.dto.response.NewsResponse;
+import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.service.NewsService;
-import jakarta.validation.Valid;
+import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/news")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
 public class NewsController {
-    
+
     private final NewsService newsService;
 
-    @PostMapping
-    public ResponseEntity<NewsResponse> createNews(@Valid @RequestBody CreateNewsRequest request) {
-        NewsResponse response = newsService.createNews(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @GetMapping
-    public ResponseEntity<List<NewsResponse>> getAllActiveNews() {
-        List<NewsResponse> news = newsService.getAllActiveNews();
-        return ResponseEntity.ok(news);
+    public ResponseEntity<PageResponse<NewsResponse>> getNews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "" + Pagination.DEFAULT_SIZE) int size,
+            @RequestParam(required = false) NewsCategory category,
+            @RequestParam(required = false) String q) {
+        return ResponseEntity.ok(newsService.getPublicNews(category, q, page, size));
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<List<NewsResponse>> getLatestNews() {
-        List<NewsResponse> news = newsService.getLatestNews();
-        return ResponseEntity.ok(news);
+    public ResponseEntity<List<NewsResponse>> getLatestNews(
+            @RequestParam(defaultValue = "" + Pagination.DEFAULT_LATEST) int limit) {
+        return ResponseEntity.ok(newsService.getLatestNews(limit));
     }
 
-    @GetMapping("/category/{category}")
-    public ResponseEntity<List<NewsResponse>> getNewsByCategory(@PathVariable NewsCategory category) {
-        List<NewsResponse> news = newsService.getNewsByCategory(category);
-        return ResponseEntity.ok(news);
-    }
-    
     @GetMapping("/{id}")
     public ResponseEntity<NewsResponse> getNewsById(@PathVariable Long id) {
-        NewsResponse news = newsService.getNewsById(id);
-        return ResponseEntity.ok(news);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<NewsResponse> updateNews(
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateNewsRequest request) {
-        NewsResponse response = newsService.updateNews(id, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNews(@PathVariable Long id) {
-        newsService.deleteNews(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(newsService.getPublicNewsById(id));
     }
 }

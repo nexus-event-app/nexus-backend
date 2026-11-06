@@ -3,208 +3,213 @@ package com.nexus.backend.service.impl;
 import com.nexus.backend.dto.request.CreateDiscussionRequest;
 import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
+import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.DiscussionLike;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.enums.DiscussionCategory;
+import com.nexus.backend.exception.ForbiddenOperationException;
+import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.DiscussionMapper;
+import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionLikeRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
+import com.nexus.backend.repository.projection.DiscussionCommentCount;
+import com.nexus.backend.repository.spec.DiscussionSpecifications;
+import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.DiscussionService;
-import com.nexus.backend.util.HtmlSanitizer;
+import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DiscussionServiceImpl implements DiscussionService {
-    
+
+    private static final String NOT_FOUND_MESSAGE = "Discusión no encontrada";
+
+    private final AccountService accountService;
     private final DiscussionRepository discussionRepository;
-    private final UserRepository userRepository;
-    private final CommentRepository commentRepository;
     private final DiscussionLikeRepository discussionLikeRepository;
+    private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
+    private final UserRepository userRepository;
     private final DiscussionMapper discussionMapper;
-    private final HtmlSanitizer htmlSanitizer;
-    
+
     @Override
-    @Transactional
-    public DiscussionResponse createDiscussion(CreateDiscussionRequest request, Long userId) {
-        User user = null;
-        if (userId != null) {
-            user = userRepository.findById(userId).orElse(null);
-        }
-        
-        request.setTitle(htmlSanitizer.sanitize(request.getTitle()));
-        request.setContent(htmlSanitizer.sanitize(request.getContent()));
-        
-        Discussion discussion = discussionMapper.toEntity(request, user);
-        Discussion saved = discussionRepository.save(discussion);
-        
-        return discussionMapper.toResponse(saved, 0, false);
+    @Transactional(readOnly = true)
+    public PageResponse<DiscussionResponse> getDiscussions(DiscussionCategory category, String text, int page, int size,
+                                                           UserDetail viewer) {
+        Specification<Discussion> spec = DiscussionSpecifications.isActive()
+                .and(DiscussionSpecifications.filter(category, text));
+        return findPage(spec, Pagination.newestFirst(page, size), viewer);
     }
-    
+
+    @Override
+    @Transactional(readOnly = true)
+    public DiscussionResponse getDiscussionById(Long id, UserDetail viewer) {
+        Discussion discussion = findActive(id);
+        boolean liked = viewer != null && discussionLikeRepository
+                .findByDiscussionIdAndUserId(id, viewer.getId()).isPresent();
+        return toResponse(discussion, liked);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<DiscussionResponse> getMyDiscussions(int page, int size, UserDetail actor) {
+        Specification<Discussion> spec = DiscussionSpecifications.isActive()
+                .and(DiscussionSpecifications.hasAuthor(actor.getId()));
+        return findPage(spec, Pagination.newestFirst(page, size), actor);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<DiscussionResponse> getAllDiscussions(String text, int page, int size, UserDetail actor) {
+        Specification<Discussion> spec = DiscussionSpecifications.filter(null, text);
+        return findPage(spec, Pagination.newestFirst(page, size), actor);
+    }
+
     @Override
     @Transactional
-    public DiscussionResponse updateDiscussion(Long id, UpdateDiscussionRequest request, Long userId) {
-        Discussion discussion = discussionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
-        
-        if (discussion.getAuthor() != null && userId != null) {
-            if (!discussion.getAuthor().getId().equals(userId)) {
-                throw new RuntimeException("No tienes permiso para editar esta discusión");
-            }
-        } else if (discussion.getAuthor() == null && userId == null) {
-    
-        } else {
-            throw new RuntimeException("No tienes permiso para editar esta discusión");
-        }
-        
-        request.setTitle(htmlSanitizer.sanitize(request.getTitle()));
-        request.setContent(htmlSanitizer.sanitize(request.getContent()));
-        
+    public DiscussionResponse createDiscussion(CreateDiscussionRequest request, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
+        User author = loadUser(actor);
+        Discussion saved = discussionRepository.save(discussionMapper.toEntity(request, author));
+        return discussionMapper.toResponse(saved, 0, 0, false);
+    }
+
+    @Override
+    @Transactional
+    public DiscussionResponse updateDiscussion(Long id, UpdateDiscussionRequest request, UserDetail actor) {
+        Discussion discussion = findById(id);
+        assertCanManage(discussion, actor);
+
         discussionMapper.updateEntity(discussion, request);
-        Discussion updated = discussionRepository.save(discussion);
-        
-        Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
-        boolean isLiked = userId != null && discussionLikeRepository.existsByDiscussionIdAndUserId(id, userId);
-        return discussionMapper.toResponse(updated, commentCount, isLiked);
+        if (actor.isAdmin() && request.getIsActive() != null) {
+            discussion.setIsActive(request.getIsActive());
+        }
+        Discussion saved = discussionRepository.save(discussion);
+        boolean liked = discussionLikeRepository.findByDiscussionIdAndUserId(id, actor.getId()).isPresent();
+        return toResponse(saved, liked);
     }
-    
+
     @Override
     @Transactional
-    public void deleteDiscussion(Long id, Long userId) {
-        Discussion discussion = discussionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
-        
-        boolean isAdmin = false;
-        if (userId != null) {
-            User user = userRepository.findById(userId).orElse(null);
-            if (user != null) {
-                isAdmin = "ADMIN".equals(user.getRole().name());
-            }
-        }
-        
-        boolean isAuthor = discussion.getAuthor() != null && userId != null 
-                && discussion.getAuthor().getId().equals(userId);
-        
-        if (!isAuthor && !isAdmin) {
-            throw new RuntimeException("No tienes permiso para eliminar esta discusión");
-        }
-        
-        commentRepository.findByDiscussionIdOrderByCreatedAtAsc(id)
-                .forEach(comment -> commentRepository.delete(comment));
-        
+    public void deleteDiscussion(Long id, UserDetail actor) {
+        Discussion discussion = findById(id);
+        assertCanManage(discussion, actor);
+
+        commentLikeRepository.deleteAllByDiscussionId(id);
+        commentRepository.deleteAllByDiscussionId(id);
+        discussionLikeRepository.deleteAllByDiscussionId(id);
         discussionRepository.delete(discussion);
+        log.info("Discusión id={} eliminada por usuario id={}", id, actor.getId());
     }
-    
-    @Override
-    public DiscussionResponse getDiscussionById(Long id) {
-        Discussion discussion = discussionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
-        
-        Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
-        return discussionMapper.toResponse(discussion, commentCount, false);
-    }
-    
-    @Override
-    public DiscussionResponse getDiscussionById(Long id, Long userId) {
-        Discussion discussion = discussionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
-        
-        Integer commentCount = commentRepository.countByDiscussionId(id).intValue();
-        boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(id, userId);
-        return discussionMapper.toResponse(discussion, commentCount, isLiked);
-    }
-    
-    @Override
-    public List<DiscussionResponse> getAllDiscussions() {
-        return discussionRepository.findByIsActiveTrueOrderByCreatedAtDesc()
-                .stream()
-                .map(discussion -> {
-                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    return discussionMapper.toResponse(discussion, commentCount, false);
-                })
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<DiscussionResponse> getAllDiscussions(Long userId) {
-        return discussionRepository.findByIsActiveTrueOrderByCreatedAtDesc()
-                .stream()
-                .map(discussion -> {
-                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussion.getId(), userId);
-                    return discussionMapper.toResponse(discussion, commentCount, isLiked);
-                })
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category) {
-        return discussionRepository.findByIsActiveTrueAndCategoryOrderByCreatedAtDesc(category)
-                .stream()
-                .map(discussion -> {
-                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    return discussionMapper.toResponse(discussion, commentCount, false);
-                })
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<DiscussionResponse> getDiscussionsByCategory(DiscussionCategory category, Long userId) {
-        return discussionRepository.findByIsActiveTrueAndCategoryOrderByCreatedAtDesc(category)
-                .stream()
-                .map(discussion -> {
-                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussion.getId(), userId);
-                    return discussionMapper.toResponse(discussion, commentCount, isLiked);
-                })
-                .collect(Collectors.toList());
-    }
-    
-    @Override
-    public List<DiscussionResponse> getMyDiscussions(Long userId) {
-        return discussionRepository.findByAuthorIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(discussion -> {
-                    Integer commentCount = commentRepository.countByDiscussionId(discussion.getId()).intValue();
-                    boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussion.getId(), userId);
-                    return discussionMapper.toResponse(discussion, commentCount, isLiked);
-                })
-                .collect(Collectors.toList());
-    }
-    
+
     @Override
     @Transactional
-    public DiscussionResponse toggleLike(Long discussionId, Long userId) {
-        Discussion discussion = discussionRepository.findById(discussionId)
-                .orElseThrow(() -> new RuntimeException("Discusión no encontrada"));
-        
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
-        boolean isLiked = discussionLikeRepository.existsByDiscussionIdAndUserId(discussionId, userId);
-        
-        if (isLiked) {
-            discussionLikeRepository.deleteByDiscussionIdAndUserId(discussionId, userId);
-            discussion.setLikesCount(discussion.getLikesCount() - 1);
+    public DiscussionResponse toggleLike(Long id, UserDetail actor) {
+        Discussion discussion = findActive(id);
+        Optional<DiscussionLike> existing = discussionLikeRepository.findByDiscussionIdAndUserId(id, actor.getId());
+
+        boolean liked;
+        if (existing.isPresent()) {
+            discussionLikeRepository.delete(existing.get());
+            liked = false;
         } else {
             DiscussionLike like = new DiscussionLike();
             like.setDiscussion(discussion);
-            like.setUser(user);
+            like.setUser(loadUser(actor));
             discussionLikeRepository.save(like);
-            discussion.setLikesCount(discussion.getLikesCount() + 1);
+            liked = true;
         }
-        
-        discussionRepository.save(discussion);
-        
-        Integer commentCount = commentRepository.countByDiscussionId(discussionId).intValue();
-        return discussionMapper.toResponse(discussion, commentCount, !isLiked);
+
+        int likesCount = (int) discussionLikeRepository.countByDiscussionId(id);
+        discussionRepository.updateLikesCount(id, likesCount);
+        int commentCount = (int) commentRepository.countByDiscussionId(id);
+        return discussionMapper.toResponse(discussion, commentCount, likesCount, liked);
+    }
+
+    private PageResponse<DiscussionResponse> findPage(Specification<Discussion> spec, Pageable pageable, UserDetail viewer) {
+        Page<Discussion> result = discussionRepository.findAll(spec, pageable);
+        List<Discussion> discussions = result.getContent();
+        List<Long> ids = discussions.stream().map(Discussion::getId).toList();
+
+        Map<Long, Long> commentCounts = loadCommentCounts(ids);
+        Set<Long> likedIds = loadLikedIds(ids, viewer);
+
+        List<DiscussionResponse> content = discussions.stream()
+                .map(discussion -> discussionMapper.toResponse(
+                        discussion,
+                        commentCounts.getOrDefault(discussion.getId(), 0L).intValue(),
+                        discussion.getLikesCount(),
+                        likedIds.contains(discussion.getId())))
+                .toList();
+        return PageResponse.from(new PageImpl<>(content, pageable, result.getTotalElements()));
+    }
+
+    private Map<Long, Long> loadCommentCounts(List<Long> discussionIds) {
+        Map<Long, Long> counts = new HashMap<>();
+        if (discussionIds.isEmpty()) {
+            return counts;
+        }
+        for (DiscussionCommentCount row : commentRepository.countByDiscussionIds(discussionIds)) {
+            counts.put(row.getDiscussionId(), row.getTotal());
+        }
+        return counts;
+    }
+
+    private Set<Long> loadLikedIds(List<Long> discussionIds, UserDetail viewer) {
+        if (viewer == null || discussionIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        return new HashSet<>(discussionLikeRepository.findLikedDiscussionIds(viewer.getId(), discussionIds));
+    }
+
+    private DiscussionResponse toResponse(Discussion discussion, boolean liked) {
+        int commentCount = (int) commentRepository.countByDiscussionId(discussion.getId());
+        return discussionMapper.toResponse(discussion, commentCount, discussion.getLikesCount(), liked);
+    }
+
+    private Discussion findById(Long id) {
+        return discussionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_MESSAGE));
+    }
+
+    private Discussion findActive(Long id) {
+        Discussion discussion = findById(id);
+        if (!Boolean.TRUE.equals(discussion.getIsActive())) {
+            throw new ResourceNotFoundException(NOT_FOUND_MESSAGE);
+        }
+        return discussion;
+    }
+
+    private User loadUser(UserDetail actor) {
+        return userRepository.findById(actor.getId())
+                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+    }
+
+    private void assertCanManage(Discussion discussion, UserDetail actor) {
+        Long ownerId = discussion.getAuthor() != null ? discussion.getAuthor().getId() : null;
+        if (!actor.canManage(ownerId)) {
+            throw new ForbiddenOperationException("Solo el autor o un administrador puede realizar esta acción");
+        }
     }
 }
