@@ -26,7 +26,6 @@ Hay una plantilla completa en [`.env.example`](.env.example).
 | `SPRING_DATASOURCE_URL/USERNAME/PASSWORD` | PostgreSQL (perfil `prod`) | obligatorias en prod |
 | `FORWARD_HEADERS_STRATEGY` | `none` o `native` (detrás de un proxy de confianza) | `none` |
 | `UPLOAD_DIR` | Directorio de imágenes subidas | `./uploads` |
-| `JPA_DDL_AUTO` | Estrategia de esquema de Hibernate en prod | `update` |
 | `IMPORT_ENABLED` | Activa la importación automática programada | `true` |
 | `IMPORT_CHECK_INTERVAL` | Cada cuánto se revisa qué fuentes toca ejecutar (ISO-8601) | `PT15M` |
 | `IMPORT_INITIAL_DELAY` | Espera tras arrancar antes de la primera revisión | `PT1M` |
@@ -41,7 +40,19 @@ export ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='Cambiame123' # opcional
 
 Con el perfil `dev` la base de datos es H2 en `./data/nexusdb` (no se versiona), la consola H2 está en `/h2-console` y se muestran las consultas SQL. La API queda en `http://localhost:8080`.
 
-Si ya tenías una base de datos H2 anterior, bórrala (`rm -r data/`) antes de arrancar: cambia el rol de usuarios (`USER`/`ADMIN`) y las credenciales de H2.
+Si ya tenías una base de datos H2 creada antes de introducir Flyway, bórrala (`rm -r data/`) antes de arrancar: Flyway necesita crear el esquema desde cero.
+
+## Base de datos y migraciones (Flyway)
+
+El esquema lo crea y actualiza [Flyway](https://documentation.red-gate.com/flyway) al arrancar, con los scripts de `src/main/resources/db/migration`. Hibernate solo valida que las entidades coinciden con las tablas (`ddl-auto=validate`), así que nunca modifica la base de datos por su cuenta.
+
+Para cambiar el esquema:
+
+1. Crea un script nuevo con el siguiente número de versión, por ejemplo `V2__perfil_de_usuario.sql`. **Nunca edites un script que ya se haya aplicado** en algún entorno: Flyway lo detecta y no arranca.
+2. Escribe SQL compatible con PostgreSQL y H2 (tipos estándar: `varchar`, `text`, `boolean`, `bigint`, `timestamp(6)`).
+3. Actualiza la entidad y ejecuta `./mvnw verify`: si el script y la entidad no coinciden, los tests fallan.
+
+Los enums se guardan como `varchar` sin `CHECK` (`@JdbcTypeCode(SqlTypes.VARCHAR)` en las entidades), así que añadir un valor nuevo a un enum no requiere migración.
 
 ## Tests
 
@@ -49,7 +60,13 @@ Si ya tenías una base de datos H2 anterior, bórrala (`rm -r data/`) antes de a
 ./mvnw test
 ```
 
-Usan el perfil `test` (H2 en memoria y un secreto JWT de prueba).
+Usan el perfil `test` (H2 en memoria con las migraciones de Flyway y un secreto JWT de prueba).
+
+`PostgresMigrationTest` aplica las migraciones sobre un PostgreSQL real y solo se ejecuta si defines `NEXUS_TEST_POSTGRES_URL` (por defecto usuario y contraseña `nexus`; cámbialos con `NEXUS_TEST_POSTGRES_USER` y `NEXUS_TEST_POSTGRES_PASSWORD`). Vacía esa base de datos al empezar, así que usa una exclusiva para tests:
+
+```bash
+NEXUS_TEST_POSTGRES_URL=jdbc:postgresql://localhost:5432/nexus_test ./mvnw test
+```
 
 ## Docker
 
