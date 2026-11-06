@@ -1,6 +1,6 @@
-# Nexus Backend
+# Primer Commit · Backend
 
-API REST de **Nexus**, una comunidad tech en español para perfiles junior: noticias, ofertas de empleo, foro y testimonios, con panel de administración y SEO (sitemap y robots) servidos desde el propio backend.
+API REST de **Primer Commit**, una comunidad tech en español para perfiles junior: noticias, ofertas de empleo, foro y testimonios, con panel de administración y SEO (sitemap y robots) servidos desde el propio backend.
 
 - Spring Boot 3.5, Java 21, Spring Security (JWT sin estado), Spring Data JPA
 - H2 en archivo para desarrollo, PostgreSQL en producción

@@ -30,7 +30,7 @@ public class FeedClient {
     private final String userAgent;
 
     public FeedClient(@Value("${app.public-url:http://localhost:5173}") String publicUrl) {
-        this.userAgent = "NexusBot/1.0 (+" + publicUrl + ")";
+        this.userAgent = "PrimerCommitBot/1.0 (+" + publicUrl + ")";
     }
 
     public byte[] get(String url, String accept) {

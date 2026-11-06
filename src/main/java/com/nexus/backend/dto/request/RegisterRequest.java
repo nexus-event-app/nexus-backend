@@ -1,8 +1,10 @@
 package com.nexus.backend.dto.request;
 
 import com.nexus.backend.util.TextUtil;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -31,6 +33,11 @@ public class RegisterRequest {
     @Pattern(regexp = "^(?=.*\\p{L})(?=.*\\d).*$", message = "La contraseña debe incluir al menos una letra y un número")
     @ToString.Exclude
     private String password;
+
+    /** Aceptación obligatoria del aviso legal, las condiciones de uso y la política de privacidad. */
+    @NotNull(message = "Debes aceptar las condiciones de uso y la política de privacidad")
+    @AssertTrue(message = "Debes aceptar las condiciones de uso y la política de privacidad")
+    private Boolean acceptTerms;
 
     public void setName(String name) {
         this.name = TextUtil.cleanLine(name);

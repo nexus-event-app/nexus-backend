@@ -40,12 +40,21 @@ class SecurityIntegrationTest {
     @Test
     void publicRegistrationAlwaysCreatesUserRole() throws Exception {
         String body = """
-                {"name":"Intruso","email":"%s","password":"Clave12345","role":"ADMIN"}
+                {"name":"Intruso","email":"%s","password":"Clave12345","acceptTerms":true,"role":"ADMIN"}
                 """.formatted(uniqueEmail());
 
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.user.role").value("USER"));
+    }
+
+    @Test
+    void registrationRequiresAcceptingTheTerms() throws Exception {
+        String body = "{\"name\":\"Sin aceptar\",\"email\":\"" + uniqueEmail() + "\",\"password\":\"Clave12345\"}";
+
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.acceptTerms").exists());
     }
 
     @Test
@@ -94,7 +103,7 @@ class SecurityIntegrationTest {
     }
 
     private String register(String email) throws Exception {
-        String body = "{\"name\":\"Usuaria\",\"email\":\"" + email + "\",\"password\":\"Clave12345\"}";
+        String body = "{\"name\":\"Usuaria\",\"email\":\"" + email + "\",\"password\":\"Clave12345\",\"acceptTerms\":true}";
         String response = mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();

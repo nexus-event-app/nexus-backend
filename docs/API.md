@@ -1,4 +1,4 @@
-# API de Nexus
+# API de Primer Commit
 
 Referencia de la API REST tal y como está implementada en este backend (Spring Boot 3.5, Java 21). Es el contrato compartido con el frontend.
 
@@ -64,7 +64,7 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 `{ users, news, jobs, discussions, comments, pendingTestimonials }` (todos enteros)
 
 ## 4. DTOs de petición (validación en español)
-- `RegisterRequest { name (2–50), email (válido, ≤100, se normaliza a minúsculas y trim), password (8–72, al menos una letra y un número) }`
+- `RegisterRequest { name (2–50), email (válido, ≤100, se normaliza a minúsculas y trim), password (8–72, al menos una letra y un número), acceptTerms (obligatorio, true) }`. Se guarda la fecha de aceptación en `users.terms_accepted_at`.
 - `LoginRequest { email, password }`
 - `CreateNewsRequest / UpdateNewsRequest { title (≤200), content (≤20000), sourceUrl (http/https, opcional), imageUrl (opcional), author (≤100, opcional), category (por defecto GENERAL) }`
 - `CreateJobRequest / UpdateJobRequest { title (≤200), company (≤120), description (≤20000), location (≤120), workMode, contractType, level, tags: string[] (máx 10, cada una ≤30), applyUrl (obligatoria, http/https), source (opcional ≤100), expiresAt (opcional, ISO local date-time) }`. En `Update*` se puede además enviar `isActive`.
