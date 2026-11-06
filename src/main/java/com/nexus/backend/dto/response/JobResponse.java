@@ -29,6 +29,8 @@ public class JobResponse {
     private List<String> tags;
     private String applyUrl;
     private String source;
+    /** true si se importó de una fuente externa (no se indexa ni se marca como JobPosting). */
+    private Boolean imported;
     private Boolean isActive;
     private LocalDateTime publishedAt;
     private LocalDateTime expiresAt;

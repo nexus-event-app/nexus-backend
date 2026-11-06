@@ -43,6 +43,7 @@ public class JobMapper {
                 .tags(splitTags(job.getTags()))
                 .applyUrl(job.getApplyUrl())
                 .source(job.getSource())
+                .imported(job.getExternalId() != null)
                 .isActive(job.getIsActive())
                 .publishedAt(job.getPublishedAt())
                 .expiresAt(job.getExpiresAt())

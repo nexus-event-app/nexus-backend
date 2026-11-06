@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+    <channel>
+        
+        <title>
+            <![CDATA[ Cursos de programación freeCodeCamp en Español: Python, JavaScript, Git y más ]]>
+        </title>
+        <description>
+            <![CDATA[ Descubre miles de cursos de programación escritos por expertos. Aprende Desarrollo Web, Ciencia de Datos, DevOps, Seguridad y obtén asesoramiento profesional para desarrolladores. ]]>
+        </description>
+        <link>https://www.freecodecamp.org/espanol/news/</link>
+        <image>
+            <url>https://cdn.freecodecamp.org/universal/favicons/favicon.png</url>
+            <title>
+                <![CDATA[ Cursos de programación freeCodeCamp en Español: Python, JavaScript, Git y más ]]>
+            </title>
+            <link>https://www.freecodecamp.org/espanol/news/</link>
+        </image>
+        <generator>Eleventy</generator>
+        <lastBuildDate>Tue, 06 Oct 2026 06:06:21 +0000</lastBuildDate>
+        <atom:link href="https://www.freecodecamp.org/espanol/news/rss.xml" rel="self" type="application/rss+xml" />
+        <ttl>60</ttl>
+        
+            <item>
+                <title>
+                    <![CDATA[ Escalabilidad en el desarrollo de aplicaciones ]]>
+                </title>
+                <description>
+                    <![CDATA[ Cuando desarrollamos software, hay aspectos cruciales que debemos cuidar y tener claros; uno de ellos es la escabilidad, pero ¿a qué nos referimos con ello? > Es un anglicismo que describe la capacidad de un negocio o sistema de crecer en magnitud. Hasta hace poco tiempo, la palabra escalabilidad no ]]>
+                </description>
+                <link>https://www.freecodecamp.org/espanol/news/escalabilidad-en-el-desarrollo-de-aplicaciones/</link>
+                <guid isPermaLink="false">6a84b06029c22304fa42a485</guid>
+                
+                <dc:creator>
+                    <![CDATA[ Leonardo José Castillo Lacruz ]]>
+                </dc:creator>
+                <pubDate>Wed, 26 Aug 2026 14:13:10 +0000</pubDate>
+                <media:content url="https://www.freecodecamp.org/espanol/news/content/images/2026/08/Generated-Image-August-18--2026---12_24PM.jpg" medium="image" />
+                <content:encoded>
+                    <![CDATA[ <p>Cuando desarrollamos software, hay aspectos cruciales que debemos cuidar y tener claros; uno de ellos es la escabilidad, pero ¿a qué nos referimos con ello?</p><blockquote>Es un anglicismo que describe la capacidad de un negocio o sistema de crecer en magnitud. Hasta hace poco tiempo, la palabra escalabilidad no existía en el diccionario de la RAE, pero ya fue incluida formalmente en el Diccionario de la lengua española como la «capacidad de adaptación y respuesta de un sistema a la medida que aumentan sus necesidades de rendimiento»</blockquote><p>Cuando partimos un proyecto de software, buscamos medir un posible tamaño; con ello dimensionamos los recursos y elegimos las estrategias para la gestión y tráfico de datos y transacciones, solo que con el tiempo, es posible que lo estimado cambie. Nuestro proyecto es un éxito y ahora tenemos más usuarios de los estimados; realizamos más operaciones de las previstas. ¿Qué implica esto? Sí, señores, significa que debemos redimensionar la aplicación, o mejor dicho, ¡debemos <em><strong>ESCALARLA</strong></em>!</p><h3 id="-c-mo-escalar-una-aplicaci-n">¿Cómo escalar una aplicación?</h3><p>Existen 2 aproximaciones para escalar una aplicación; la primera y más común es decir: "Bueno, si para X usuarios con Y operaciones tenía un Servidor de tamaño Z, vamos a incrementar los recursos en el servidor entonces.</p><p>¿Es correcta esta aproximación? Lo es hasta cierto punto; aquí estamos partiendo de que nuestra aplicació, sigue una arquitectura monolítica, es decir, todo está en un único recurso o servidor. Entonces, la primera aproximación se denomina <strong>Escalamiento Vertical.</strong></p><figure class="kg-card kg-image-card"><img src="https://cdn-images-1.medium.com/max/800/1*MooyOrVt8aUIqP2JSDJepg.jpeg" class="kg-image" alt="1*MooyOrVt8aUIqP2JSDJepg" width="600" height="400" loading="lazy"></figure><p>Este tipo de escalamiento es de rápida aplicación, siempre que estemos usando un servicio en la nube, con ajuste elástico, tipo EC2 de Amazon o VM de GCP; con esto, en pocos minutos podemos redimensionar nuestros recursos y con ello poder atender la demanda creciente.</p><p><em>¿Qué impactos o implicaciones le ves a este tipo de escalamiento?</em></p><p>El primero, este escalamiento es limitado, ya que podemos llegar a usar el hardware más potente disponible y, si aun así no solventamos el problema, ya no tenemos otra opción.</p><p>El costo, ya que podemos llegar a necesitar un hardware muy caro que nos impacte de forma negativa en la parte financiera.</p><h4 id="-qu-otra-aproximaci-n-podemos-aplicar">¿Qué otra aproximación podemos aplicar?</h4><p>Efectivamente, así como existe un Escalamiento Vertical, existe un escalamiento horizontal; de esta forma, en lugar de crecer hacia arriba, crecemos a los lados, es decir, agregamos servidores a los lados.</p><p>¿Qué ventajas tiene? No tiene límites, podemos crecer a los lados de forma infinita, con ello mitigar el problema de recursos; en cuanto a costos, en la medida que necesitemos vamos agregando, pero siempre con la ventaja de que deberíamos poder resolver el problema. Entonces, ¿siempre debemos escalar horizontalmente? ¡Parece genial, parece simple, pero no, no lo es!</p><p>La realidad es que podemos replicar nuestros servidores, pero vamos a necesitar de algo más, de un responsable por orquestar o dirigir el proceso de uso de cada instancia de servidor, ¿y eso cómo se hace?</p><p>Primero veamos cómo sería ese Escalamiento Horizontal:</p><figure class="kg-card kg-image-card"><img src="https://cdn-images-1.medium.com/max/800/1*q9h0JQNTZJfmLQnH-CshVQ.jpeg" class="kg-image" alt="1*q9h0JQNTZJfmLQnH-CshVQ" width="600" height="400" loading="lazy"></figure><p>En la imagen anterior nos falta un elemento central, responsable por ordenar el tráfico y llevar el control de cuál servidor atiende qué petición; de acuerdo al tipo de problema que tengamos, ese elemento central puede ser:</p><ul><li>Load balancers: responsable por definir a quién se le entrega la petición (más adelante tendremos contenido sobre esto)</li><li>Colas de mensajes: aplicaciones que controlan el procesamiento y son capaces de controlar el flujo.</li><li>Bases de datos distribuidas: Cuando se trata de almacenamiento, podemos dividir la base de datos en N servidores, aplicando la técnica de <em>sharding.</em></li></ul><p>¿Ya has enfrentado problemas de Escalibidad en tus aplicaciones? ¿Qué abordaje has usado? Coméntalo para que podamos discutir sobre este apasionante tema.</p><p>Sígueme en mis redes:</p><ul><li><a href="https://www.linkedin.com/in/leonardo-jose-castillo-lacruz-4911571a/?locale=es" rel="noopener">Linkedin</a></li><li><a href="https://www.youtube.com/@LeonardoCastillo79" rel="noopener">Youtube</a></li></ul> ]]>
+                </content:encoded>
+            </item>
+<item>
+                <title>
+                    <![CDATA[ Cómo iniciar tu carrera en tecnología con freeCodeCamp - Charla completa ]]>
+                </title>
+                <description>
+                    <![CDATA[ La tecnología está transformando rápidamente al mundo. Saber cómo aprovechar los recursos educativos gratuitos disponibles y contribuir a proyectos open source te puede ser muy útil para iniciar tu carrera en este campo. Acabamos de publicar una charla en el canal de YouTube de freeCodeCamp en español [https://www.youtube.com/@freecodecampes] sobre cómo ]]>
+                </description>
+                <link>https://www.freecodecamp.org/espanol/news/como-iniciar-tu-carrera-en-tecnologia-con-freecodecamp/</link>
+                <guid isPermaLink="false">6a1a02fdebd58a04609290eb</guid>
+                
+                    <category>
+                        <![CDATA[ freeCodeCamp ]]>
+                    </category>
+                
+                    <category>
+                        <![CDATA[ Tecnología ]]>
+                    </category>
+                
+                    <category>
+                        <![CDATA[ Carrera ]]>
+                    </category>
+                
+                    <category>
+                        <![CDATA[ Charla ]]>
+                    </category>
+                
+                <dc:creator>
+                    <![CDATA[ Estefania Cassingena Navone ]]>
+                </dc:creator>
+                <pubDate>Thu, 11 Jun 2026 04:00:00 +0000</pubDate>
+                <media:content url="https://www.freecodecamp.org/espanol/news/content/images/2026/05/thumbnail.png" medium="image" />
+                <content:encoded>
+                    <![CDATA[ <p>La tecnología está transformando rápidamente al mundo. Saber cómo aprovechar los recursos educativos gratuitos disponibles y contribuir a proyectos open source te puede ser muy útil para iniciar tu carrera en este campo.</p><p>Acabamos de publicar una charla en el <a href="https://www.youtube.com/@freecodecampes">canal de YouTube de freeCodeCamp en español</a> sobre cómo aprovechar los recursos educativos gratuitos de freeCodeCamp y su comunidad para iniciar tu carrera en tecnología. </p><p>Aprenderás dónde encontrar recursos útiles y los conceptos clave que necesitas saber para empezar.</p><p>Esta charla fue presentada por Estefania (¡Yo!). Soy miembro del equipo de freeCodeCamp. Desarrollo contenido educativo sobre programación y manejo el canal de YouTube de freeCodeCamp en español. Me encanta ayudar a otros a aprender y crecer profesionalmente. Di esta charla virtual para la Escuela Superior Politécnica del Litoral, ubicada en Guayaquil, Ecuador.</p><p>Antes de adentrarnos en el contenido de la charla, veamos en qué consisten las carreras en tecnología y por qué deberías empezar ahora si tu objetivo es ser parte de este campo.</p><p>Las carreras en tecnología pueden ser muy interesantes porque te dan la oportunidad de resolver problemas del mundo real y ser parte de un campo que puede definir y moldear futuro de la humanidad. Al unirte a la comunidad de freeCodeCamp, encontrarás el apoyo y las herramientas prácticas que necesitas.</p><p>Aprender a programar y contribuir a proyectos open source pueden ser dos pasos iniciales muy importantes. Contribuir a proyectos open source desarrolla tus habilidades técnicas y te conecta con una red global de estudiantes y profesionales que comparten tus intereses y metas. Al contribuir a proyectos open source adquieres experiencia práctica, expandes tu portafolio y aumentas las posibilidades de conseguir tu primer empleo.</p><h2 id="lo-que-aprender-s-durante-la-charla"><strong>Lo que aprenderás durante la charla</strong></h2><p>Genial. Veamos lo qué aprenderás durante la charla:</p><ul><li>La historia y misión de freeCodeCamp.org.</li><li>Cómo usar los recursos gratuitos de freeCodeCamp para aprender a programar.</li><li>Las certificaciones de freeCodeCamp.</li><li>Los retos diarios de programación de freeCodeCamp.</li><li>El catálogo y los foros de freeCodeCamp.</li><li>Los canales de YouTube de freeCodeCamp con cursos completos.</li><li>La publicación de freeCodeCamp.</li><li>Recursos educativos adicionales de freeCodeCamp.</li><li>La importancia de contribuir a proyectos open source y cómo contribuir.</li><li>Terminología comúnmente utilizada en proyectos open source.</li><li>Consejos personales para iniciarte en este campo.</li><li>Cómo unirte a la comunidad de freeCodeCamp.</li></ul><p>Al finalizar la charla, sabrás cómo puedes aprovechar los recursos gratuitos de freeCodeCamp para aprender a programar e iniciar tu carrera.</p><p>Te invitamos a ver la charla en el canal de YouTube de freeCodeCamp en español:</p><figure class="kg-card kg-embed-card" data-test-label="fitted">
+        <div class="fluid-width-video-container">
+          <div style="padding-top: 56.49999999999999%;" class="fluid-width-video-wrapper">
+            <iframe width="200" height="113" src="https://www.youtube.com/embed/WfkFz6-q1Ew?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="" title="Cómo iniciar tu carrera en tecnología con freeCodeCamp - Charla completa" name="fitvid0"></iframe>
+          </div>
+        </div>
+      </figure><p>✍️ Charla presentada por Estefania Cassingena Navone.</p><ul><li>YouTube: <a href="https://www.youtube.com/@freecodecampes">https://www.youtube.com/@freecodecampes</a></li></ul><p>En colaboración con:</p><ul><li>Canal del Capítulo (IEEE Computer Society ESPOL): <a href="https://www.youtube.com/@ieeeespolcomputersociety7497">https://www.youtube.com/@ieeeespolcomputersociety7497</a></li><li>Canal de la Rama Estudiantil (IEEE ESPOL): <a href="https://www.youtube.com/@ramaestudiantilieee-espol84">https://www.youtube.com/@ramaestudiantilieee-espol84</a></li></ul> ]]>
+                </content:encoded>
+            </item>
+<item>
+                <title>
+                    <![CDATA[ Aprende SQL - Curso desde cero en español ]]>
+                </title>
+                <description>
+                    <![CDATA[ SQL (Structured Query Language) es el lenguaje estándar para gestionar y manipular datos almacenados en bases de datos relacionales. Es la herramienta esencial que te permite comunicarte con las bases de datos que impulsan las aplicaciones modernas. Acabamos de publicar un curso en el canal de YouTube de freeCodeCamp en ]]>
+                </description>
+                <link>https://www.freecodecamp.org/espanol/news/aprende-sql-curso-desde-cero-en-espanol/</link>
+                <guid isPermaLink="false">69b88053633d5f04fc668404</guid>
+                
+                    <category>
+                        <![CDATA[ SQL ]]>
+                    </category>
+                
+                <dc:creator>
+                    <![CDATA[ Estefania Cassingena Navone ]]>
+                </dc:creator>
+                <pubDate>Thu, 26 Mar 2026 04:00:00 +0000</pubDate>
+                <media:content url="https://www.freecodecamp.org/espanol/news/content/images/2026/03/Thumbnail-A.png" medium="image" />
+                <content:encoded>
+                    <![CDATA[ <p>SQL (Structured Query Language) es el lenguaje estándar para gestionar y manipular datos almacenados en bases de datos relacionales. Es la herramienta esencial que te permite comunicarte con las bases de datos que impulsan las aplicaciones modernas.</p><p>Acabamos de publicar un curso en el canal de YouTube de freeCodeCamp en español que te guiará paso a paso a través de los fundamentos de SQL. Aprenderás los conceptos básicos que necesitas para comenzar y crearás dos proyectos.</p><p>El curso fue creado por Sergie Code. Sergie es ingeniero de software y creador de contenido a quien le encanta enseñar y compartir sus conocimientos. Su trabajo se centra en JavaScript, incluyendo React.js, Angular.js y otros frameworks.</p><p>Antes de adentrarnos en el contenido del curso, veamos qué es SQL y por qué deberías aprenderlo.</p><p>Los datos están en todas partes. Las plataformas y organizaciones modernas dependen de las bases de datos todos los días. Cada vez que inicias sesión en un sitio web, estás utilizando el poder de las bases de datos. Al dominar SQL, podrás extraer información valiosa a partir de los datos almacenados, una habilidad que es muy valorada en la ingeniería de software, la ciencia de datos y en los negocios.</p><p>SQL es un lenguaje especializado diseñado para gestionar datos almacenados en bases de datos relacionales. Con SQL, puedes crear bases de datos, definir su estructura y realizar operaciones clave como crear, insertar, actualizar y eliminar registros. Una de sus características principales es que te permite acceder a los datos a través de consultas (queries) para encontrar de forma eficiente los datos exactos que tú o tu aplicación necesitan.</p><h2 id="curso-de-sql-en-espa-ol"><strong>Curso de SQL en español</strong></h2><p>Genial. Ahora que ya sabes más sobre SQL, veamos lo que aprenderás durante el curso:</p><ul><li>Introducción a SQL y bases de datos.</li><li>SQL vs. MySQL, PostgreSQL y SQL Server.</li><li>Jerarquía de bases de datos relacionales.</li><li>DBngin y TablePlus.</li><li>Lenguaje de Definición de Datos (DDL): CREATE, DROP, ALTER y DESCRIBE.</li><li>Trabajo con tablas, atributos y restricciones.</li><li>Claves foráneas y relaciones entre tablas.</li><li>Lenguaje de Manipulación de Datos (DML): INSERT, UPDATE, DELETE y TRUNCATE.</li><li>Lenguaje de Consulta de Datos (DQL): SELECT, WHERE y ORDER BY.</li><li>Funciones de agregación (COUNT, SUM, AVG).</li><li>INNER JOIN, LEFT JOIN, RIGHT JOIN, y Joins de 3 tablas.</li><li>Subconsultas, GROUP BY y HAVING.</li><li>Gestión de SQL con Docker y variables de entorno.</li><li>Buenas prácticas y ejemplos prácticos.</li></ul><p>Al final del curso, conocerás los fundamentos de SQL y podrás comenzar a crear y gestionar tus propias bases de datos relacionales.</p><p>Te invitamos a ver el curso en el canal de YouTube de freeCodeCamp.org en español:</p><figure class="kg-card kg-embed-card" data-test-label="fitted">
+        <div class="fluid-width-video-container">
+          <div style="padding-top: 56.49999999999999%;" class="fluid-width-video-wrapper">
+            <iframe width="200" height="113" src="https://www.youtube.com/embed/6JBsoPOwPew?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="" title="Aprende SQL - Curso desde cero con MySQL, PostgreSQL, Backend y Docker" name="fitvid0"></iframe>
+          </div>
+        </div>
+      </figure><p>✍️ Curso creado por Sergie Code.</p><ul><li>Youtube: <a href="https://www.youtube.com/@SergieCode">@SergieCode</a></li><li>Instagram: <a href="https://www.instagram.com/sergiecode">sergiecode</a></li><li>LinkedIn: <a href="https://www.linkedin.com/in/sergiecode/">Sergie Code</a></li><li>GitHub: <a href="https://github.com/sergiecode">sergiecode</a></li><li>Facebook: <a href="https://www.facebook.com/sergiecodeok">sergiecodeok</a></li><li>TikTok: <a href="https://www.tiktok.com/@sergiecode">@sergiecode</a></li><li>Twitter: <a href="https://twitter.com/sergiecode">@sergiecode</a></li><li>Threads: <a href="https://www.threads.net/@sergiecode">@sergiecode</a></li></ul> ]]>
+                </content:encoded>
+            </item>
+</channel>
+</rss>

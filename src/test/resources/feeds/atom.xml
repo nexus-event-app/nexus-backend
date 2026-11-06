@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Blog de ejemplo</title>
+  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+  <updated>2026-11-05T18:30:02Z</updated>
+  <entry>
+    <title>Novedades de &lt;b&gt;Java 25&lt;/b&gt; &amp; Spring</title>
+    <link href="https://blog.example.com/java-25"/>
+    <id>urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a</id>
+    <updated>2026-11-05T18:30:02Z</updated>
+    <author><name>Ana López</name></author>
+    <content type="html">&lt;p&gt;Primer párrafo con &lt;a href="#"&gt;enlace&lt;/a&gt;.&lt;/p&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;p&gt;&lt;img src="https://blog.example.com/img.png"&gt;Segundo párrafo.&lt;/p&gt;</content>
+  </entry>
+  <entry>
+    <title>Entrada sin enlace</title>
+    <id>urn:uuid:sin-enlace</id>
+    <updated>2026-11-04T10:00:00Z</updated>
+  </entry>
+</feed>
