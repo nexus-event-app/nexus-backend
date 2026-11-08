@@ -137,7 +137,7 @@ idioma, se usa el castellano. Afecta a:
   `messages_en.properties`. Los servicios lanzan excepciones con una **clave** (`error.news.notFound`) y `GlobalExceptionHandler`
   la traduce; los DTO usan `message = "{validation.title.required}"`.
 - Emails de cuenta (`mail.*`): salen en el idioma de la petición y los enlaces apuntan a `/ca/...` o `/en/...`.
-- `sitemap.xml`: cada página aparece en los tres idiomas con enlaces `hreflang`. `robots.txt` cubre también las rutas con prefijo.
+- `sitemap.xml`: las páginas traducidas (portada, listados y testimonios) aparecen en los tres idiomas con enlaces `hreflang`. Las noticias, ofertas, debates y páginas legales, cuyo texto solo existe en castellano, aparecen una sola vez en su URL castellana y sin `hreflang`, para que no cuenten como contenido duplicado. `robots.txt` cubre también las rutas con prefijo.
 
 Para añadir un texto, créalo **en los tres ficheros** con la misma clave: `MessageBundlesTest` falla si falta alguna.
 Los textos con argumentos (`{0}`) duplican el apóstrofo (`''`); en el resto se usa `’`.

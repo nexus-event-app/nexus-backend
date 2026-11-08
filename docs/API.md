@@ -164,3 +164,4 @@ Los filtros y la paginación de listados van en la query de la URL (`?page=2&cat
 - `isLikedByCurrentUser` se calcula con una única consulta por página; `commentCount` con una única consulta agrupada.
 - `/sitemap.xml` y `/robots.txt` se cachean 10 minutos en memoria; el sitemap incluye hasta 5000 URLs por tipo (noticias activas, ofertas vigentes, discusiones activas; sin contenido importado).
 - `/sitemap.xml` excluye noticias y ofertas importadas (`externalId` no nulo): son resúmenes de contenido ajeno.
+- `/sitemap.xml` por idioma: las páginas traducidas (`/`, `/noticias`, `/empleo`, `/foro`, `/testimonios`) se listan con prefijo `/ca` y `/en` y enlaces `hreflang`; los detalles de noticias, ofertas y debates y las páginas legales solo en castellano, sin `hreflang`.

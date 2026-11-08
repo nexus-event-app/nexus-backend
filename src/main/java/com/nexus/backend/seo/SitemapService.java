@@ -25,7 +25,10 @@ public class SitemapService {
 
     private static final int MAX_URLS_PER_TYPE = 5000;
     private static final String CACHE_KEY = "content";
-    private static final List<String> STATIC_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios");
+    /** Páginas con la interfaz y el contenido traducidos: se publican en todos los idiomas con hreflang. */
+    private static final List<String> TRANSLATED_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios");
+    /** Páginas cuyo texto solo existe en castellano: una única URL, sin alternativas de idioma. */
+    private static final List<String> SPANISH_ONLY_PATHS = List.of("/aviso-legal", "/privacidad", "/cookies");
 
     private final NewsRepository newsRepository;
     private final JobOfferRepository jobOfferRepository;
@@ -66,8 +69,11 @@ public class SitemapService {
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n");
 
-        for (String path : STATIC_PATHS) {
-            appendUrl(xml, path, null);
+        for (String path : TRANSLATED_PATHS) {
+            appendTranslatedUrl(xml, path);
+        }
+        for (String path : SPANISH_ONLY_PATHS) {
+            appendSingleUrl(xml, path, null);
         }
         appendEntries(xml, "/noticias/", newsRepository.findSitemapEntries(limit));
         appendEntries(xml, "/empleo/", jobOfferRepository.findSitemapEntries(LocalDateTime.now(), limit));
@@ -77,20 +83,28 @@ public class SitemapService {
         return xml.toString();
     }
 
+    /**
+     * Noticias, ofertas y debates: su contenido está escrito en un solo idioma (castellano), así que solo se
+     * publica esa URL. Las versiones /ca y /en existen para navegar, pero apuntan con canonical a esta.
+     */
     private void appendEntries(StringBuilder xml, String section, List<SitemapEntry> entries) {
         for (SitemapEntry entry : entries) {
-            appendUrl(xml, section + SlugUtil.idSlug(entry.getId(), entry.getTitle()), entry.getLastModified());
+            appendSingleUrl(xml, section + SlugUtil.idSlug(entry.getId(), entry.getTitle()), entry.getLastModified());
         }
     }
 
+    private void appendSingleUrl(StringBuilder xml, String path, LocalDateTime lastModified) {
+        xml.append("  <url>\n");
+        xml.append("    <loc>").append(escapeXml(localizedUrl(Languages.DEFAULT, path))).append("</loc>\n");
+        appendLastModified(xml, lastModified);
+        xml.append("  </url>\n");
+    }
+
     /** Una entrada por idioma, cada una con los enlaces alternativos a todas las versiones (hreflang). */
-    private void appendUrl(StringBuilder xml, String path, LocalDateTime lastModified) {
+    private void appendTranslatedUrl(StringBuilder xml, String path) {
         for (Locale locale : Languages.SUPPORTED) {
             xml.append("  <url>\n");
             xml.append("    <loc>").append(escapeXml(localizedUrl(locale, path))).append("</loc>\n");
-            if (lastModified != null) {
-                xml.append("    <lastmod>").append(DateTimeFormatter.ISO_LOCAL_DATE.format(lastModified)).append("</lastmod>\n");
-            }
             for (Locale alternate : Languages.SUPPORTED) {
                 xml.append("    <xhtml:link rel=\"alternate\" hreflang=\"").append(alternate.getLanguage())
                         .append("\" href=\"").append(escapeXml(localizedUrl(alternate, path))).append("\"/>\n");
@@ -98,6 +112,12 @@ public class SitemapService {
             xml.append("    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"")
                     .append(escapeXml(localizedUrl(Languages.DEFAULT, path))).append("\"/>\n");
             xml.append("  </url>\n");
+        }
+    }
+
+    private static void appendLastModified(StringBuilder xml, LocalDateTime lastModified) {
+        if (lastModified != null) {
+            xml.append("    <lastmod>").append(DateTimeFormatter.ISO_LOCAL_DATE.format(lastModified)).append("</lastmod>\n");
         }
     }
 
