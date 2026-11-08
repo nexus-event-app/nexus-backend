@@ -54,6 +54,8 @@ public class ImportSourceInitializer implements CommandLineRunner {
                         "https://www.getonbrd.com/api/v0/categories/data-science-analytics/jobs?per_page=100", false),
                 jobs("Remotive", ImportSourceType.REMOTIVE_JOBS,
                         "https://remotive.com/api/remote-jobs?category=software-dev&search=junior", false),
+                jobs("Jobicy · Europa", ImportSourceType.JOBICY_JOBS,
+                        "https://jobicy.com/api/v2/remote-jobs?count=100&geo=europe&industry=dev", false),
                 jobs("Arbeitnow", ImportSourceType.ARBEITNOW_JOBS, "https://www.arbeitnow.com/api/job-board-api", true));
         sourceRepository.saveAll(defaults);
         log.info("Creadas {} fuentes de importación por defecto", defaults.size());

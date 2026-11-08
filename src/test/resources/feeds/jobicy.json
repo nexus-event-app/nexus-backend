@@ -1,0 +1,46 @@
+{
+  "apiVersion": "2.0",
+  "friendlyNotice": "fixture escrita a mano a partir de la documentación de la API de Jobicy (no es una respuesta real)",
+  "jobCount": 4,
+  "jobs": [
+    {
+      "id": 900001,
+      "url": "https://jobicy.com/jobs/900001-junior-frontend-developer",
+      "jobSlug": "900001-junior-frontend-developer",
+      "jobTitle": "Junior Frontend Developer",
+      "companyName": "Ejemplo SL",
+      "jobIndustry": ["Engineering"],
+      "jobType": ["full-time"],
+      "jobGeo": "Europe",
+      "jobLevel": "Junior",
+      "jobExcerpt": "Buscamos a alguien que empiece su carrera con React.",
+      "jobDescription": "<p>Trabajarás con React y TypeScript en un equipo remoto.</p>",
+      "pubDate": "2026-11-05 09:30:00"
+    },
+    {
+      "id": 900002,
+      "url": "https://jobicy.com/jobs/900002-software-engineering-intern",
+      "jobTitle": "Software Engineering Intern",
+      "companyName": "Prácticas Inc",
+      "jobIndustry": ["Engineering"],
+      "jobType": ["internship"],
+      "jobGeo": ["Europe", "UK"],
+      "jobLevel": ["Entry"],
+      "jobDescription": "<p>Prácticas remotas.</p>",
+      "pubDate": "2026-11-04T16:53:35"
+    },
+    {
+      "id": 900003,
+      "url": "https://jobicy.com/jobs/900003-part-time-qa",
+      "jobTitle": "QA Tester",
+      "companyName": "Test Co",
+      "jobType": "part-time",
+      "jobExcerpt": "Resumen sin descripción larga."
+    },
+    {
+      "id": 900004,
+      "jobTitle": "Oferta sin enlace",
+      "companyName": "No válida"
+    }
+  ]
+}

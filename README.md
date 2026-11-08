@@ -137,6 +137,7 @@ El paquete `importer/` consulta periódicamente fuentes externas y guarda lo nue
 | `RSS_NEWS` | Cualquier feed RSS 2.0 o Atom | 30 min |
 | `GETONBRD_JOBS` | API pública de [Get on Board](https://www.getonbrd.com) (empleo tech en español), por categoría | 2 h |
 | `REMOTIVE_JOBS` | API pública de [Remotive](https://remotive.com/api-documentation) (empleo en remoto) | 6 h (máximo 4 consultas al día según sus condiciones) |
+| `JOBICY_JOBS` | API pública de [Jobicy](https://github.com/Jobicy/remote-jobs-api) (empleo en remoto; se filtra con `geo=europe`) | 6 h (sus condiciones piden máximo una consulta por hora) |
 | `ARBEITNOW_JOBS` | API pública de [Arbeitnow](https://www.arbeitnow.com/blog/job-board-api) (Europa) | 1 h |
 
 Reglas que aplica en cada ejecución:

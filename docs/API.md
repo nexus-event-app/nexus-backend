@@ -57,7 +57,7 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 `{ id, name, role, location, content, isActive, isPending, isHighlighted, createdAt, updatedAt }`
 ### ImportSourceResponse (admin)
 `{ id, name, type, url, newsCategory, autoPublish, active, remoteOnly, keywords, intervalMinutes, minIntervalMinutes, lastRunAt, lastStatus: "SUCCESS"|"FAILED"|null, lastMessage, lastImportedCount, running, createdAt }`
-`type`: `RSS_NEWS | GETONBRD_JOBS | REMOTIVE_JOBS | ARBEITNOW_JOBS`
+`type`: `RSS_NEWS | GETONBRD_JOBS | REMOTIVE_JOBS | JOBICY_JOBS | ARBEITNOW_JOBS`
 ### ImportRunResponse (admin)
 `{ status, fetched, imported, message, source: ImportSourceResponse }`
 ### StatsResponse (admin)

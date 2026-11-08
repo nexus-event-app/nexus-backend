@@ -19,6 +19,7 @@ class ProvidersTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RssNewsProvider rss = new RssNewsProvider(null);
+    private final JobicyJobProvider jobicy = new JobicyJobProvider(null, objectMapper);
     private final RemotiveJobProvider remotive = new RemotiveJobProvider(null, objectMapper);
     private final ArbeitnowJobProvider arbeitnow = new ArbeitnowJobProvider(null, objectMapper);
     private final GetonbrdJobProvider getonbrd = new GetonbrdJobProvider(null, objectMapper);
@@ -73,6 +74,32 @@ class ProvidersTest {
         assertThat(junior.location()).isEqualTo("Remoto (Europe)");
         assertThat(junior.contractType()).isEqualTo(ContractType.FULL_TIME);
         assertThat(junior.tags()).containsExactly("react", "javascript");
+    }
+
+    @Test
+    void parsesJobicyJobsAcceptingTextOrListFields() throws IOException {
+        List<ImportedJob> jobs = jobicy.parse(objectMapper.readTree(fixture("jobicy.json")));
+
+        assertThat(jobs).hasSize(3);
+        ImportedJob junior = jobs.get(0);
+        assertThat(junior.externalId()).isEqualTo("jobicy:900001");
+        assertThat(junior.workMode()).isEqualTo(WorkMode.REMOTE);
+        assertThat(junior.location()).isEqualTo("Remoto (Europe)");
+        assertThat(junior.levelHints()).containsExactly("Junior");
+        assertThat(junior.contractType()).isEqualTo(ContractType.FULL_TIME);
+        assertThat(junior.publishedAt()).isNotNull();
+        assertThat(junior.applyUrl()).startsWith("https://jobicy.com/");
+
+        ImportedJob intern = jobs.get(1);
+        assertThat(intern.contractType()).isEqualTo(ContractType.INTERNSHIP);
+        assertThat(intern.location()).isEqualTo("Remoto (Europe, UK)");
+        assertThat(intern.publishedAt()).isNotNull();
+
+        ImportedJob minimal = jobs.get(2);
+        assertThat(minimal.contractType()).isEqualTo(ContractType.PART_TIME);
+        assertThat(minimal.location()).isEqualTo("Remoto");
+        assertThat(minimal.description()).isEqualTo("Resumen sin descripción larga.");
+        assertThat(minimal.publishedAt()).isNull();
     }
 
     @Test

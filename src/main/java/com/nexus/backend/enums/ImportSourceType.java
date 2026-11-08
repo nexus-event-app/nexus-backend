@@ -12,6 +12,8 @@ public enum ImportSourceType {
     REMOTIVE_JOBS(false, 360, 360),
     /** API pública de Arbeitnow. */
     ARBEITNOW_JOBS(false, 60, 5),
+    /** API pública de Jobicy: empleo en remoto; sus condiciones piden no consultarla más de una vez por hora. */
+    JOBICY_JOBS(false, 360, 60),
     /** API pública de Get on Board: empleo tech en español con nivel explícito. */
     GETONBRD_JOBS(false, 120, 5);
 
