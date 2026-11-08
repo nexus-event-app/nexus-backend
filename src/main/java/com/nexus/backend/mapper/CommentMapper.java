@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommentMapper {
 
-    private static final String ANONYMOUS_NAME = "Anónimo";
-
     public Comment toEntity(CreateCommentRequest request, Discussion discussion, User author) {
         Comment comment = new Comment();
         comment.setContent(request.getContent());
@@ -27,8 +25,8 @@ public class CommentMapper {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .discussionId(comment.getDiscussion().getId())
-                .authorId(author != null ? author.getId() : null)
-                .authorName(author != null ? author.getName() : ANONYMOUS_NAME)
+                .authorId(author.getId())
+                .authorName(author.getName())
                 .likesCount(likesCount)
                 .isLikedByCurrentUser(likedByCurrentUser)
                 .createdAt(comment.getCreatedAt())

@@ -75,7 +75,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void deleteComment(Long id, UserDetail actor) {
         Comment comment = findComment(id);
-        Long ownerId = comment.getAuthor() != null ? comment.getAuthor().getId() : null;
+        Long ownerId = comment.getAuthor().getId();
         if (!actor.canManage(ownerId)) {
             throw new ForbiddenOperationException("Solo el autor o un administrador puede eliminar el comentario");
         }

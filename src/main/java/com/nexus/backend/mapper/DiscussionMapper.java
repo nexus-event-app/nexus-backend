@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DiscussionMapper {
 
-    private static final String ANONYMOUS_NAME = "Anónimo";
-
     public Discussion toEntity(CreateDiscussionRequest request, User author) {
         Discussion discussion = new Discussion();
         discussion.setTitle(request.getTitle());
@@ -38,8 +36,8 @@ public class DiscussionMapper {
                 .title(discussion.getTitle())
                 .content(discussion.getContent())
                 .category(discussion.getCategory())
-                .authorId(author != null ? author.getId() : null)
-                .authorName(author != null ? author.getName() : ANONYMOUS_NAME)
+                .authorId(author.getId())
+                .authorName(author.getName())
                 .isActive(discussion.getIsActive())
                 .commentCount(commentCount)
                 .likesCount(likesCount)

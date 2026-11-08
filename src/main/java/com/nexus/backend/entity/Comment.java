@@ -43,8 +43,8 @@ public class Comment {
     @JoinColumn(name = "discussion_id")
     private Discussion discussion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
     @Column(name = "created_at", nullable = false, updatable = false)

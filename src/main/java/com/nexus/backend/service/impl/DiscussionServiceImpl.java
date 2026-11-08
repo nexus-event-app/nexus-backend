@@ -207,7 +207,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     }
 
     private void assertCanManage(Discussion discussion, UserDetail actor) {
-        Long ownerId = discussion.getAuthor() != null ? discussion.getAuthor().getId() : null;
+        Long ownerId = discussion.getAuthor().getId();
         if (!actor.canManage(ownerId)) {
             throw new ForbiddenOperationException("Solo el autor o un administrador puede realizar esta acción");
         }
