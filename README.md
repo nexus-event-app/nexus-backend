@@ -128,6 +128,21 @@ Todas las listas paginadas usan `page` (desde 0) y `size` (por defecto 12, máxi
 
 **En producción**, crea una cuenta en un proveedor SMTP, verifica tu dominio (registros SPF y DKIM que te indicará) y define `MAIL_ENABLED=true`, `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD` y `MAIL_FROM`.
 
+## Idiomas (castellano, catalán, inglés)
+
+El servidor responde en el idioma de la cabecera `Accept-Language` (el frontend la envía con el idioma elegido). Si falta o es otro
+idioma, se usa el castellano. Afecta a:
+
+- Mensajes de error y de validación: están en `src/main/resources/messages.properties` (castellano), `messages_ca.properties` y
+  `messages_en.properties`. Los servicios lanzan excepciones con una **clave** (`error.news.notFound`) y `GlobalExceptionHandler`
+  la traduce; los DTO usan `message = "{validation.title.required}"`.
+- Emails de cuenta (`mail.*`): salen en el idioma de la petición y los enlaces apuntan a `/ca/...` o `/en/...`.
+- `sitemap.xml`: cada página aparece en los tres idiomas con enlaces `hreflang`. `robots.txt` cubre también las rutas con prefijo.
+
+Para añadir un texto, créalo **en los tres ficheros** con la misma clave: `MessageBundlesTest` falla si falta alguna.
+Los textos con argumentos (`{0}`) duplican el apóstrofo (`''`); en el resto se usa `’`.
+El contenido que escribe la gente (noticias, ofertas, foro) no se traduce.
+
 ## Importación automática de noticias y empleo
 
 El paquete `importer/` consulta periódicamente fuentes externas y guarda lo nuevo como noticias u ofertas. Las fuentes se gestionan en el panel (`/admin/importacion`) o en `/api/admin/import-sources`.

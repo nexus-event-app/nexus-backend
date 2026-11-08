@@ -12,8 +12,8 @@ import lombok.ToString;
 @AllArgsConstructor
 public class VerifyEmailRequest {
 
-    @NotBlank(message = "El enlace no es válido")
-    @Size(max = 200, message = "El enlace no es válido")
+    @NotBlank(message = "{validation.link.invalid}")
+    @Size(max = 200, message = "{validation.link.invalid}")
     @ToString.Exclude
     private String token;
 }

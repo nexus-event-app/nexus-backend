@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateUserStatusRequest {
 
-    @NotNull(message = "El campo enabled es obligatorio")
+    @NotNull(message = "{validation.enabled.required}")
     private Boolean enabled;
 }

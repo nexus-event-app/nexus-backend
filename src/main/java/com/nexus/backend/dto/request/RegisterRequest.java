@@ -19,24 +19,24 @@ import java.util.Locale;
 @AllArgsConstructor
 public class RegisterRequest {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
+    @NotBlank(message = "{validation.name.required}")
+    @Size(min = 2, max = 50, message = "{validation.name.size.2.50}")
     private String name;
 
-    @NotBlank(message = "El email es obligatorio")
-    @Email(message = "El email debe ser válido")
-    @Size(max = 100, message = "El email no puede superar 100 caracteres")
+    @NotBlank(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
+    @Size(max = 100, message = "{validation.email.max100}")
     private String email;
 
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres")
-    @Pattern(regexp = "^(?=.*\\p{L})(?=.*\\d).*$", message = "La contraseña debe incluir al menos una letra y un número")
+    @NotBlank(message = "{validation.password.required}")
+    @Size(min = 8, max = 72, message = "{validation.password.size}")
+    @Pattern(regexp = "^(?=.*\\p{L})(?=.*\\d).*$", message = "{validation.password.pattern}")
     @ToString.Exclude
     private String password;
 
     /** Aceptación obligatoria del aviso legal, las condiciones de uso y la política de privacidad. */
-    @NotNull(message = "Debes aceptar las condiciones de uso y la política de privacidad")
-    @AssertTrue(message = "Debes aceptar las condiciones de uso y la política de privacidad")
+    @NotNull(message = "{validation.terms.required}")
+    @AssertTrue(message = "{validation.terms.required}")
     private Boolean acceptTerms;
 
     public void setName(String name) {

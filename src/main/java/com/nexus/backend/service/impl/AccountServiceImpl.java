@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 public class AccountServiceImpl implements AccountService {
 
     private static final int BCRYPT_MAX_BYTES = 72;
-    private static final String INVALID_LINK = "El enlace no es válido o ha caducado. Pide uno nuevo";
+    private static final String INVALID_LINK = "error.link.invalid";
 
     private final UserRepository userRepository;
     private final UserTokenRepository tokenRepository;
@@ -76,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         if (request.getPassword().getBytes(StandardCharsets.UTF_8).length > BCRYPT_MAX_BYTES) {
-            throw new BadRequestException("La contraseña no puede superar los 72 bytes");
+            throw new BadRequestException("error.password.tooLong");
         }
         UserToken token = consume(request.getToken(), UserTokenType.PASSWORD_RESET);
         User user = token.getUser();
@@ -108,9 +108,9 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void resendEmailVerification(UserDetail actor) {
         User user = userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
         if (user.isEmailVerified()) {
-            throw new BadRequestException("Tu email ya está verificado");
+            throw new BadRequestException("error.email.alreadyVerified");
         }
         sendEmailVerification(user);
     }

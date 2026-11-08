@@ -18,16 +18,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ImportSourceRequest {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
+    @NotBlank(message = "{validation.name.required}")
+    @Size(min = 2, max = 100, message = "{validation.name.size.2.100}")
     private String name;
 
-    @NotNull(message = "El tipo de fuente es obligatorio")
+    @NotNull(message = "{validation.source.type.required}")
     private ImportSourceType type;
 
-    @NotBlank(message = "La URL es obligatoria")
-    @Size(max = 500, message = "La URL no puede superar 500 caracteres")
-    @Pattern(regexp = "^https?://\\S+$", message = "La URL debe empezar por http:// o https://")
+    @NotBlank(message = "{validation.url.required}")
+    @Size(max = 500, message = "{validation.url.max500}")
+    @Pattern(regexp = "^https?://\\S+$", message = "{validation.url.pattern}")
     private String url;
 
     private NewsCategory newsCategory;
@@ -38,12 +38,12 @@ public class ImportSourceRequest {
 
     private Boolean remoteOnly = false;
 
-    @Size(max = 500, message = "Las palabras clave no pueden superar 500 caracteres")
+    @Size(max = 500, message = "{validation.keywords.max500}")
     private String keywords;
 
     /** Si no se indica, se usa el mínimo del tipo de fuente. */
-    @Min(value = 30, message = "El intervalo mínimo es de 30 minutos")
-    @Max(value = 10080, message = "El intervalo máximo es de una semana (10080 minutos)")
+    @Min(value = 30, message = "{validation.interval.min}")
+    @Max(value = 10080, message = "{validation.interval.max}")
     private Integer intervalMinutes;
 
     public void setName(String name) {

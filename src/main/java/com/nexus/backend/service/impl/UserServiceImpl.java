@@ -45,10 +45,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (request.getPassword().getBytes(StandardCharsets.UTF_8).length > BCRYPT_MAX_BYTES) {
-            throw new BadRequestException("La contraseña no puede superar los 72 bytes");
+            throw new BadRequestException("error.password.tooLong");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Ya existe una cuenta con ese email");
+            throw new ConflictException("error.account.exists");
         }
 
         User user = userMapper.toEntity(request, passwordEncoder.encode(request.getPassword()));
@@ -63,10 +63,10 @@ public class UserServiceImpl implements UserService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Credenciales inválidas");
+            throw new UnauthorizedException("error.credentials.invalid");
         }
         if (!user.isEnabled()) {
-            throw new UnauthorizedException("Tu cuenta está desactivada. Contacta con un administrador");
+            throw new UnauthorizedException("error.account.disabled");
         }
         return buildAuthResponse(user);
     }
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser(UserDetail principal) {
         User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
         return userMapper.toResponse(user);
     }
 
@@ -90,13 +90,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateStatus(Long userId, boolean enabled, UserDetail actor) {
         User target = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
         if (!enabled) {
             if (target.getId().equals(actor.getId())) {
-                throw new ForbiddenOperationException("No puedes desactivar tu propia cuenta");
+                throw new ForbiddenOperationException("error.user.selfDisable");
             }
             if (target.getRole() == User.Role.ADMIN) {
-                throw new ForbiddenOperationException("No se puede desactivar a otro administrador");
+                throw new ForbiddenOperationException("error.user.adminDisable");
             }
         }
         target.setEnabled(enabled);

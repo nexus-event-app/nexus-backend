@@ -21,41 +21,41 @@ import java.util.Set;
 @NoArgsConstructor
 public class CreateJobRequest {
 
-    @NotBlank(message = "El título es obligatorio")
-    @Size(max = 200, message = "El título no puede superar 200 caracteres")
+    @NotBlank(message = "{validation.title.required}")
+    @Size(max = 200, message = "{validation.title.max200}")
     private String title;
 
-    @NotBlank(message = "La empresa es obligatoria")
-    @Size(max = 120, message = "La empresa no puede superar 120 caracteres")
+    @NotBlank(message = "{validation.company.required}")
+    @Size(max = 120, message = "{validation.company.max120}")
     private String company;
 
-    @NotBlank(message = "La descripción es obligatoria")
-    @Size(max = 20000, message = "La descripción no puede superar 20000 caracteres")
+    @NotBlank(message = "{validation.description.required}")
+    @Size(max = 20000, message = "{validation.description.max20000}")
     private String description;
 
-    @NotBlank(message = "La ubicación es obligatoria")
-    @Size(max = 120, message = "La ubicación no puede superar 120 caracteres")
+    @NotBlank(message = "{validation.location.required}")
+    @Size(max = 120, message = "{validation.location.max120}")
     private String location;
 
-    @NotNull(message = "La modalidad de trabajo es obligatoria")
+    @NotNull(message = "{validation.workMode.required}")
     private WorkMode workMode;
 
-    @NotNull(message = "El tipo de contrato es obligatorio")
+    @NotNull(message = "{validation.contractType.required}")
     private ContractType contractType;
 
-    @NotNull(message = "El nivel es obligatorio")
+    @NotNull(message = "{validation.level.required}")
     private JobLevel level;
 
-    @Size(max = 10, message = "No puede haber más de 10 etiquetas")
-    private List<@NotBlank(message = "Las etiquetas no pueden estar vacías")
-            @Size(max = 30, message = "Cada etiqueta no puede superar 30 caracteres") String> tags = new ArrayList<>();
+    @Size(max = 10, message = "{validation.tags.max10}")
+    private List<@NotBlank(message = "{validation.tag.blank}")
+            @Size(max = 30, message = "{validation.tag.max30}") String> tags = new ArrayList<>();
 
-    @NotBlank(message = "La URL de solicitud es obligatoria")
-    @Size(max = 500, message = "La URL de solicitud no puede superar 500 caracteres")
-    @Pattern(regexp = "^https?://\\S+$", message = "La URL de solicitud debe empezar por http:// o https://")
+    @NotBlank(message = "{validation.applyUrl.required}")
+    @Size(max = 500, message = "{validation.applyUrl.max500}")
+    @Pattern(regexp = "^https?://\\S+$", message = "{validation.applyUrl.pattern}")
     private String applyUrl;
 
-    @Size(max = 100, message = "La fuente no puede superar 100 caracteres")
+    @Size(max = 100, message = "{validation.source.max100}")
     private String source;
 
     private LocalDateTime expiresAt;

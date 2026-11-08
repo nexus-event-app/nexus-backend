@@ -59,16 +59,16 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public UploadResponse storeImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Debes adjuntar un archivo de imagen");
+            throw new BadRequestException("error.image.required");
         }
 
         String extension = extractExtension(file.getOriginalFilename());
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new BadRequestException("Formato no permitido. Usa jpg, jpeg, png, webp, avif o gif");
+            throw new BadRequestException("error.image.format");
         }
         String contentType = file.getContentType() == null ? "" : file.getContentType().toLowerCase(Locale.ROOT);
         if (!CONTENT_TYPE_BY_EXTENSION.containsValue(contentType)) {
-            throw new BadRequestException("El tipo de contenido del archivo no es una imagen permitida");
+            throw new BadRequestException("error.image.contentType");
         }
 
         try {
@@ -77,7 +77,7 @@ public class FileStorageServiceImpl implements FileStorageService {
                 header = in.readNBytes(SIGNATURE_BYTES);
             }
             if (!hasValidSignature(extension, header)) {
-                throw new BadRequestException("El contenido del archivo no coincide con una imagen válida");
+                throw new BadRequestException("error.image.invalid");
             }
 
             String fileName = UUID.randomUUID() + "." + extension;
@@ -97,15 +97,15 @@ public class FileStorageServiceImpl implements FileStorageService {
     @Override
     public void deleteImage(String fileName) {
         if (fileName == null || !STORED_NAME.matcher(fileName).matches()) {
-            throw new BadRequestException("Nombre de archivo no válido");
+            throw new BadRequestException("error.file.name");
         }
         Path target = newsDirectory.resolve(fileName).normalize();
         if (!target.startsWith(newsDirectory)) {
-            throw new BadRequestException("Nombre de archivo no válido");
+            throw new BadRequestException("error.file.name");
         }
         try {
             if (!Files.deleteIfExists(target)) {
-                throw new ResourceNotFoundException("Imagen no encontrada");
+                throw new ResourceNotFoundException("error.image.notFound");
             }
         } catch (IOException ex) {
             throw new UncheckedIOException("No se pudo eliminar la imagen", ex);

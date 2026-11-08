@@ -14,9 +14,9 @@ import java.util.Locale;
 @AllArgsConstructor
 public class ForgotPasswordRequest {
 
-    @NotBlank(message = "El email es obligatorio")
-    @Email(message = "El email debe ser válido")
-    @Size(max = 100, message = "El email no puede superar 100 caracteres")
+    @NotBlank(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
+    @Size(max = 100, message = "{validation.email.max100}")
     private String email;
 
     public void setEmail(String email) {

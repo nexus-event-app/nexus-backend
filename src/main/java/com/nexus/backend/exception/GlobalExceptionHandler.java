@@ -1,6 +1,8 @@
 package com.nexus.backend.exception;
 
+import com.nexus.backend.i18n.Messages;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -25,57 +27,60 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final Messages messages;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-        return build(HttpStatus.NOT_FOUND, "NOT_FOUND", ex.getMessage(), request);
+        return build(HttpStatus.NOT_FOUND, "NOT_FOUND", messages.get(ex.getMessage()), request);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiError> handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
-        return build(HttpStatus.NOT_FOUND, "NOT_FOUND", "Recurso no encontrado", request);
+        return build(HttpStatus.NOT_FOUND, "NOT_FOUND", messages.get("error.resource.notFound"), request);
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)
     public ResponseEntity<ApiError> handleForbidden(ForbiddenOperationException ex, HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, "FORBIDDEN", ex.getMessage(), request);
+        return build(HttpStatus.FORBIDDEN, "FORBIDDEN", messages.get(ex.getMessage()), request);
     }
 
     @ExceptionHandler(EmailNotVerifiedException.class)
     public ResponseEntity<ApiError> handleEmailNotVerified(EmailNotVerifiedException ex, HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, "EMAIL_NOT_VERIFIED", ex.getMessage(), request);
+        return build(HttpStatus.FORBIDDEN, "EMAIL_NOT_VERIFIED", messages.get(ex.getMessage()), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, "FORBIDDEN", "No tienes permisos para realizar esta acción", request);
+        return build(HttpStatus.FORBIDDEN, "FORBIDDEN", messages.get("error.forbidden"), request);
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ApiError> handleConflict(ConflictException ex, HttpServletRequest request) {
-        return build(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage(), request);
+        return build(HttpStatus.CONFLICT, "CONFLICT", messages.get(ex.getMessage()), request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
         log.warn("Violación de integridad de datos en {}: {}", request.getRequestURI(), ex.getMostSpecificCause().getMessage());
-        return build(HttpStatus.CONFLICT, "CONFLICT", "La operación entra en conflicto con datos existentes", request);
+        return build(HttpStatus.CONFLICT, "CONFLICT", messages.get("error.conflict"), request);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiError> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), request);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", messages.get(ex.getMessage()), request);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
-        return build(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage(), request);
+        return build(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", messages.get(ex.getMessage()), request);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiError> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
-        return build(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Autenticación requerida", request);
+        return build(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", messages.get("error.authRequired"), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -83,54 +88,54 @@ public class GlobalExceptionHandler {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
         ex.getBindingResult().getFieldErrors()
                 .forEach(error -> fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage()));
-        ApiError body = ApiError.validation("Datos no válidos", fieldErrors, request.getRequestURI());
+        ApiError body = ApiError.validation(messages.get("error.validation"), fieldErrors, request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "El cuerpo de la petición no es válido", request);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", messages.get("error.body.invalid"), request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "El parámetro '" + ex.getName() + "' no es válido", request);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", messages.get("error.param.invalid", ex.getName()), request);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiError> handleMissingParameter(MissingServletRequestParameterException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Falta el parámetro '" + ex.getParameterName() + "'", request);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", messages.get("error.param.missing", ex.getParameterName()), request);
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<ApiError> handleMissingPart(MissingServletRequestPartException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Falta el archivo '" + ex.getRequestPartName() + "'", request);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", messages.get("error.part.missing", ex.getRequestPartName()), request);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiError> handleMaxUpload(MaxUploadSizeExceededException ex, HttpServletRequest request) {
-        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "El archivo supera el tamaño máximo permitido", request);
+        return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", messages.get("error.upload.tooLarge"), request);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
-        return build(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", "Método no permitido", request);
+        return build(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", messages.get("error.method.notAllowed"), request);
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ApiError> handleMediaType(HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
-        return build(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", "Tipo de contenido no soportado", request);
+        return build(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "UNSUPPORTED_MEDIA_TYPE", messages.get("error.mediaType.unsupported"), request);
     }
 
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
     public ResponseEntity<ApiError> handleNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpServletRequest request) {
-        return build(HttpStatus.NOT_ACCEPTABLE, "NOT_ACCEPTABLE", "Formato de respuesta no disponible", request);
+        return build(HttpStatus.NOT_ACCEPTABLE, "NOT_ACCEPTABLE", messages.get("error.notAcceptable"), request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Error inesperado en {} {}", request.getMethod(), request.getRequestURI(), ex);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Se ha producido un error interno", request);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", messages.get("error.internal"), request);
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, String error, String message, HttpServletRequest request) {

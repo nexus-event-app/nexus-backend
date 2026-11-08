@@ -12,18 +12,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateTestimonialRequest {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
+    @NotBlank(message = "{validation.name.required}")
+    @Size(min = 2, max = 100, message = "{validation.name.size.2.100}")
     private String name;
 
-    @Size(max = 100, message = "El rol no puede superar 100 caracteres")
+    @Size(max = 100, message = "{validation.role.max100}")
     private String role;
 
-    @Size(max = 100, message = "La ubicación no puede superar 100 caracteres")
+    @Size(max = 100, message = "{validation.location.max100}")
     private String location;
 
-    @NotBlank(message = "El testimonio es obligatorio")
-    @Size(min = 50, max = 300, message = "El testimonio debe tener entre 50 y 300 caracteres")
+    @NotBlank(message = "{validation.testimonial.required}")
+    @Size(min = 50, max = 300, message = "{validation.testimonial.size}")
     private String content;
 
     public void setName(String name) {

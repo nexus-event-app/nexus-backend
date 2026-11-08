@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateCommentRequest {
 
-    @NotNull(message = "El ID de la discusión es obligatorio")
+    @NotNull(message = "{validation.discussionId.required}")
     private Long discussionId;
 
-    @NotBlank(message = "El contenido es obligatorio")
-    @Size(min = 3, max = 5000, message = "El comentario debe tener entre 3 y 5000 caracteres")
+    @NotBlank(message = "{validation.content.required}")
+    @Size(min = 3, max = 5000, message = "{validation.comment.size}")
     private String content;
 
     public void setContent(String content) {

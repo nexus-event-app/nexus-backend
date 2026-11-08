@@ -28,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
 
-    private static final String NOT_FOUND_MESSAGE = "Oferta de empleo no encontrada";
+    private static final String NOT_FOUND_MESSAGE = "error.job.notFound";
 
     private final JobOfferRepository jobOfferRepository;
     private final ImportExclusionRepository importExclusionRepository;

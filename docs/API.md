@@ -31,6 +31,9 @@ Comunidad tech para perfiles junior en español:
 ```
 Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `EMAIL_NOT_VERIFIED` (403, al publicar sin haber verificado el email), `NOT_FOUND` (404), `CONFLICT` (409), `TOO_MANY_REQUESTS` (429), `INTERNAL_ERROR` (500). `fieldErrors` solo aparece en validación. Mensajes en español y sin detalles internos.
 
+### Idioma
+Los mensajes de error, de validación y los emails salen en el idioma de `Accept-Language` (`es` por defecto, `ca`, `en`). Los códigos de error (`error`) no cambian.
+
 ## 3. DTOs de respuesta
 ### UserResponse
 `{ id, name, email, role: "USER"|"ADMIN", enabled: boolean, emailVerified: boolean, createdAt }`
@@ -63,7 +66,7 @@ Códigos `error`: `VALIDATION_ERROR` (400), `BAD_REQUEST` (400), `UNAUTHORIZED` 
 ### StatsResponse (admin)
 `{ users, news, jobs, discussions, comments, pendingTestimonials }` (todos enteros)
 
-## 4. DTOs de petición (validación en español)
+## 4. DTOs de petición (validación en es/ca/en)
 - `RegisterRequest { name (2–50), email (válido, ≤100, se normaliza a minúsculas y trim), password (8–72, al menos una letra y un número), acceptTerms (obligatorio, true) }`. Se guarda la fecha de aceptación en `users.terms_accepted_at`.
 - `LoginRequest { email, password }`
 - `CreateNewsRequest / UpdateNewsRequest { title (≤200), content (≤20000), sourceUrl (http/https, opcional), imageUrl (opcional), author (≤100, opcional), category (por defecto GENERAL) }`

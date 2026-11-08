@@ -2,6 +2,7 @@ package com.nexus.backend.seo;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.nexus.backend.i18n.Languages;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.NewsRepository;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 /** Genera sitemap.xml y robots.txt, con caché en memoria para que los bots no carguen la base de datos. */
 @Service
@@ -62,10 +64,10 @@ public class SitemapService {
         Pageable limit = PageRequest.of(0, MAX_URLS_PER_TYPE);
         StringBuilder xml = new StringBuilder(4096);
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
+        xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n");
 
         for (String path : STATIC_PATHS) {
-            appendUrl(xml, publicUrl + path, null);
+            appendUrl(xml, path, null);
         }
         appendEntries(xml, "/noticias/", newsRepository.findSitemapEntries(limit));
         appendEntries(xml, "/empleo/", jobOfferRepository.findSitemapEntries(LocalDateTime.now(), limit));
@@ -77,29 +79,45 @@ public class SitemapService {
 
     private void appendEntries(StringBuilder xml, String section, List<SitemapEntry> entries) {
         for (SitemapEntry entry : entries) {
-            String location = publicUrl + section + SlugUtil.idSlug(entry.getId(), entry.getTitle());
-            appendUrl(xml, location, entry.getLastModified());
+            appendUrl(xml, section + SlugUtil.idSlug(entry.getId(), entry.getTitle()), entry.getLastModified());
         }
     }
 
-    private void appendUrl(StringBuilder xml, String location, LocalDateTime lastModified) {
-        xml.append("  <url>\n");
-        xml.append("    <loc>").append(escapeXml(location)).append("</loc>\n");
-        if (lastModified != null) {
-            xml.append("    <lastmod>").append(DateTimeFormatter.ISO_LOCAL_DATE.format(lastModified)).append("</lastmod>\n");
+    /** Una entrada por idioma, cada una con los enlaces alternativos a todas las versiones (hreflang). */
+    private void appendUrl(StringBuilder xml, String path, LocalDateTime lastModified) {
+        for (Locale locale : Languages.SUPPORTED) {
+            xml.append("  <url>\n");
+            xml.append("    <loc>").append(escapeXml(localizedUrl(locale, path))).append("</loc>\n");
+            if (lastModified != null) {
+                xml.append("    <lastmod>").append(DateTimeFormatter.ISO_LOCAL_DATE.format(lastModified)).append("</lastmod>\n");
+            }
+            for (Locale alternate : Languages.SUPPORTED) {
+                xml.append("    <xhtml:link rel=\"alternate\" hreflang=\"").append(alternate.getLanguage())
+                        .append("\" href=\"").append(escapeXml(localizedUrl(alternate, path))).append("\"/>\n");
+            }
+            xml.append("    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"")
+                    .append(escapeXml(localizedUrl(Languages.DEFAULT, path))).append("\"/>\n");
+            xml.append("  </url>\n");
         }
-        xml.append("  </url>\n");
+    }
+
+    private String localizedUrl(Locale locale, String path) {
+        String prefix = Languages.pathPrefix(locale);
+        // La portada en castellano es la raíz; en otros idiomas, «/ca» y «/en» sin barra final.
+        if ("/".equals(path)) {
+            return prefix.isEmpty() ? publicUrl + "/" : publicUrl + prefix;
+        }
+        return publicUrl + prefix + path;
     }
 
     private String buildRobots() {
-        return "User-agent: *\n"
-                + "Allow: /\n"
-                + "Disallow: /api/\n"
-                + "Disallow: /admin\n"
-                + "Disallow: /login\n"
-                + "Disallow: /registro\n"
-                + "\n"
-                + "Sitemap: " + publicUrl + "/sitemap.xml\n";
+        StringBuilder robots = new StringBuilder("User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\n");
+        for (Locale locale : Languages.SUPPORTED) {
+            String prefix = Languages.pathPrefix(locale);
+            robots.append("Disallow: ").append(prefix).append("/login\n");
+            robots.append("Disallow: ").append(prefix).append("/registro\n");
+        }
+        return robots.append("\nSitemap: ").append(publicUrl).append("/sitemap.xml\n").toString();
     }
 
     private static String escapeXml(String value) {

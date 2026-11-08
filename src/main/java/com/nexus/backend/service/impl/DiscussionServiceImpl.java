@@ -44,7 +44,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class DiscussionServiceImpl implements DiscussionService {
 
-    private static final String NOT_FOUND_MESSAGE = "Discusión no encontrada";
+    private static final String NOT_FOUND_MESSAGE = "error.discussion.notFound";
 
     private final AccountService accountService;
     private final DiscussionRepository discussionRepository;
@@ -203,13 +203,13 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     private User loadUser(UserDetail actor) {
         return userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
     }
 
     private void assertCanManage(Discussion discussion, UserDetail actor) {
         Long ownerId = discussion.getAuthor().getId();
         if (!actor.canManage(ownerId)) {
-            throw new ForbiddenOperationException("Solo el autor o un administrador puede realizar esta acción");
+            throw new ForbiddenOperationException("error.action.ownerOnly");
         }
     }
 }

@@ -52,11 +52,11 @@ public class TestimonialServiceImpl implements TestimonialService {
         accountService.assertCanParticipate(actor);
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         if (testimonialRepository.existsByUserIdAndCreatedAtAfter(actor.getId(), since)) {
-            throw new ConflictException("Solo puedes enviar un testimonio cada 24 horas");
+            throw new ConflictException("error.testimonial.limit");
         }
 
         User user = userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
         Testimonial saved = testimonialRepository.save(testimonialMapper.toEntity(request, user));
         return testimonialMapper.toResponse(saved);
     }
@@ -103,6 +103,6 @@ public class TestimonialServiceImpl implements TestimonialService {
 
     private Testimonial findById(Long id) {
         return testimonialRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Testimonio no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("error.testimonial.notFound"));
     }
 }

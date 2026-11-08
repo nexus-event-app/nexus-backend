@@ -32,8 +32,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    private static final String DISCUSSION_NOT_FOUND = "Discusión no encontrada";
-    private static final String COMMENT_NOT_FOUND = "Comentario no encontrado";
+    private static final String DISCUSSION_NOT_FOUND = "error.discussion.notFound";
+    private static final String COMMENT_NOT_FOUND = "error.comment.notFound";
 
     private final AccountService accountService;
     private final CommentRepository commentRepository;
@@ -65,7 +65,7 @@ public class CommentServiceImpl implements CommentService {
         accountService.assertCanParticipate(actor);
         Discussion discussion = findActiveDiscussion(request.getDiscussionId());
         User author = userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
 
         Comment saved = commentRepository.save(commentMapper.toEntity(request, discussion, author));
         return commentMapper.toResponse(saved, 0, false);
@@ -77,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = findComment(id);
         Long ownerId = comment.getAuthor().getId();
         if (!actor.canManage(ownerId)) {
-            throw new ForbiddenOperationException("Solo el autor o un administrador puede eliminar el comentario");
+            throw new ForbiddenOperationException("error.comment.deleteForbidden");
         }
 
         commentLikeRepository.deleteAllByCommentId(id);
@@ -99,7 +99,7 @@ public class CommentServiceImpl implements CommentService {
             CommentLike like = new CommentLike();
             like.setComment(comment);
             like.setUser(userRepository.findById(actor.getId())
-                    .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado")));
+                    .orElseThrow(() -> new UnauthorizedException("error.user.notFound")));
             commentLikeRepository.save(like);
             liked = true;
         }

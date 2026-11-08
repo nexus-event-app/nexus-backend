@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NewsServiceImpl implements NewsService {
 
-    private static final String NOT_FOUND_MESSAGE = "Noticia no encontrada";
+    private static final String NOT_FOUND_MESSAGE = "error.news.notFound";
 
     private final NewsRepository newsRepository;
     private final ImportExclusionRepository importExclusionRepository;

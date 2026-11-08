@@ -14,24 +14,24 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateNewsRequest {
 
-    @NotBlank(message = "El título es obligatorio")
-    @Size(max = 200, message = "El título no puede superar 200 caracteres")
+    @NotBlank(message = "{validation.title.required}")
+    @Size(max = 200, message = "{validation.title.max200}")
     private String title;
 
-    @NotBlank(message = "El contenido es obligatorio")
-    @Size(max = 20000, message = "El contenido no puede superar 20000 caracteres")
+    @NotBlank(message = "{validation.content.required}")
+    @Size(max = 20000, message = "{validation.content.max20000}")
     private String content;
 
-    @Size(max = 500, message = "La URL de la fuente no puede superar 500 caracteres")
-    @Pattern(regexp = "^https?://\\S+$", message = "La URL de la fuente debe empezar por http:// o https://")
+    @Size(max = 500, message = "{validation.sourceUrl.max500}")
+    @Pattern(regexp = "^https?://\\S+$", message = "{validation.sourceUrl.pattern}")
     private String sourceUrl;
 
-    @Size(max = 500, message = "La URL de la imagen no puede superar 500 caracteres")
+    @Size(max = 500, message = "{validation.imageUrl.max500}")
     @Pattern(regexp = "^(https?://\\S+|/uploads/news/[a-f0-9\\-]{36}\\.(jpg|jpeg|png|webp|avif|gif))$",
-            message = "La URL de la imagen no es válida")
+            message = "{validation.imageUrl.invalid}")
     private String imageUrl;
 
-    @Size(max = 100, message = "El autor no puede superar 100 caracteres")
+    @Size(max = 100, message = "{validation.author.max100}")
     private String author;
 
     private NewsCategory category = NewsCategory.GENERAL;

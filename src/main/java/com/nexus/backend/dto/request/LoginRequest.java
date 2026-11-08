@@ -15,13 +15,13 @@ import java.util.Locale;
 @AllArgsConstructor
 public class LoginRequest {
 
-    @NotBlank(message = "El email es obligatorio")
-    @Email(message = "El email debe ser válido")
-    @Size(max = 100, message = "El email no puede superar 100 caracteres")
+    @NotBlank(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
+    @Size(max = 100, message = "{validation.email.max100}")
     private String email;
 
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(max = 72, message = "La contraseña no puede superar 72 caracteres")
+    @NotBlank(message = "{validation.password.required}")
+    @Size(max = 72, message = "{validation.password.max72}")
     @ToString.Exclude
     private String password;
 

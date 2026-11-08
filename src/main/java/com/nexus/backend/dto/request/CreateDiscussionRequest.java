@@ -14,15 +14,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateDiscussionRequest {
 
-    @NotBlank(message = "El título es obligatorio")
-    @Size(min = 5, max = 200, message = "El título debe tener entre 5 y 200 caracteres")
+    @NotBlank(message = "{validation.title.required}")
+    @Size(min = 5, max = 200, message = "{validation.title.size.5.200}")
     private String title;
 
-    @NotBlank(message = "El contenido es obligatorio")
-    @Size(min = 10, max = 10000, message = "El contenido debe tener entre 10 y 10000 caracteres")
+    @NotBlank(message = "{validation.content.required}")
+    @Size(min = 10, max = 10000, message = "{validation.content.size.10.10000}")
     private String content;
 
-    @NotNull(message = "La categoría es obligatoria")
+    @NotNull(message = "{validation.category.required}")
     private DiscussionCategory category;
 
     public void setTitle(String title) {

@@ -70,7 +70,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         long retryAfterSeconds = Math.max(1L, (long) Math.ceil(probe.getNanosToWaitForRefill() / 1_000_000_000.0));
         response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds));
         apiErrorWriter.write(request, response, HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS",
-                "Demasiadas peticiones. Inténtalo de nuevo más tarde");
+                "error.tooManyRequests");
     }
 
     private Optional<Rule> findRule(String path) {

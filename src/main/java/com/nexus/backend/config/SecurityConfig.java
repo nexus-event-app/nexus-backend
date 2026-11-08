@@ -99,10 +99,10 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY)))
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((request, response, ex) -> apiErrorWriter.write(
-                                request, response, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Autenticación requerida"))
+                                request, response, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "error.authRequired"))
                         .accessDeniedHandler((request, response, ex) -> apiErrorWriter.write(
                                 request, response, HttpStatus.FORBIDDEN, "FORBIDDEN",
-                                "No tienes permisos para realizar esta acción")))
+                                "error.forbidden")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error", "/uploads/**", "/sitemap.xml", "/robots.txt").permitAll()
