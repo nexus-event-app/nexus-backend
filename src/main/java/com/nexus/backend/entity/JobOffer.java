@@ -16,6 +16,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import com.nexus.backend.util.SpainLocation;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -83,6 +84,10 @@ public class JobOffer {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    /** Calculado a partir de la ubicación: las ofertas de España se listan primero. */
+    @Column(name = "in_spain", nullable = false)
+    private boolean inSpain;
+
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;
 
@@ -97,6 +102,7 @@ public class JobOffer {
 
     @PrePersist
     protected void onCreate() {
+        inSpain = SpainLocation.matches(location);
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
         if (publishedAt == null) {
@@ -106,6 +112,7 @@ public class JobOffer {
 
     @PreUpdate
     protected void onUpdate() {
+        inSpain = SpainLocation.matches(location);
         updatedAt = LocalDateTime.now();
     }
 }

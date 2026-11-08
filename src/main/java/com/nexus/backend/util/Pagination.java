@@ -22,6 +22,18 @@ public final class Pagination {
         return PageRequest.of(safePage, safeSize, sort);
     }
 
+    /** Como {@link #newestFirst} pero con las ofertas de España delante. */
+    public static Pageable spainFirst(int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_SIZE);
+        Sort sort = Sort.by(Sort.Order.desc("inSpain"), Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
+        return PageRequest.of(safePage, safeSize, sort);
+    }
+
+    public static Pageable latestSpainFirst(int limit) {
+        return spainFirst(0, Math.min(Math.max(limit, 1), MAX_LATEST));
+    }
+
     public static Pageable latest(int limit) {
         int safeLimit = Math.min(Math.max(limit, 1), MAX_LATEST);
         return newestFirst(0, safeLimit);

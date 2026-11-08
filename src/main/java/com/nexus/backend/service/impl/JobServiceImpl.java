@@ -40,14 +40,14 @@ public class JobServiceImpl implements JobService {
                                                    String text, int page, int size) {
         Page<JobOffer> result = jobOfferRepository.findAll(
                 JobSpecifications.isPublished().and(JobSpecifications.filter(level, workMode, contractType, text)),
-                Pagination.newestFirst(page, size));
+                Pagination.spainFirst(page, size));
         return PageResponse.from(result.map(jobMapper::toResponse));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<JobResponse> getLatestJobs(int limit) {
-        return jobOfferRepository.findAll(JobSpecifications.isPublished(), Pagination.latest(limit))
+        return jobOfferRepository.findAll(JobSpecifications.isPublished(), Pagination.latestSpainFirst(limit))
                 .getContent()
                 .stream()
                 .map(jobMapper::toResponse)
