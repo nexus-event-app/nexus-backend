@@ -38,6 +38,8 @@ public class ImportSourceRequest {
 
     private Boolean remoteOnly = false;
 
+    private Boolean useSourceImages = true;
+
     @Size(max = 500, message = "{validation.keywords.max500}")
     private String keywords;
 

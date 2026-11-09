@@ -14,6 +14,7 @@ import com.nexus.backend.importer.UrlGuard;
 import com.nexus.backend.importer.ImportException;
 import com.nexus.backend.mapper.ImportSourceMapper;
 import com.nexus.backend.repository.ImportSourceRepository;
+import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.service.ImportSourceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class ImportSourceServiceImpl implements ImportSourceService {
     private final ImportSourceRepository sourceRepository;
     private final ImportSourceMapper sourceMapper;
     private final ImportRunner importRunner;
+    private final NewsRepository newsRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,8 +62,14 @@ public class ImportSourceServiceImpl implements ImportSourceService {
         if (source.getType() != request.getType()) {
             throw new BadRequestException("No se puede cambiar el tipo de una fuente; crea una nueva");
         }
+        boolean stopUsingImages = !Boolean.FALSE.equals(source.getUseSourceImages())
+                && Boolean.FALSE.equals(request.getUseSourceImages());
         sourceMapper.updateEntity(source, request);
-        return toResponse(sourceRepository.save(source));
+        ImportSource saved = sourceRepository.save(source);
+        if (stopUsingImages) {
+            newsRepository.clearImportedImages(saved.getName());
+        }
+        return toResponse(saved);
     }
 
     @Override

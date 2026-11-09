@@ -73,6 +73,13 @@ public class ImportSource {
     @Column(name = "exclude_keywords", length = 500)
     private String excludeKeywords;
 
+    /**
+     * Noticias: si es false, se ignoran las imágenes de la fuente (feed y página del artículo) y la web muestra
+     * sus propias fotos de portada. Útil para fuentes cuyas portadas son tarjetas generadas automáticamente.
+     */
+    @Column(name = "use_source_images", nullable = false)
+    private Boolean useSourceImages = true;
+
     @Column(name = "interval_minutes", nullable = false)
     private Integer intervalMinutes;
 

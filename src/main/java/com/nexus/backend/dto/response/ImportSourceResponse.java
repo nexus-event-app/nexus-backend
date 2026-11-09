@@ -24,6 +24,7 @@ public class ImportSourceResponse {
     private Boolean autoPublish;
     private Boolean active;
     private Boolean remoteOnly;
+    private Boolean useSourceImages;
     private String keywords;
     private String excludeKeywords;
     private Integer intervalMinutes;

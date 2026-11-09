@@ -122,7 +122,9 @@ public class ImportRunner {
         List<News> entities = fresh.reversed().stream().map(item -> toNews(item, source)).toList();
         transactionTemplate.executeWithoutResult(status -> newsRepository.saveAll(entities));
         // Si el feed no trae imagen, se busca la portada en la página del artículo.
-        newsImageBackfill.fill(entities);
+        if (!Boolean.FALSE.equals(source.getUseSourceImages())) {
+            newsImageBackfill.fill(entities);
+        }
         return ImportRunResult.success(fetched.size(), entities.size());
     }
 
@@ -179,7 +181,7 @@ public class ImportRunner {
         news.setTitle(TextUtil.truncate(item.title(), 200));
         news.setContent(item.summary().isEmpty() ? item.title() : item.summary());
         news.setSourceUrl(item.link());
-        news.setImageUrl(item.imageUrl());
+        news.setImageUrl(Boolean.FALSE.equals(source.getUseSourceImages()) ? null : item.imageUrl());
         news.setAuthor(TextUtil.truncate(Optional.ofNullable(item.author()).orElse(source.getName()), 100));
         news.setCategory(Optional.ofNullable(source.getNewsCategory()).orElse(NewsCategory.GENERAL));
         news.setIsActive(Boolean.TRUE.equals(source.getAutoPublish()));

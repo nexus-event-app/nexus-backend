@@ -36,7 +36,8 @@ public final class DefaultImportSources {
                 news("freeCodeCamp en español", "https://www.freecodecamp.org/espanol/news/rss/", NewsCategory.RECURSOS, true),
                 filtered(news("Genbeta", "https://www.genbeta.com/feedburner.xml", NewsCategory.GENERAL, true),
                         GENBETA_KEYWORDS, GENBETA_EXCLUDED),
-                inactive(news("DEV Community · #beginners", "https://dev.to/feed/tag/beginners", NewsCategory.DESARROLLO, false)),
+                inactive(withoutSourceImages(news("DEV Community · #beginners", "https://dev.to/feed/tag/beginners",
+                        NewsCategory.DESARROLLO, false))),
                 jobs("Get on Board · Programación", ImportSourceType.GETONBRD_JOBS,
                         "https://www.getonbrd.com/api/v0/categories/programming/jobs?per_page=100", false),
                 jobs("Get on Board · DevOps y QA", ImportSourceType.GETONBRD_JOBS,
@@ -62,6 +63,12 @@ public final class DefaultImportSources {
     /** Fuente creada pero apagada: un admin puede activarla desde el panel si le sirve. */
     private static ImportSource inactive(ImportSource source) {
         source.setActive(false);
+        return source;
+    }
+
+    /** Sus portadas son tarjetas de texto generadas automáticamente: mejor las fotos propias de la web. */
+    private static ImportSource withoutSourceImages(ImportSource source) {
+        source.setUseSourceImages(false);
         return source;
     }
 

@@ -26,6 +26,7 @@ public class ImportSourceMapper {
         source.setRemoteOnly(!news && Boolean.TRUE.equals(request.getRemoteOnly()));
         source.setKeywords(request.getKeywords());
         source.setExcludeKeywords(request.getExcludeKeywords());
+        source.setUseSourceImages(!Boolean.FALSE.equals(request.getUseSourceImages()));
         int minimum = request.getType().getMinIntervalMinutes();
         source.setIntervalMinutes(request.getIntervalMinutes() == null ? minimum : Math.max(minimum, request.getIntervalMinutes()));
     }
@@ -40,6 +41,7 @@ public class ImportSourceMapper {
                 .autoPublish(source.getAutoPublish())
                 .active(source.getActive())
                 .remoteOnly(source.getRemoteOnly())
+                .useSourceImages(source.getUseSourceImages())
                 .keywords(source.getKeywords())
                 .excludeKeywords(source.getExcludeKeywords())
                 .intervalMinutes(source.getIntervalMinutes())

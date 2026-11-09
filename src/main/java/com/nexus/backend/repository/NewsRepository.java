@@ -25,8 +25,14 @@ public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificat
 
     /** Noticias sin imagen pero con enlace a su fuente, de las más recientes a las más antiguas. */
     @Query("select n from News n where n.imageUrl is null and n.sourceUrl is not null and n.createdAt >= :since "
+            + "and not exists (select s.id from ImportSource s where s.name = n.source and s.useSourceImages = false) "
             + "order by n.createdAt desc")
     List<News> findWithoutImage(@Param("since") LocalDateTime since, Pageable pageable);
+
+    /** Quita las imágenes de lo importado de una fuente (cuando se decide no usar sus imágenes). */
+    @Modifying
+    @Query("update News n set n.imageUrl = null where n.source = :source and n.externalId is not null")
+    int clearImportedImages(@Param("source") String source);
 
     @Modifying
     @Query("update News n set n.imageUrl = :imageUrl where n.id = :id and n.imageUrl is null")

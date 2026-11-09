@@ -1,5 +1,6 @@
 package com.nexus.backend.importer;
 
+import com.nexus.backend.dto.request.ImportSourceRequest;
 import com.nexus.backend.entity.ImportSource;
 import com.nexus.backend.entity.JobOffer;
 import com.nexus.backend.entity.News;
@@ -12,6 +13,7 @@ import com.nexus.backend.repository.ImportExclusionRepository;
 import com.nexus.backend.repository.ImportSourceRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.NewsRepository;
+import com.nexus.backend.service.ImportSourceService;
 import com.nexus.backend.service.JobService;
 import com.nexus.backend.service.NewsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +42,8 @@ class ImportRunnerIntegrationTest {
     private FeedClient feedClient;
     @Autowired
     private NewsImageBackfill newsImageBackfill;
+    @Autowired
+    private ImportSourceService importSourceService;
 
     @Autowired
     private ImportRunner importRunner;
@@ -127,6 +131,37 @@ class ImportRunnerIntegrationTest {
         assertThat(newsImageBackfill.run()).isZero();
         assertThat(newsRepository.findAll()).extracting(News::getImageUrl)
                 .containsExactlyInAnyOrder("https://cdn.example.com/portada.jpg", "https://blog.example.com/img/tarde.png");
+    }
+
+    @Test
+    void ignoresTheSourceImagesWhenTheSourceIsSetToUseOwnPhotos() throws Exception {
+        ImportSource source = source("Fotos propias", ImportSourceType.RSS_NEWS, "https://feeds.example.com/propias", false);
+        source.setUseSourceImages(false);
+        sourceRepository.save(source);
+        when(feedClient.get(eq(source.getUrl()), anyString())).thenReturn(ProvidersTestFixtures.bytes("freecodecamp.xml"));
+
+        assertThat(importRunner.run(source).imported()).isEqualTo(3);
+        assertThat(newsRepository.findAll()).extracting(News::getImageUrl).containsOnlyNulls();
+        // El relleno periódico tampoco busca imágenes para esta fuente.
+        assertThat(newsImageBackfill.run()).isZero();
+    }
+
+    @Test
+    void turningOffSourceImagesRemovesTheOnesAlreadyImported() throws Exception {
+        ImportSource source = source("freeCodeCamp", ImportSourceType.RSS_NEWS, "https://feeds.example.com/fcc", false);
+        when(feedClient.get(eq(source.getUrl()), anyString())).thenReturn(ProvidersTestFixtures.bytes("freecodecamp.xml"));
+        importRunner.run(source);
+        assertThat(newsRepository.findAll()).extracting(News::getImageUrl).doesNotContainNull();
+
+        ImportSourceRequest request = new ImportSourceRequest();
+        request.setName(source.getName());
+        request.setType(source.getType());
+        request.setUrl(source.getUrl());
+        request.setNewsCategory(source.getNewsCategory());
+        request.setUseSourceImages(false);
+        importSourceService.update(source.getId(), request);
+
+        assertThat(newsRepository.findAll()).extracting(News::getImageUrl).containsOnlyNulls();
     }
 
     @Test
