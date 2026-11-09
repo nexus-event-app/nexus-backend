@@ -27,6 +27,7 @@ public class CommentMapper {
                 .discussionId(comment.getDiscussion().getId())
                 .authorId(author.getId())
                 .authorName(author.getName())
+                .authorAvatarUrl(author.getAvatarUrl())
                 .likesCount(likesCount)
                 .isLikedByCurrentUser(likedByCurrentUser)
                 .createdAt(comment.getCreatedAt())

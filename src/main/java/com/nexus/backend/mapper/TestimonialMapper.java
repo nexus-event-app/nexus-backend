@@ -24,7 +24,11 @@ public class TestimonialMapper {
     }
 
     public TestimonialResponse toResponse(Testimonial testimonial) {
+        User user = testimonial.getUser();
+        boolean linked = user != null && user.isEnabled();
         return TestimonialResponse.builder()
+                .authorId(linked ? user.getId() : null)
+                .authorAvatarUrl(linked ? user.getAvatarUrl() : null)
                 .id(testimonial.getId())
                 .name(testimonial.getName())
                 .role(testimonial.getRole())

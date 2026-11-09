@@ -47,6 +47,7 @@ class LanguagesTest {
                 Map.entry("registro", Map.of("ca", "registre", "en", "sign-up")),
                 Map.entry("recuperar-contrasena", Map.of("ca", "recupera-contrasenya", "en", "forgot-password")),
                 Map.entry("restablecer-contrasena", Map.of("ca", "restableix-contrasenya", "en", "reset-password")),
-                Map.entry("verificar-email", Map.of("ca", "verifica-correu", "en", "verify-email"))));
+                Map.entry("verificar-email", Map.of("ca", "verifica-correu", "en", "verify-email")),
+                Map.entry("perfil", Map.of("ca", "perfil", "en", "profile"))));
     }
 }

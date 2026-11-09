@@ -20,5 +20,6 @@ public class UserResponse {
     private User.Role role;
     private boolean enabled;
     private boolean emailVerified;
+    private String avatarUrl;
     private LocalDateTime createdAt;
 }

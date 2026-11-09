@@ -82,6 +82,14 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     @Override
     @Transactional(readOnly = true)
+    public PageResponse<DiscussionResponse> getDiscussionsByAuthor(Long authorId, int page, int size, UserDetail viewer) {
+        Specification<Discussion> spec = DiscussionSpecifications.isActive()
+                .and(DiscussionSpecifications.hasAuthor(authorId));
+        return findPage(spec, Pagination.newestFirst(page, size), viewer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public PageResponse<DiscussionResponse> getAllDiscussions(String text, int page, int size, UserDetail actor) {
         Specification<Discussion> spec = DiscussionSpecifications.filter(null, text);
         return findPage(spec, Pagination.newestFirst(page, size), actor);

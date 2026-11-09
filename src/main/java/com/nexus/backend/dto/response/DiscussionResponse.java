@@ -21,6 +21,7 @@ public class DiscussionResponse {
     private DiscussionCategory category;
     private Long authorId;
     private String authorName;
+    private String authorAvatarUrl;
     private Boolean isActive;
     private Integer commentCount;
     private Integer likesCount;

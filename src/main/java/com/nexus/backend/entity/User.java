@@ -58,6 +58,27 @@ public class User {
     @Column(name = "terms_accepted_at")
     private LocalDateTime termsAcceptedAt;
 
+    /** Perfil público (todo opcional). */
+    @Column(length = 80)
+    private String headline;
+
+    @Column(length = 300)
+    private String bio;
+
+    /** Tecnologías separadas por comas, en el orden en que la persona las escribió. */
+    @Column(length = 400)
+    private String technologies;
+
+    @Column(name = "github_url", length = 200)
+    private String githubUrl;
+
+    @Column(name = "linkedin_url", length = 200)
+    private String linkedinUrl;
+
+    /** Ruta pública de la foto ya procesada («/uploads/avatars/...»). */
+    @Column(name = "avatar_url", length = 200)
+    private String avatarUrl;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

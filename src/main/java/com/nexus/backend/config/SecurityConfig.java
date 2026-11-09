@@ -117,7 +117,8 @@ public class SecurityConfig {
                                 "/api/jobs", "/api/jobs/latest", "/api/jobs/*",
                                 "/api/discussions", "/api/discussions/*",
                                 "/api/comments/discussion/*",
-                                "/api/testimonials", "/api/testimonials/latest").permitAll()
+                                "/api/testimonials", "/api/testimonials/latest",
+                                "/api/users/*", "/api/users/*/discussions", "/api/users/*/testimonials").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/discussions", "/api/discussions/*/like",
                                 "/api/comments", "/api/comments/*/like",

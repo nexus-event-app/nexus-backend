@@ -18,6 +18,7 @@ public class CommentResponse {
     private Long discussionId;
     private Long authorId;
     private String authorName;
+    private String authorAvatarUrl;
     private Integer likesCount;
     private Boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;

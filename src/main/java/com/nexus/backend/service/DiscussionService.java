@@ -26,4 +26,7 @@ public interface DiscussionService {
     void deleteDiscussion(Long id, UserDetail actor);
 
     DiscussionResponse toggleLike(Long id, UserDetail actor);
+
+    /** Discusiones publicadas de un autor, para su perfil público. */
+    PageResponse<DiscussionResponse> getDiscussionsByAuthor(Long authorId, int page, int size, UserDetail viewer);
 }

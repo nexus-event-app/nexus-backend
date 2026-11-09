@@ -30,6 +30,7 @@ public class UserMapper {
                 .role(user.getRole())
                 .enabled(user.isEnabled())
                 .emailVerified(user.isEmailVerified())
+                .avatarUrl(user.getAvatarUrl())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

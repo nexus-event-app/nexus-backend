@@ -40,7 +40,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
             new Rule("resend-verification", "/api/auth/resend-verification", 5, Duration.ofHours(1)),
             new Rule("discussion", "/api/discussions", 10, Duration.ofHours(1)),
             new Rule("comment", "/api/comments", 30, Duration.ofHours(1)),
-            new Rule("testimonial", "/api/testimonials", 5, Duration.ofHours(1)));
+            new Rule("testimonial", "/api/testimonials", 5, Duration.ofHours(1)),
+            new Rule("avatar", "/api/profile/avatar", 20, Duration.ofHours(1)));
 
     private final ApiErrorWriter apiErrorWriter;
 

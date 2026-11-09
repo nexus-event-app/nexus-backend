@@ -18,6 +18,9 @@ public class TestimonialResponse {
     private String role;
     private String location;
     private String content;
+    /** Autor con cuenta (si la tiene y sigue activa): enlaza a su perfil público. */
+    private Long authorId;
+    private String authorAvatarUrl;
     private Boolean isActive;
     private Boolean isPending;
     private Boolean isHighlighted;
