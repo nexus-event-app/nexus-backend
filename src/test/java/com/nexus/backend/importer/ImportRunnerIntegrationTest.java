@@ -21,9 +21,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -84,6 +88,39 @@ class ImportRunnerIntegrationTest {
         ImportSource updated = sourceRepository.findById(source.getId()).orElseThrow();
         assertThat(updated.getLastStatus()).isEqualTo(ImportStatus.SUCCESS);
         assertThat(updated.getLastRunAt()).isNotNull();
+    }
+
+    @Test
+    void looksForTheCoverImageOnTheArticlePageWhenTheFeedHasNone() throws Exception {
+        ImportSource source = source("Blog sin imágenes", ImportSourceType.RSS_NEWS, "https://feeds.example.com/sin-img", false);
+        String now = ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        String rss = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rss version="2.0"><channel><title>Blog</title><link>https://blog.example.com</link><description>d</description>
+                <item><title>Con portada en la página</title><link>https://blog.example.com/con-portada</link>
+                  <description>Texto sin imágenes</description><pubDate>%s</pubDate></item>
+                <item><title>Sin portada en ningún sitio</title><link>https://blog.example.com/sin-portada</link>
+                  <description>Texto sin imágenes</description><pubDate>%s</pubDate></item>
+                </channel></rss>
+                """.formatted(now, now).strip();
+        when(feedClient.get(eq(source.getUrl()), anyString())).thenReturn(rss.getBytes(StandardCharsets.UTF_8));
+        when(feedClient.get(eq("https://blog.example.com/con-portada"), anyString())).thenReturn(
+                "<head><meta property=\"og:image\" content=\"https://cdn.example.com/portada.jpg\"></head>"
+                        .getBytes(StandardCharsets.UTF_8));
+        when(feedClient.get(eq("https://blog.example.com/sin-portada"), anyString())).thenReturn(
+                "<head><title>Nada</title></head>".getBytes(StandardCharsets.UTF_8));
+
+        assertThat(importRunner.run(source).imported()).isEqualTo(2);
+        assertThat(newsRepository.findAll()).extracting(News::getTitle, News::getImageUrl).containsExactlyInAnyOrder(
+                tuple("Con portada en la página", "https://cdn.example.com/portada.jpg"),
+                tuple("Sin portada en ningún sitio", null));
+
+        // Si la página publica después su portada, la siguiente ejecución la recoge.
+        when(feedClient.get(eq("https://blog.example.com/sin-portada"), anyString())).thenReturn(
+                "<head><meta name=\"twitter:image\" content=\"/img/tarde.png\"></head>".getBytes(StandardCharsets.UTF_8));
+        assertThat(importRunner.run(source).imported()).isZero();
+        assertThat(newsRepository.findAll()).extracting(News::getImageUrl)
+                .containsExactlyInAnyOrder("https://cdn.example.com/portada.jpg", "https://blog.example.com/img/tarde.png");
     }
 
     @Test

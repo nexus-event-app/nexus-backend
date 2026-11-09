@@ -8,6 +8,7 @@ import com.nexus.backend.entity.ImportExclusion;
 import com.nexus.backend.entity.News;
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.importer.ArticleImageFinder;
 import com.nexus.backend.mapper.NewsMapper;
 import com.nexus.backend.repository.ImportExclusionRepository;
 import com.nexus.backend.repository.NewsRepository;
@@ -30,6 +31,7 @@ public class NewsServiceImpl implements NewsService {
     private final NewsRepository newsRepository;
     private final ImportExclusionRepository importExclusionRepository;
     private final NewsMapper newsMapper;
+    private final ArticleImageFinder articleImageFinder;
 
     @Override
     @Transactional(readOnly = true)
@@ -71,8 +73,9 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional
     public NewsResponse createNews(CreateNewsRequest request) {
-        News saved = newsRepository.save(newsMapper.toEntity(request));
-        return newsMapper.toResponse(saved);
+        News news = newsMapper.toEntity(request);
+        fillImageFromSource(news);
+        return newsMapper.toResponse(newsRepository.save(news));
     }
 
     @Override
@@ -80,7 +83,15 @@ public class NewsServiceImpl implements NewsService {
     public NewsResponse updateNews(Long id, UpdateNewsRequest request) {
         News news = findById(id);
         newsMapper.updateEntity(news, request);
+        fillImageFromSource(news);
         return newsMapper.toResponse(newsRepository.save(news));
+    }
+
+    /** Sin imagen subida pero con enlace a la fuente: se usa la portada de esa página, si la tiene. */
+    private void fillImageFromSource(News news) {
+        if ((news.getImageUrl() == null || news.getImageUrl().isBlank()) && news.getSourceUrl() != null) {
+            news.setImageUrl(articleImageFinder.find(news.getSourceUrl()).orElse(null));
+        }
     }
 
     @Override
