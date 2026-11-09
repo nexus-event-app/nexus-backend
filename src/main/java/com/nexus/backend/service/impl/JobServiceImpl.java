@@ -13,6 +13,7 @@ import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mapper.JobMapper;
 import com.nexus.backend.repository.ImportExclusionRepository;
 import com.nexus.backend.repository.JobOfferRepository;
+import com.nexus.backend.repository.SavedJobRepository;
 import com.nexus.backend.repository.spec.JobSpecifications;
 import com.nexus.backend.service.JobService;
 import com.nexus.backend.util.Pagination;
@@ -32,6 +33,7 @@ public class JobServiceImpl implements JobService {
 
     private final JobOfferRepository jobOfferRepository;
     private final ImportExclusionRepository importExclusionRepository;
+    private final SavedJobRepository savedJobRepository;
     private final JobMapper jobMapper;
 
     @Override
@@ -97,6 +99,7 @@ public class JobServiceImpl implements JobService {
         if (job.getExternalId() != null) {
             importExclusionRepository.save(new ImportExclusion(job.getExternalId()));
         }
+        savedJobRepository.deleteAllByJobId(id);
         jobOfferRepository.delete(job);
     }
 
