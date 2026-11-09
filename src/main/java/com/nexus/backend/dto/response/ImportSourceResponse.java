@@ -25,6 +25,7 @@ public class ImportSourceResponse {
     private Boolean active;
     private Boolean remoteOnly;
     private String keywords;
+    private String excludeKeywords;
     private Integer intervalMinutes;
     private Integer minIntervalMinutes;
     private LocalDateTime lastRunAt;

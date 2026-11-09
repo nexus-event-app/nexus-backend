@@ -69,6 +69,10 @@ public class ImportSource {
     @Column(length = 500)
     private String keywords;
 
+    /** Palabras clave separadas por comas: lo que contenga alguna no se importa aunque cumpla las demás condiciones. */
+    @Column(name = "exclude_keywords", length = 500)
+    private String excludeKeywords;
+
     @Column(name = "interval_minutes", nullable = false)
     private Integer intervalMinutes;
 

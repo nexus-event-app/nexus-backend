@@ -43,8 +43,11 @@ class SitemapServiceTest {
     void translatedPagesAreListedInEveryLanguageWithHreflang() {
         assertThat(block(SITE + "/")).contains("hreflang=\"ca\" href=\"" + SITE + "/ca\"",
                 "hreflang=\"en\" href=\"" + SITE + "/en\"", "hreflang=\"x-default\" href=\"" + SITE + "/\"");
-        assertThat(block(SITE + "/en/empleo")).contains("hreflang=\"es\" href=\"" + SITE + "/empleo\"");
-        assertThat(block(SITE + "/ca/foro")).isNotNull();
+        assertThat(block(SITE + "/en/jobs")).contains("hreflang=\"es\" href=\"" + SITE + "/empleo\"",
+                "hreflang=\"ca\" href=\"" + SITE + "/ca/feina\"");
+        assertThat(block(SITE + "/ca/forum")).isNotNull();
+        assertThat(block(SITE + "/en/news")).contains("hreflang=\"ca\" href=\"" + SITE + "/ca/noticies\"");
+        assertThat(xml).doesNotContain("/en/empleo", "/ca/foro<", "/en/noticias");
     }
 
     @Test

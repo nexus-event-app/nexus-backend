@@ -45,7 +45,7 @@ public class EmailTemplates {
     }
 
     private String link(Locale locale, String path, String token) {
-        return publicUrl + Languages.pathPrefix(locale) + path + "?token=" + token;
+        return publicUrl + Languages.localizePath(locale, path) + "?token=" + token;
     }
 
     private EmailMessage build(Locale locale, String to, String subject, String name, String intro, String action,

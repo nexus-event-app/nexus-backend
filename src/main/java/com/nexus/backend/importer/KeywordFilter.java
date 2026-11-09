@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 public final class KeywordFilter {
 
     private static final KeywordFilter ALL = new KeywordFilter(null);
+    private static final KeywordFilter NONE = new KeywordFilter(Pattern.compile("(?!)"));
 
     private final Pattern pattern;
 
@@ -34,6 +35,12 @@ public final class KeywordFilter {
             return ALL;
         }
         return new KeywordFilter(Pattern.compile("(?<![\\p{L}\\p{N}])(" + String.join("|", terms) + ")(?![\\p{L}\\p{N}])"));
+    }
+
+    /** Filtro de exclusión: ningún texto queda excluido si no hay palabras clave. */
+    public static KeywordFilter exclusion(String keywords) {
+        KeywordFilter filter = of(keywords);
+        return filter == ALL ? NONE : filter;
     }
 
     public boolean matches(String text) {

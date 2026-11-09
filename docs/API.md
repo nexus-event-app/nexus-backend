@@ -77,7 +77,7 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 - `CreateTestimonialRequest { name (2–100), role (≤100, opcional), location (≤100, opcional), content (50–300) }`
 - `UpdateTestimonialRequest { isActive, isPending, isHighlighted }` (todos opcionales; solo admin)
 - `UpdateUserStatusRequest { enabled: boolean }`
-- `ImportSourceRequest { name (2–100, único), type, url (http/https pública, ≤500), newsCategory (solo noticias, por defecto GENERAL), autoPublish (por defecto true), active (por defecto true), remoteOnly (solo empleo), keywords (≤500, separadas por comas), intervalMinutes (30–10080; si es menor que el mínimo del tipo se eleva a ese mínimo) }`. El `type` no se puede cambiar al editar.
+- `ImportSourceRequest { name (2–100, único), type, url (http/https pública, ≤500), newsCategory (solo noticias, por defecto GENERAL), autoPublish (por defecto true), active (por defecto true), remoteOnly (solo empleo), keywords (≤500, separadas por comas), excludeKeywords (≤500, separadas por comas: lo que contenga alguna no se importa), intervalMinutes (30–10080; si es menor que el mínimo del tipo se eleva a ese mínimo) }`. El `type` no se puede cambiar al editar.
 
 ## 5. Endpoints
 ### Públicos (sin sesión)
@@ -137,12 +137,14 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | GET | `/api/admin/import-sources` | `ImportSourceResponse[]` ordenadas por nombre |
 | POST | `/api/admin/import-sources` | 201 `ImportSourceResponse`; 409 si el nombre ya existe |
 | PUT/DELETE | `/api/admin/import-sources/{id}` | borrar una fuente no borra lo ya importado |
+| POST | `/api/admin/import-sources/defaults` | crea las fuentes recomendadas que falten (por nombre) → `ImportSourceResponse[]` con las creadas; no modifica las existentes |
 | POST | `/api/admin/import-sources/{id}/run` | ejecuta ahora → `ImportRunResponse`; 400 si se consultó hace menos del tiempo mínimo del tipo (Remotive 6 h, Get on Board y Arbeitnow 5 min, RSS 1 min) |
 
 Las imágenes se sirven en `/uploads/news/{fileName}`. El borrado de discusiones y comentarios por parte de un admin usa los mismos endpoints de usuario (`DELETE /api/discussions/{id}`, `DELETE /api/comments/{id}`).
 
-## 6. Rutas del frontend (todas en español)
+## 6. Rutas del frontend
 `/` · `/noticias` · `/noticias/:idSlug` · `/empleo` · `/empleo/:idSlug` · `/foro` · `/foro/nueva` · `/foro/:idSlug` · `/testimonios` · `/login` · `/registro` · `/admin` · `/admin/noticias` · `/admin/empleo` · `/admin/foro` · `/admin/testimonios` · `/admin/usuarios` · `/admin/importacion` · `*` → página 404 real (no redirigir a la home).
+Esas son las rutas internas, que son también las públicas en castellano. En catalán e inglés llevan prefijo y la sección traducida (`/ca/noticies`, `/en/news`, `/en/forum/new`…); la tabla está en `Languages.SEGMENTS` (backend) y en `src/shared/i18n/routeSegments.js` (frontend), y debe coincidir en los dos. Las direcciones antiguas con la sección en castellano bajo `/ca` o `/en` redirigen a la traducida. El panel de admin no se traduce.
 Las páginas de admin, login y registro llevan `noindex`.
 Los filtros y la paginación de listados van en la query de la URL (`?page=2&categoria=...`) para que sean enlazables y rastreables.
 

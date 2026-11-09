@@ -143,7 +143,7 @@ idioma, se usa el castellano. Afecta a:
   `messages_en.properties`. Los servicios lanzan excepciones con una **clave** (`error.news.notFound`) y `GlobalExceptionHandler`
   la traduce; los DTO usan `message = "{validation.title.required}"`.
 - Emails de cuenta (`mail.*`): salen en el idioma de la petición y los enlaces apuntan a `/ca/...` o `/en/...`.
-- `sitemap.xml`: las páginas traducidas (portada, listados y testimonios) aparecen en los tres idiomas con enlaces `hreflang`. Las noticias, ofertas, debates y páginas legales, cuyo texto solo existe en castellano, aparecen una sola vez en su URL castellana y sin `hreflang`, para que no cuenten como contenido duplicado. `robots.txt` cubre también las rutas con prefijo.
+- `sitemap.xml`: las páginas traducidas (portada, listados y testimonios) aparecen en los tres idiomas con enlaces `hreflang`. Las noticias, ofertas, debates y páginas legales, cuyo texto solo existe en castellano, aparecen una sola vez en su URL castellana y sin `hreflang`, para que no cuenten como contenido duplicado. `robots.txt` cubre también las rutas de cada idioma. Las URLs de catalán e inglés llevan la sección traducida (`/ca/noticies`, `/en/jobs`): la tabla está en `i18n/Languages` y debe coincidir con `src/shared/i18n/routeSegments.js` del frontend (`LanguagesTest` lo recuerda). Los enlaces de los emails usan la misma tabla.
 
 Para añadir un texto, créalo **en los tres ficheros** con la misma clave: `MessageBundlesTest` falla si falta alguna.
 Los textos con argumentos (`{0}`) duplican el apóstrofo (`''`); en el resto se usa `’`.
@@ -169,6 +169,8 @@ Reglas que aplica en cada ejecución:
 - **SEO y atribución:** lo importado sale marcado con su fuente y enlaza al original, no entra en el sitemap y el frontend lo publica con `noindex` y sin datos estructurados (Remotive prohíbe expresamente que sus ofertas acaben en Google Jobs).
 - **Seguridad:** solo URLs `http`/`https` públicas (se rechazan localhost y redes privadas, también en cada redirección), tiempo de espera de 25 s, respuestas de 8 MB como máximo, XML sin DOCTYPE y HTML convertido a texto plano con jsoup.
 - **Revisión manual:** con `autoPublish=false` lo importado queda oculto hasta que un admin lo publique.
+- **Palabras clave y exclusiones:** con `keywords` solo entra lo que contenga alguna; con `excludeKeywords` se descarta lo que contenga alguna, aunque cumpla lo demás. Genbeta trae ambas por defecto.
+- **Fuentes recomendadas:** están en `importer/DefaultImportSources`. Se crean al arrancar con una base de datos vacía; en el panel, «Añadir fuentes recomendadas» crea las que falten sin tocar las existentes. Si cambia la configuración recomendada de una fuente ya existente, se aplica a las bases de datos existentes con una migración (como la V7).
 
 El planificador está pensado para una sola instancia. Si despliegas varias réplicas, deja `IMPORT_ENABLED=true` solo en una.
 

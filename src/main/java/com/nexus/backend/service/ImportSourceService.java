@@ -18,4 +18,7 @@ public interface ImportSourceService {
 
     /** Ejecuta la fuente ahora, respetando el tiempo mínimo entre ejecuciones manuales de su tipo. */
     ImportRunResponse runNow(Long id);
+
+    /** Crea las fuentes recomendadas que falten (por nombre) y devuelve las creadas. No modifica las existentes. */
+    List<ImportSourceResponse> addMissingDefaults();
 }

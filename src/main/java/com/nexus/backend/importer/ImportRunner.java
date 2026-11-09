@@ -104,8 +104,10 @@ public class ImportRunner {
 
         LocalDateTime oldest = LocalDateTime.now().minusDays(properties.newsMaxAgeDays());
         KeywordFilter keywords = KeywordFilter.of(source.getKeywords());
+        KeywordFilter excluded = KeywordFilter.exclusion(source.getExcludeKeywords());
         List<ImportedNews> candidates = fetched.stream()
                 .filter(item -> keywords.matches(item.title() + " " + item.summary()))
+                .filter(item -> !excluded.matches(item.title() + " " + item.summary()))
                 .filter(item -> item.publishedAt() == null || item.publishedAt().isAfter(oldest))
                 .filter(item -> item.link().length() <= 500)
                 .sorted(Comparator.comparing(ImportedNews::publishedAt, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -130,12 +132,14 @@ public class ImportRunner {
         LocalDateTime oldest = now.minusDays(properties.jobMaxAgeDays());
         boolean remoteOnly = Boolean.TRUE.equals(source.getRemoteOnly());
         KeywordFilter keywords = KeywordFilter.of(source.getKeywords());
+        KeywordFilter excluded = KeywordFilter.exclusion(source.getExcludeKeywords());
         List<ClassifiedJob> candidates = fetched.stream()
                 .filter(job -> job.location() != null && job.applyUrl().length() <= 500)
                 .filter(job -> job.publishedAt() == null || job.publishedAt().isAfter(oldest))
                 .filter(job -> !remoteOnly || job.workMode() == WorkMode.REMOTE)
                 .filter(job -> job.techSource() || JobClassifier.isTech(job.title(), job.tags()))
                 .filter(job -> keywords.matches(job.title() + " " + String.join(" ", job.tags())))
+                .filter(job -> !excluded.matches(job.title() + " " + String.join(" ", job.tags())))
                 .map(job -> JobClassifier.level(job.title(), job.levelHints()).map(level -> new ClassifiedJob(job, level)))
                 .flatMap(Optional::stream)
                 .sorted(Comparator.comparing((ClassifiedJob c) -> c.job().publishedAt(),

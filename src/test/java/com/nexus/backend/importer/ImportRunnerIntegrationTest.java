@@ -144,6 +144,18 @@ class ImportRunnerIntegrationTest {
     }
 
     @Test
+    void excludedKeywordsSkipMatchingItems() throws Exception {
+        ImportSource source = source("Con exclusiones", ImportSourceType.RSS_NEWS, "https://feeds.example.com/excl", false);
+        source.setExcludeKeywords("escalabilidad");
+        sourceRepository.save(source);
+        when(feedClient.get(eq(source.getUrl()), anyString())).thenReturn(ProvidersTestFixtures.bytes("freecodecamp.xml"));
+
+        assertThat(importRunner.run(source).imported()).isEqualTo(2);
+        assertThat(newsRepository.findAll()).extracting(News::getTitle)
+                .noneMatch(title -> title.toLowerCase().contains("escalabilidad"));
+    }
+
+    @Test
     void recordsFailuresWithoutThrowing() {
         ImportSource source = source("Roto", ImportSourceType.RSS_NEWS, "https://feeds.example.com/roto", false);
         when(feedClient.get(eq(source.getUrl()), anyString())).thenThrow(new ImportException("La fuente respondió con el estado HTTP 503"));

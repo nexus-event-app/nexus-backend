@@ -38,7 +38,7 @@ class EmailTemplatesTest {
         EmailMessage message = templates.passwordReset("ana@test.com", "Ana", "TOKEN");
 
         assertThat(message.subject()).isEqualTo("Restableix la teva contrasenya de Primer Commit");
-        assertThat(message.text()).contains("https://primercommit.test/ca/restablecer-contrasena?token=TOKEN");
+        assertThat(message.text()).contains("https://primercommit.test/ca/restableix-contrasenya?token=TOKEN");
         assertThat(message.html()).contains("<html lang=\"ca\">");
     }
 
@@ -49,7 +49,7 @@ class EmailTemplatesTest {
         EmailMessage message = templates.emailVerification("ana@test.com", "Ana", "TOKEN");
 
         assertThat(message.subject()).isEqualTo("Confirm your email on Primer Commit");
-        assertThat(message.text()).contains("Hi Ana,").contains("https://primercommit.test/en/verificar-email?token=TOKEN");
+        assertThat(message.text()).contains("Hi Ana,").contains("https://primercommit.test/en/verify-email?token=TOKEN");
     }
 
     private static ResourceBundleMessageSource messageSource() {

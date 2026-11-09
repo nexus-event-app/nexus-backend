@@ -22,4 +22,12 @@ class KeywordFilterTest {
         assertThat(filter.matches("Un dinosaurio preservado durante millones de años")).isFalse();
         assertThat(filter.matches("Una media de tres horas")).as("'ia' dentro de otra palabra no cuenta").isFalse();
     }
+
+    @Test
+    void exclusionWithoutKeywordsExcludesNothing() {
+        assertThat(KeywordFilter.exclusion(null).matches("cualquier cosa")).isFalse();
+        assertThat(KeywordFilter.exclusion(" ").matches("cualquier cosa")).isFalse();
+        assertThat(KeywordFilter.exclusion("apuestas, cripto").matches("Las apuestas online crecen")).isTrue();
+        assertThat(KeywordFilter.exclusion("apuestas, cripto").matches("Aprende Python desde cero")).isFalse();
+    }
 }

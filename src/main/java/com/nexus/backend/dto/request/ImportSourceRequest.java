@@ -41,6 +41,9 @@ public class ImportSourceRequest {
     @Size(max = 500, message = "{validation.keywords.max500}")
     private String keywords;
 
+    @Size(max = 500, message = "{validation.excludeKeywords.max500}")
+    private String excludeKeywords;
+
     /** Si no se indica, se usa el mínimo del tipo de fuente. */
     @Min(value = 30, message = "{validation.interval.min}")
     @Max(value = 10080, message = "{validation.interval.max}")
@@ -52,6 +55,10 @@ public class ImportSourceRequest {
 
     public void setKeywords(String keywords) {
         this.keywords = TextUtil.optionalLine(keywords);
+    }
+
+    public void setExcludeKeywords(String excludeKeywords) {
+        this.excludeKeywords = TextUtil.optionalLine(excludeKeywords);
     }
 
     public void setUrl(String url) {

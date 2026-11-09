@@ -7,6 +7,7 @@ import com.nexus.backend.entity.ImportSource;
 import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.importer.DefaultImportSources;
 import com.nexus.backend.importer.ImportRunResult;
 import com.nexus.backend.importer.ImportRunner;
 import com.nexus.backend.importer.UrlGuard;
@@ -92,6 +93,15 @@ public class ImportSourceServiceImpl implements ImportSourceService {
         long hours = minutes / 60;
         long rest = minutes % 60;
         return rest == 0 ? hours + " h" : hours + " h " + rest + " min";
+    }
+
+    @Override
+    @Transactional
+    public List<ImportSourceResponse> addMissingDefaults() {
+        List<ImportSource> missing = DefaultImportSources.create().stream()
+                .filter(source -> !sourceRepository.existsByNameIgnoreCase(source.getName()))
+                .toList();
+        return sourceRepository.saveAll(missing).stream().map(this::toResponse).toList();
     }
 
     private void validate(ImportSourceRequest request) {

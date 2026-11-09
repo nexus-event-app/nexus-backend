@@ -121,21 +121,17 @@ public class SitemapService {
         }
     }
 
+    /** URL pública de una ruta interna en un idioma: «/empleo» → «…/en/jobs». La portada castellana es «…/». */
     private String localizedUrl(Locale locale, String path) {
-        String prefix = Languages.pathPrefix(locale);
-        // La portada en castellano es la raíz; en otros idiomas, «/ca» y «/en» sin barra final.
-        if ("/".equals(path)) {
-            return prefix.isEmpty() ? publicUrl + "/" : publicUrl + prefix;
-        }
-        return publicUrl + prefix + path;
+        return publicUrl + Languages.localizePath(locale, path);
     }
 
     private String buildRobots() {
         StringBuilder robots = new StringBuilder("User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin\n");
         for (Locale locale : Languages.SUPPORTED) {
-            String prefix = Languages.pathPrefix(locale);
-            robots.append("Disallow: ").append(prefix).append("/login\n");
-            robots.append("Disallow: ").append(prefix).append("/registro\n");
+            for (String path : List.of("/login", "/registro")) {
+                robots.append("Disallow: ").append(Languages.localizePath(locale, path)).append('\n');
+            }
         }
         return robots.append("\nSitemap: ").append(publicUrl).append("/sitemap.xml\n").toString();
     }
