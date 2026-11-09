@@ -38,6 +38,8 @@ class ImportRunnerIntegrationTest {
 
     @MockitoBean
     private FeedClient feedClient;
+    @Autowired
+    private NewsImageBackfill newsImageBackfill;
 
     @Autowired
     private ImportRunner importRunner;
@@ -115,10 +117,14 @@ class ImportRunnerIntegrationTest {
                 tuple("Con portada en la página", "https://cdn.example.com/portada.jpg"),
                 tuple("Sin portada en ningún sitio", null));
 
-        // Si la página publica después su portada, la siguiente ejecución la recoge.
+        // Si la página publica después su portada, el relleno periódico la recoge aunque la fuente esté pausada.
+        source.setActive(false);
+        sourceRepository.save(source);
         when(feedClient.get(eq("https://blog.example.com/sin-portada"), anyString())).thenReturn(
                 "<head><meta name=\"twitter:image\" content=\"/img/tarde.png\"></head>".getBytes(StandardCharsets.UTF_8));
-        assertThat(importRunner.run(source).imported()).isZero();
+        assertThat(newsImageBackfill.run()).isEqualTo(1);
+        // La misma noticia no se vuelve a intentar enseguida.
+        assertThat(newsImageBackfill.run()).isZero();
         assertThat(newsRepository.findAll()).extracting(News::getImageUrl)
                 .containsExactlyInAnyOrder("https://cdn.example.com/portada.jpg", "https://blog.example.com/img/tarde.png");
     }

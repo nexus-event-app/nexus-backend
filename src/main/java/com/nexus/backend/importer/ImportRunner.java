@@ -17,7 +17,6 @@ import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.util.HtmlText;
 import com.nexus.backend.util.TextUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -41,10 +40,6 @@ public class ImportRunner {
     private static final int MAX_TAGS = 10;
     private static final int MAX_TAG_LENGTH = 30;
     private static final int MAX_DESCRIPTION_LENGTH = 20000;
-    /** Días hacia atrás en los que se reintenta buscar la imagen de noticias que se quedaron sin ella. */
-    private static final int MISSING_IMAGE_LOOKBACK_DAYS = 14;
-    /** Noticias antiguas sin imagen que se revisan, además de las nuevas, en cada ejecución. */
-    private static final int MISSING_IMAGE_EXTRA_PER_RUN = 5;
 
     private final List<NewsFeedProvider> newsProviders;
     private final List<JobFeedProvider> jobProviders;
@@ -54,7 +49,7 @@ public class ImportRunner {
     private final ImportExclusionRepository exclusionRepository;
     private final TransactionTemplate transactionTemplate;
     private final ImportProperties properties;
-    private final ArticleImageFinder articleImageFinder;
+    private final NewsImageBackfill newsImageBackfill;
 
     /** Fuentes en ejecución, para no lanzar la misma dos veces a la vez (planificador + admin). */
     private final Set<Long> running = ConcurrentHashMap.newKeySet();
@@ -67,14 +62,14 @@ public class ImportRunner {
                         ImportExclusionRepository exclusionRepository,
                         TransactionTemplate transactionTemplate,
                         ImportProperties properties,
-                        ArticleImageFinder articleImageFinder) {
+                        NewsImageBackfill newsImageBackfill) {
         this.newsProviders = newsProviders;
         this.jobProviders = jobProviders;
         this.sourceRepository = sourceRepository;
         this.newsRepository = newsRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.exclusionRepository = exclusionRepository;
-        this.articleImageFinder = articleImageFinder;
+        this.newsImageBackfill = newsImageBackfill;
         this.transactionTemplate = transactionTemplate;
         this.properties = properties;
     }
@@ -126,24 +121,11 @@ public class ImportRunner {
         // Se guardan de la más antigua a la más reciente para que el orden por fecha de alta se respete.
         List<News> entities = fresh.reversed().stream().map(item -> toNews(item, source)).toList();
         transactionTemplate.executeWithoutResult(status -> newsRepository.saveAll(entities));
-        fillMissingImages(source);
+        // Si el feed no trae imagen, se busca la portada en la página del artículo.
+        newsImageBackfill.fill(entities);
         return ImportRunResult.success(fetched.size(), entities.size());
     }
 
-    /**
-     * Si el feed no trae imagen, se busca la portada en la página del artículo. Cubre las recién importadas y,
-     * poco a poco, las de días anteriores que se quedaron sin imagen (unas pocas por ejecución, para no
-     * sobrecargar la fuente). Las que no tengan imagen tampoco en su página muestran la imagen por defecto.
-     */
-    private void fillMissingImages(ImportSource source) {
-        LocalDateTime since = LocalDateTime.now().minusDays(MISSING_IMAGE_LOOKBACK_DAYS);
-        List<News> missing = newsRepository.findImportedWithoutImage(source.getName(), since,
-                PageRequest.of(0, properties.newsMaxItemsPerRun() + MISSING_IMAGE_EXTRA_PER_RUN));
-        for (News news : missing) {
-            articleImageFinder.find(news.getSourceUrl()).ifPresent(url ->
-                    transactionTemplate.executeWithoutResult(status -> newsRepository.updateImageUrl(news.getId(), url)));
-        }
-    }
 
     private ImportRunResult runJobs(ImportSource source) {
         JobFeedProvider provider = jobProviders.stream()

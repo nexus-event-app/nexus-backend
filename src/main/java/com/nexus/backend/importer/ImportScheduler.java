@@ -28,6 +28,7 @@ public class ImportScheduler {
     private final ImportRunner importRunner;
     private final ImportProperties properties;
     private final TransactionTemplate transactionTemplate;
+    private final NewsImageBackfill newsImageBackfill;
 
     @Scheduled(initialDelayString = "${app.import.initial-delay}", fixedDelayString = "${app.import.check-interval}")
     public void runDueSources() {
@@ -39,6 +40,7 @@ public class ImportScheduler {
             }
         }
         purgeExpiredJobs(now);
+        newsImageBackfill.run();
     }
 
     static boolean isDue(ImportSource source, LocalDateTime now) {

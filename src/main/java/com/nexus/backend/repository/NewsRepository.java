@@ -23,11 +23,10 @@ public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificat
     @Query("select n.externalId from News n where n.externalId in :ids")
     Set<String> findExistingExternalIds(@Param("ids") Collection<String> externalIds);
 
-    /** Noticias importadas de una fuente que siguen sin imagen, de las más recientes a las más antiguas. */
-    @Query("select n from News n where n.source = :source and n.externalId is not null and n.imageUrl is null "
-            + "and n.sourceUrl is not null and n.createdAt >= :since order by n.createdAt desc")
-    List<News> findImportedWithoutImage(@Param("source") String source, @Param("since") LocalDateTime since,
-                                        Pageable pageable);
+    /** Noticias sin imagen pero con enlace a su fuente, de las más recientes a las más antiguas. */
+    @Query("select n from News n where n.imageUrl is null and n.sourceUrl is not null and n.createdAt >= :since "
+            + "order by n.createdAt desc")
+    List<News> findWithoutImage(@Param("since") LocalDateTime since, Pageable pageable);
 
     @Modifying
     @Query("update News n set n.imageUrl = :imageUrl where n.id = :id and n.imageUrl is null")
