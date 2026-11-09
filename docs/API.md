@@ -16,7 +16,7 @@ Comunidad tech para perfiles junior en español:
 - Identidad SOLO por JWT (`Authorization: Bearer <token>`). Se elimina por completo la cabecera `User-Id`.
 - Todo texto de usuario se guarda como **texto plano** y el frontend lo pinta como texto (React lo escapa). Prohibido `dangerouslySetInnerHTML`. Se elimina el saneador HTML del backend (codificaba entidades y rompía código tipo `C++ & Java`).
 - El frontend usa URLs relativas: `/api/...`, `/uploads/...`. En desarrollo Vite hace proxy a `http://localhost:8080`; en Docker, nginx hace proxy al backend (`BACKEND_URL`). `/sitemap.xml` y `/robots.txt` los sirve el backend y también pasan por el proxy.
-- Paginación 0-based con `page` (por defecto 0) y `size` (por defecto 12, máximo 50). Orden fijo: más reciente primero.
+- Paginación 0-based con `page` (por defecto 0) y `size` (por defecto 12, máximo 50). Orden fijo: más reciente primero. Excepción: las ofertas de empleo públicas se ordenan con las de España delante (`in_spain`, calculado con `SpainLocation` a partir de la ubicación) y, dentro de cada grupo, por fecha de publicación en la fuente (`publishedAt`), no por fecha de importación. En el panel de admin, las ofertas van por `publishedAt`.
 - URLs públicas con slug: `/noticias/{id}-{slug}`, `/empleo/{id}-{slug}`, `/foro/{id}-{slug}`. El backend devuelve `slug` en las respuestas; el frontend extrae el `id` de los dígitos iniciales y redirige al canónico si el slug no coincide.
 - Slug: minúsculas, sin acentos (Normalizer NFD), todo lo no alfanumérico pasa a `-`, sin guiones repetidos ni en los extremos, máximo 80 caracteres; si queda vacío, `"sin-titulo"`.
 

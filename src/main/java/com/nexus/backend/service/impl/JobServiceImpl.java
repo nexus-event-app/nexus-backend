@@ -71,7 +71,7 @@ public class JobServiceImpl implements JobService {
                                                 String text, int page, int size) {
         Page<JobOffer> result = jobOfferRepository.findAll(
                 JobSpecifications.filter(level, workMode, contractType, text),
-                Pagination.newestFirst(page, size));
+                Pagination.newestPublishedFirst(page, size));
         return PageResponse.from(result.map(jobMapper::toResponse));
     }
 
