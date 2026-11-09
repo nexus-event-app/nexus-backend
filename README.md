@@ -42,7 +42,13 @@ export ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='Cambiame123' # opcional
 ./mvnw spring-boot:run
 ```
 
-Con el perfil `dev` la base de datos es H2 en `./data/nexusdb` (no se versiona), la consola H2 está en `/h2-console` y se muestran las consultas SQL. La API queda en `http://localhost:8080`.
+Con el perfil `dev` la base de datos es H2 en `./data/nexusdb` (no se versiona) y la consola H2 está en `/h2-console`.
+
+Para que el arranque sea rápido y la terminal se lea bien, en desarrollo **no se imprimen las consultas SQL** y el nivel de log es `INFO`. Si necesitas depurar, arranca con `SHOW_SQL=true` (consultas SQL) o `LOG_LEVEL=DEBUG` (más detalle de la aplicación). Para arrancar sin compilar los tests, que no hacen falta para usar la web:
+
+```bash
+./mvnw spring-boot:run -Dmaven.test.skip=true
+``` La API queda en `http://localhost:8080`.
 
 Si ya tenías una base de datos H2 creada antes de introducir Flyway, bórrala (`rm -r data/`) antes de arrancar: Flyway necesita crear el esquema desde cero.
 
