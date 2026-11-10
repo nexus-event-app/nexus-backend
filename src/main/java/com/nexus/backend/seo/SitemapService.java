@@ -26,7 +26,8 @@ public class SitemapService {
     private static final int MAX_URLS_PER_TYPE = 5000;
     private static final String CACHE_KEY = "content";
     /** Páginas con la interfaz y el contenido traducidos: se publican en todos los idiomas con hreflang. */
-    private static final List<String> TRANSLATED_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios");
+    private static final List<String> TRANSLATED_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios",
+            "/sobre-el-proyecto");
     /** Páginas cuyo texto solo existe en castellano: una única URL, sin alternativas de idioma. */
     private static final List<String> SPANISH_ONLY_PATHS = List.of("/aviso-legal", "/privacidad", "/cookies");
 
