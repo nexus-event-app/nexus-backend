@@ -28,7 +28,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
-    private record Rule(String name, String path, int capacity, Duration period) {
+    private record Rule(String method, String name, String path, int capacity, Duration period) {
+
+        Rule(String name, String path, int capacity, Duration period) {
+            this("POST", name, path, capacity, period);
+        }
     }
 
     private static final List<Rule> RULES = List.of(
@@ -41,7 +45,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
             new Rule("discussion", "/api/discussions", 10, Duration.ofHours(1)),
             new Rule("comment", "/api/comments", 30, Duration.ofHours(1)),
             new Rule("testimonial", "/api/testimonials", 5, Duration.ofHours(1)),
-            new Rule("avatar", "/api/profile/avatar", 20, Duration.ofHours(1)));
+            new Rule("avatar", "/api/profile/avatar", 20, Duration.ofHours(1)),
+            // La búsqueda se lanza mientras se escribe: límite generoso, pero evita el raspado masivo.
+            new Rule("GET", "search", "/api/search", 120, Duration.ofMinutes(1)));
 
     private final ApiErrorWriter apiErrorWriter;
 
@@ -54,7 +60,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        Optional<Rule> rule = "POST".equals(request.getMethod()) ? findRule(request.getServletPath()) : Optional.empty();
+        Optional<Rule> rule = findRule(request.getMethod(), request.getServletPath());
         if (rule.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
@@ -74,8 +80,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 "error.tooManyRequests");
     }
 
-    private Optional<Rule> findRule(String path) {
-        return RULES.stream().filter(rule -> rule.path().equals(path)).findFirst();
+    private Optional<Rule> findRule(String method, String path) {
+        return RULES.stream().filter(rule -> rule.method().equals(method) && rule.path().equals(path)).findFirst();
     }
 
     private Bucket newBucket(Rule rule) {

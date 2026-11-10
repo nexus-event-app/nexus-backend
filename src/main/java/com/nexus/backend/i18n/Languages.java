@@ -31,7 +31,8 @@ public final class Languages {
             Map.entry("recuperar-contrasena", Map.of("ca", "recupera-contrasenya", "en", "forgot-password")),
             Map.entry("restablecer-contrasena", Map.of("ca", "restableix-contrasenya", "en", "reset-password")),
             Map.entry("verificar-email", Map.of("ca", "verifica-correu", "en", "verify-email")),
-            Map.entry("perfil", Map.of("ca", "perfil", "en", "profile")));
+            Map.entry("perfil", Map.of("ca", "perfil", "en", "profile")),
+            Map.entry("buscar", Map.of("ca", "cerca", "en", "search")));
 
     private Languages() {
     }
