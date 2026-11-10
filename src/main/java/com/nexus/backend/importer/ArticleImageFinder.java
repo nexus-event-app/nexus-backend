@@ -21,7 +21,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ArticleImageFinder {
 
-    static final int MAX_URL_LENGTH = 500;
     private static final List<String> SELECTORS = List.of(
             "meta[property=og:image:secure_url]",
             "meta[property=og:image]",
@@ -67,7 +66,7 @@ public class ArticleImageFinder {
     private static Optional<String> absolute(String pageUrl, String value) {
         try {
             String url = URI.create(pageUrl).resolve(value.replace(" ", "%20")).toString();
-            return url.startsWith("https://") && url.length() <= MAX_URL_LENGTH ? Optional.of(url) : Optional.empty();
+            return ImageUrlPolicy.isAcceptable(url) ? Optional.of(url) : Optional.empty();
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }

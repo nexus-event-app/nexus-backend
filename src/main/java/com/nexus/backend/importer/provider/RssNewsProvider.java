@@ -3,6 +3,7 @@ package com.nexus.backend.importer.provider;
 import com.nexus.backend.entity.ImportSource;
 import com.nexus.backend.enums.ImportSourceType;
 import com.nexus.backend.importer.FeedClient;
+import com.nexus.backend.importer.ImageUrlPolicy;
 import com.nexus.backend.importer.ImportException;
 import com.nexus.backend.util.HtmlText;
 import com.nexus.backend.util.TextUtil;
@@ -108,9 +109,9 @@ public class RssNewsProvider implements NewsFeedProvider {
         return Stream.concat(media, enclosures)
                 .filter(Objects::nonNull)
                 .map(String::trim)
-                .filter(url -> url.startsWith("https://") && url.length() <= 500)
+                .filter(ImageUrlPolicy::isAcceptable)
                 .findFirst()
-                .or(() -> HtmlText.firstImage(html).filter(url -> url.length() <= 500))
+                .or(() -> HtmlText.firstImage(html).filter(ImageUrlPolicy::isAcceptable))
                 .orElse(null);
     }
 

@@ -68,6 +68,7 @@ public class NewsImageBackfill {
 
     private boolean tryFill(News item) {
         return articleImageFinder.find(item.getSourceUrl())
+                .filter(ImageUrlPolicy::isAcceptable)
                 .map(url -> {
                     Integer updated = transactionTemplate.execute(status -> newsRepository.updateImageUrl(item.getId(), url));
                     return updated != null && updated > 0;

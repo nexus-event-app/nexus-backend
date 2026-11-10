@@ -181,7 +181,8 @@ public class ImportRunner {
         news.setTitle(TextUtil.truncate(item.title(), 200));
         news.setContent(item.summary().isEmpty() ? item.title() : item.summary());
         news.setSourceUrl(item.link());
-        news.setImageUrl(Boolean.FALSE.equals(source.getUseSourceImages()) ? null : item.imageUrl());
+        boolean useImage = !Boolean.FALSE.equals(source.getUseSourceImages()) && ImageUrlPolicy.isAcceptable(item.imageUrl());
+        news.setImageUrl(useImage ? item.imageUrl() : null);
         news.setAuthor(TextUtil.truncate(Optional.ofNullable(item.author()).orElse(source.getName()), 100));
         news.setCategory(Optional.ofNullable(source.getNewsCategory()).orElse(NewsCategory.GENERAL));
         news.setIsActive(Boolean.TRUE.equals(source.getAutoPublish()));
