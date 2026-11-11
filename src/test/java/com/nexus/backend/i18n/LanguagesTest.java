@@ -50,6 +50,7 @@ class LanguagesTest {
                 Map.entry("verificar-email", Map.of("ca", "verifica-correu", "en", "verify-email")),
                 Map.entry("perfil", Map.of("ca", "perfil", "en", "profile")),
                 Map.entry("buscar", Map.of("ca", "cerca", "en", "search")),
-                Map.entry("sobre-el-proyecto", Map.of("ca", "sobre-el-projecte", "en", "about"))));
+                Map.entry("sobre-el-proyecto", Map.of("ca", "sobre-el-projecte", "en", "about")),
+                Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications"))));
     }
 }
