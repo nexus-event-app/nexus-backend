@@ -4,10 +4,12 @@ import com.nexus.backend.dto.request.CreateDiscussionRequest;
 import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
 import com.nexus.backend.dto.response.PageResponse;
+import com.nexus.backend.entity.Comment;
 import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.DiscussionLike;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.enums.DiscussionCategory;
+import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.exception.UnauthorizedException;
@@ -22,6 +24,7 @@ import com.nexus.backend.repository.spec.DiscussionSpecifications;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.DiscussionService;
+import com.nexus.backend.service.NotificationService;
 import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +56,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final CommentLikeRepository commentLikeRepository;
     private final UserRepository userRepository;
     private final DiscussionMapper discussionMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -130,6 +134,49 @@ public class DiscussionServiceImpl implements DiscussionService {
         discussionLikeRepository.deleteAllByDiscussionId(id);
         discussionRepository.delete(discussion);
         log.info("Discusión id={} eliminada por usuario id={}", id, actor.getId());
+    }
+
+    @Override
+    @Transactional
+    public DiscussionResponse acceptAnswer(Long id, Long commentId, UserDetail actor) {
+        Discussion discussion = findActive(id);
+        assertIsAuthor(discussion, actor);
+        Comment comment = commentRepository.findById(commentId)
+                .filter(found -> found.getDiscussion().getId().equals(id))
+                .orElseThrow(() -> new BadRequestException("error.comment.notInDiscussion"));
+
+        if (!commentId.equals(discussion.getAcceptedCommentId())) {
+            if (discussion.getAcceptedCommentId() != null) {
+                notificationService.withdrawAcceptedAnswer(discussion.getAcceptedCommentId());
+            }
+            discussion.setAcceptedCommentId(commentId);
+            notificationService.notifyAcceptedAnswer(comment);
+            log.info("Discusión id={}: comentario id={} marcado como mejor respuesta", id, commentId);
+        }
+        return toResponse(discussion, isLiked(id, actor));
+    }
+
+    @Override
+    @Transactional
+    public DiscussionResponse clearAcceptedAnswer(Long id, UserDetail actor) {
+        Discussion discussion = findActive(id);
+        assertIsAuthor(discussion, actor);
+        if (discussion.getAcceptedCommentId() != null) {
+            notificationService.withdrawAcceptedAnswer(discussion.getAcceptedCommentId());
+            discussion.setAcceptedCommentId(null);
+        }
+        return toResponse(discussion, isLiked(id, actor));
+    }
+
+    /** La mejor respuesta la elige quien preguntó: ni otras personas ni el equipo de administración. */
+    private void assertIsAuthor(Discussion discussion, UserDetail actor) {
+        if (!discussion.getAuthor().getId().equals(actor.getId())) {
+            throw new ForbiddenOperationException("error.discussion.acceptForbidden");
+        }
+    }
+
+    private boolean isLiked(Long id, UserDetail actor) {
+        return discussionLikeRepository.findByDiscussionIdAndUserId(id, actor.getId()).isPresent();
     }
 
     @Override

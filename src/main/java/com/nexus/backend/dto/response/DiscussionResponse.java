@@ -25,6 +25,8 @@ public class DiscussionResponse {
     private Boolean isActive;
     private Integer commentCount;
     private Integer likesCount;
+    /** Comentario marcado como la mejor respuesta; null si la discusión aún no está resuelta. */
+    private Long acceptedCommentId;
     private Boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

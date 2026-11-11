@@ -25,6 +25,12 @@ public interface DiscussionService {
 
     void deleteDiscussion(Long id, UserDetail actor);
 
+    /** Marca un comentario como la mejor respuesta. Solo puede hacerlo quien abrió la discusión. */
+    DiscussionResponse acceptAnswer(Long id, Long commentId, UserDetail actor);
+
+    /** Quita la marca de mejor respuesta. */
+    DiscussionResponse clearAcceptedAnswer(Long id, UserDetail actor);
+
     DiscussionResponse toggleLike(Long id, UserDetail actor);
 
     /** Discusiones publicadas de un autor, para su perfil público. */

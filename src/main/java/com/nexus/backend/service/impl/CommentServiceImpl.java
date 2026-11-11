@@ -17,6 +17,7 @@ import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.CommentService;
+import com.nexus.backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ public class CommentServiceImpl implements CommentService {
     private final DiscussionRepository discussionRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -68,6 +70,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
 
         Comment saved = commentRepository.save(commentMapper.toEntity(request, discussion, author));
+        notificationService.notifyNewComment(saved);
         return commentMapper.toResponse(saved, 0, false);
     }
 
@@ -80,6 +83,11 @@ public class CommentServiceImpl implements CommentService {
             throw new ForbiddenOperationException("error.comment.deleteForbidden");
         }
 
+        // Si era la mejor respuesta, la discusión vuelve a quedar sin resolver (la base de datos también lo haría).
+        Discussion discussion = comment.getDiscussion();
+        if (id.equals(discussion.getAcceptedCommentId())) {
+            discussion.setAcceptedCommentId(null);
+        }
         commentLikeRepository.deleteAllByCommentId(id);
         commentRepository.delete(comment);
         log.info("Comentario id={} eliminado por usuario id={}", id, actor.getId());

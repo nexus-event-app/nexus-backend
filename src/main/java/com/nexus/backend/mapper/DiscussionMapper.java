@@ -42,6 +42,7 @@ public class DiscussionMapper {
                 .isActive(discussion.getIsActive())
                 .commentCount(commentCount)
                 .likesCount(likesCount)
+                .acceptedCommentId(discussion.getAcceptedCommentId())
                 .isLikedByCurrentUser(likedByCurrentUser)
                 .createdAt(discussion.getCreatedAt())
                 .updatedAt(discussion.getUpdatedAt())

@@ -1,5 +1,6 @@
 package com.nexus.backend.controller;
 
+import com.nexus.backend.dto.request.AcceptAnswerRequest;
 import com.nexus.backend.dto.request.CreateDiscussionRequest;
 import com.nexus.backend.dto.request.UpdateDiscussionRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
@@ -74,6 +75,21 @@ public class DiscussionController {
     public ResponseEntity<Void> deleteDiscussion(@PathVariable Long id, @AuthenticationPrincipal UserDetail principal) {
         discussionService.deleteDiscussion(id, principal);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/accepted-answer")
+    public ResponseEntity<DiscussionResponse> acceptAnswer(
+            @PathVariable Long id,
+            @Valid @RequestBody AcceptAnswerRequest request,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.acceptAnswer(id, request.commentId(), principal));
+    }
+
+    @DeleteMapping("/{id}/accepted-answer")
+    public ResponseEntity<DiscussionResponse> clearAcceptedAnswer(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(discussionService.clearAcceptedAnswer(id, principal));
     }
 
     @PostMapping("/{id}/like")
