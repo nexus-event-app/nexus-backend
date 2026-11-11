@@ -18,11 +18,16 @@ import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.CommentService;
 import com.nexus.backend.service.NotificationService;
+import com.nexus.backend.enums.ReportAction;
+import com.nexus.backend.enums.ReportStatus;
+import com.nexus.backend.enums.ReportTargetType;
+import com.nexus.backend.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
     private final NotificationService notificationService;
+    private final ReportRepository reportRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -88,6 +94,8 @@ public class CommentServiceImpl implements CommentService {
         if (id.equals(discussion.getAcceptedCommentId())) {
             discussion.setAcceptedCommentId(null);
         }
+        reportRepository.closePending(ReportTargetType.COMMENT, id, ReportStatus.RESOLVED, ReportAction.DELETE,
+                userRepository.getReferenceById(actor.getId()), LocalDateTime.now());
         commentLikeRepository.deleteAllByCommentId(id);
         commentRepository.delete(comment);
         log.info("Comentario id={} eliminado por usuario id={}", id, actor.getId());

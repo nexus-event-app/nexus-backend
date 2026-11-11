@@ -17,4 +17,6 @@ public class StatsResponse {
     private long discussions;
     private long comments;
     private long pendingTestimonials;
+    /** Reportes de la comunidad pendientes de revisar. */
+    private long pendingReports;
 }

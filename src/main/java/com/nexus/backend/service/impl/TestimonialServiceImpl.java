@@ -14,6 +14,10 @@ import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.TestimonialService;
+import com.nexus.backend.enums.ReportAction;
+import com.nexus.backend.enums.ReportStatus;
+import com.nexus.backend.enums.ReportTargetType;
+import com.nexus.backend.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ public class TestimonialServiceImpl implements TestimonialService {
 
     private final AccountService accountService;
     private final TestimonialRepository testimonialRepository;
+    private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final TestimonialMapper testimonialMapper;
 
@@ -93,6 +98,9 @@ public class TestimonialServiceImpl implements TestimonialService {
     @Transactional
     public void deleteTestimonial(Long id) {
         testimonialRepository.delete(findById(id));
+        // Sus reportes pendientes quedan resueltos: el testimonio ya no existe.
+        reportRepository.closePending(ReportTargetType.TESTIMONIAL, id, ReportStatus.RESOLVED, ReportAction.DELETE, null,
+                LocalDateTime.now());
     }
 
     private List<TestimonialResponse> findPublished(int limit) {

@@ -45,6 +45,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             new Rule("discussion", "/api/discussions", 10, Duration.ofHours(1)),
             new Rule("comment", "/api/comments", 30, Duration.ofHours(1)),
             new Rule("testimonial", "/api/testimonials", 5, Duration.ofHours(1)),
+            new Rule("report", "/api/reports", 20, Duration.ofHours(1)),
             new Rule("avatar", "/api/profile/avatar", 20, Duration.ofHours(1)),
             // La búsqueda se lanza mientras se escribe: límite generoso, pero evita el raspado masivo.
             new Rule("GET", "search", "/api/search", 120, Duration.ofMinutes(1)));

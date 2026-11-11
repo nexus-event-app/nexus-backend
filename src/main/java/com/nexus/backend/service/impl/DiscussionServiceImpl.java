@@ -26,6 +26,10 @@ import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.DiscussionService;
 import com.nexus.backend.service.NotificationService;
 import com.nexus.backend.util.Pagination;
+import com.nexus.backend.enums.ReportAction;
+import com.nexus.backend.enums.ReportStatus;
+import com.nexus.backend.enums.ReportTargetType;
+import com.nexus.backend.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +39,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +62,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final UserRepository userRepository;
     private final DiscussionMapper discussionMapper;
     private final NotificationService notificationService;
+    private final ReportRepository reportRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -129,6 +135,12 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = findById(id);
         assertCanManage(discussion, actor);
 
+        // Lo reportado deja de estar pendiente: se ha borrado.
+        User deletedBy = userRepository.getReferenceById(actor.getId());
+        LocalDateTime now = LocalDateTime.now();
+        reportRepository.closePendingCommentReportsOfDiscussion(id, deletedBy, now);
+        reportRepository.closePending(ReportTargetType.DISCUSSION, id, ReportStatus.RESOLVED, ReportAction.DELETE,
+                deletedBy, now);
         commentLikeRepository.deleteAllByDiscussionId(id);
         commentRepository.deleteAllByDiscussionId(id);
         discussionLikeRepository.deleteAllByDiscussionId(id);
