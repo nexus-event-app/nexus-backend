@@ -34,7 +34,20 @@ public final class Languages {
             Map.entry("perfil", Map.of("ca", "perfil", "en", "profile")),
             Map.entry("buscar", Map.of("ca", "cerca", "en", "search")),
             Map.entry("sobre-el-proyecto", Map.of("ca", "sobre-el-projecte", "en", "about")),
-            Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications")));
+            Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications")),
+            Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths")));
+
+    /**
+     * Subsecciones fijas que también se traducen (el resto de segundos segmentos son identificadores como
+     * «12-mi-duda»). Debe coincidir con ROUTE_SUBSEGMENTS de routeSegments.js; LanguagesTest lo comprueba.
+     */
+    static final Map<String, Map<String, Map<String, String>>> SUBSEGMENTS = Map.of(
+            "foro", Map.of("nueva", Map.of("ca", "nova", "en", "new")),
+            "empleo", Map.of("guardadas", Map.of("ca", "desades", "en", "saved")),
+            "perfil", Map.of("editar", Map.of("ca", "edita", "en", "edit")),
+            "rutas", Map.of(
+                    "datos", Map.of("ca", "dades", "en", "data"),
+                    "ia", Map.of("ca", "ia", "en", "ai")));
 
     private Languages() {
     }
@@ -58,11 +71,19 @@ public final class Languages {
         if (prefix.isEmpty()) {
             return internalPath;
         }
-        int end = internalPath.indexOf('/', 1);
-        String first = end == -1 ? internalPath.substring(1) : internalPath.substring(1, end);
-        String rest = end == -1 ? "" : internalPath.substring(end);
-        String translated = SEGMENTS.getOrDefault(first, Map.of()).getOrDefault(language, first);
-        return prefix + "/" + translated + rest;
+        String[] parts = internalPath.substring(1).split("/", 3);
+        String first = parts[0];
+        StringBuilder localized = new StringBuilder(prefix).append('/')
+                .append(SEGMENTS.getOrDefault(first, Map.of()).getOrDefault(language, first));
+        if (parts.length > 1) {
+            String second = parts[1];
+            localized.append('/').append(SUBSEGMENTS.getOrDefault(first, Map.of())
+                    .getOrDefault(second, Map.of()).getOrDefault(language, second));
+        }
+        if (parts.length > 2) {
+            localized.append('/').append(parts[2]);
+        }
+        return localized.toString();
     }
 
     private static String languageOf(Locale locale) {

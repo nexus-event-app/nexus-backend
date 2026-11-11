@@ -51,6 +51,24 @@ class LanguagesTest {
                 Map.entry("perfil", Map.of("ca", "perfil", "en", "profile")),
                 Map.entry("buscar", Map.of("ca", "cerca", "en", "search")),
                 Map.entry("sobre-el-proyecto", Map.of("ca", "sobre-el-projecte", "en", "about")),
-                Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications"))));
+                Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications")),
+                Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths"))));
+        assertThat(Languages.SUBSEGMENTS).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "foro", Map.of("nueva", Map.of("ca", "nova", "en", "new")),
+                "empleo", Map.of("guardadas", Map.of("ca", "desades", "en", "saved")),
+                "perfil", Map.of("editar", Map.of("ca", "edita", "en", "edit")),
+                "rutas", Map.of(
+                        "datos", Map.of("ca", "dades", "en", "data"),
+                        "ia", Map.of("ca", "ia", "en", "ai"))));
+    }
+
+    @Test
+    void localizesFixedSubsectionsButNotIdentifiers() {
+        assertThat(Languages.localizePath(EN, "/rutas/datos")).isEqualTo("/en/learning-paths/data");
+        assertThat(Languages.localizePath(CA, "/rutas/ia")).isEqualTo("/ca/rutes/ia");
+        assertThat(Languages.localizePath(EN, "/rutas/frontend")).isEqualTo("/en/learning-paths/frontend");
+        assertThat(Languages.localizePath(EN, "/empleo/guardadas")).isEqualTo("/en/jobs/saved");
+        assertThat(Languages.localizePath(EN, "/foro/12-nueva/extra")).isEqualTo("/en/forum/12-nueva/extra");
+        assertThat(Languages.localizePath(ES, "/rutas/datos")).isEqualTo("/rutas/datos");
     }
 }
