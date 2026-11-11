@@ -30,9 +30,7 @@ public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificat
     List<News> findWithoutImage(@Param("since") LocalDateTime since, Pageable pageable);
 
     /** Quita las imágenes de lo importado de una fuente (cuando se decide no usar sus imágenes). */
-    @Modifying
-    @Query("update News n set n.language = :language where n.source = :source and n.externalId is not null")
-    void updateImportedLanguage(@Param("source") String source, @Param("language") String language);
+    List<News> findBySourceAndExternalIdIsNotNull(String source);
 
     @Modifying
     @Query("update News n set n.imageUrl = null where n.source = :source and n.externalId is not null")

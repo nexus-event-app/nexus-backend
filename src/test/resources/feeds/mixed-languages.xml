@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Blog con artículos en dos idiomas</title>
+    <link>https://feeds.example.com/mixed</link>
+    <description>Ejemplo</description>
+    <item>
+      <title>What is Docker and why should you learn it?</title>
+      <link>https://feeds.example.com/mixed/docker</link>
+      <guid>mixed-docker</guid>
+      <description>A short guide for people who are starting their career in tech.</description>
+      <pubDate>Wed, 04 Nov 2026 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Cómo preparar tu primera entrevista técnica</title>
+      <link>https://feeds.example.com/mixed/entrevista</link>
+      <guid>mixed-entrevista</guid>
+      <description>Consejos para quien busca su primer empleo en el sector.</description>
+      <pubDate>Wed, 04 Nov 2026 09:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Kubernetes 1.31</title>
+      <link>https://feeds.example.com/mixed/kubernetes</link>
+      <guid>mixed-kubernetes</guid>
+      <description>Kubernetes 1.31</description>
+      <pubDate>Wed, 04 Nov 2026 08:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

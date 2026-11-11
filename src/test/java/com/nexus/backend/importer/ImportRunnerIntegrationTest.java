@@ -27,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -270,23 +272,47 @@ class ImportRunnerIntegrationTest {
     }
 
     @Test
-    void importedNewsTakeTheSourceLanguageAndCorrectingItUpdatesThem() throws Exception {
+    void eachImportedNewsTakesTheLanguageOfItsTextAndTheSourceOnlyDecidesWhenItIsUnclear() throws Exception {
+        // Fuente marcada en castellano que también publica en inglés: lo que pasaba con el filtro «En castellano».
+        ImportSource source = source("Blog mixto", ImportSourceType.RSS_NEWS, "https://feeds.example.com/mixed", false);
+        when(feedClient.get(eq(source.getUrl()), anyString()))
+                .thenReturn(ProvidersTestFixtures.bytes("mixed-languages.xml"));
+        importRunner.run(source);
+        assertThat(languagesByTitle()).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "What is Docker and why should you learn it?", "en",
+                "Cómo preparar tu primera entrevista técnica", "es",
+                "Kubernetes 1.31", "es"));
+
+        // Al marcar la fuente en inglés solo cambia la noticia cuyo texto no deja claro el idioma.
+        importSourceService.update(source.getId(), requestWithLanguage(source, "en"));
+        assertThat(languagesByTitle()).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "What is Docker and why should you learn it?", "en",
+                "Cómo preparar tu primera entrevista técnica", "es",
+                "Kubernetes 1.31", "en"));
+    }
+
+    @Test
+    void spanishArticlesFromASourceMarkedInEnglishStayInSpanish() throws Exception {
         ImportSource source = source("Blog en inglés", ImportSourceType.RSS_NEWS, "https://feeds.example.com/en", false);
         source.setLanguage("en");
         sourceRepository.save(source);
         when(feedClient.get(eq(source.getUrl()), anyString())).thenReturn(ProvidersTestFixtures.bytes("freecodecamp.xml"));
         importRunner.run(source);
-        assertThat(newsRepository.findAll()).isNotEmpty().extracting(News::getLanguage).containsOnly("en");
+        assertThat(newsRepository.findAll()).isNotEmpty().extracting(News::getLanguage).containsOnly("es");
+    }
 
-        // En realidad publicaba en castellano: al corregir la fuente se corrigen también sus noticias.
+    private Map<String, String> languagesByTitle() {
+        return newsRepository.findAll().stream().collect(Collectors.toMap(News::getTitle, News::getLanguage));
+    }
+
+    private ImportSourceRequest requestWithLanguage(ImportSource source, String language) {
         ImportSourceRequest request = new ImportSourceRequest();
         request.setName(source.getName());
         request.setType(source.getType());
         request.setUrl(source.getUrl());
         request.setNewsCategory(source.getNewsCategory());
-        request.setLanguage("es");
-        importSourceService.update(source.getId(), request);
-        assertThat(newsRepository.findAll()).extracting(News::getLanguage).containsOnly("es");
+        request.setLanguage(language);
+        return request;
     }
 
     @Test

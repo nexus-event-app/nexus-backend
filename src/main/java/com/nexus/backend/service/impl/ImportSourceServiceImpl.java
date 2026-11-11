@@ -16,6 +16,7 @@ import com.nexus.backend.mapper.ImportSourceMapper;
 import com.nexus.backend.repository.ImportSourceRepository;
 import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.service.ImportSourceService;
+import com.nexus.backend.util.LanguageDetector;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,9 +72,11 @@ public class ImportSourceServiceImpl implements ImportSourceService {
         if (stopUsingImages) {
             newsRepository.clearImportedImages(saved.getName());
         }
-        // Si se corrige el idioma de la fuente, sus noticias ya importadas pasan a tenerlo también.
+        // Si se corrige el idioma de la fuente, sus noticias ya importadas lo toman cuando su propio texto no deja claro
+        // en qué idioma están (el idioma de cada noticia se detecta por su texto al importarla).
         if (!saved.getLanguage().equals(previousLanguage)) {
-            newsRepository.updateImportedLanguage(previousName, saved.getLanguage());
+            newsRepository.findBySourceAndExternalIdIsNotNull(previousName).forEach(news -> news.setLanguage(
+                    LanguageDetector.detectOr(news.getTitle() + ". " + news.getContent(), saved.getLanguage())));
         }
         return toResponse(saved);
     }

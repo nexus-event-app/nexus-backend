@@ -15,7 +15,7 @@ import com.nexus.backend.repository.ImportSourceRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.util.HtmlText;
-import com.nexus.backend.util.ContentLanguage;
+import com.nexus.backend.util.LanguageDetector;
 import com.nexus.backend.util.TextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -182,7 +182,8 @@ public class ImportRunner {
         news.setTitle(TextUtil.truncate(item.title(), 200));
         news.setContent(item.summary().isEmpty() ? item.title() : item.summary());
         news.setSourceUrl(item.link());
-        news.setLanguage(ContentLanguage.orDefault(source.getLanguage()));
+        // Cada noticia lleva el idioma de su texto: una fuente puede mezclar artículos en castellano y en inglés.
+        news.setLanguage(LanguageDetector.detectOr(news.getTitle() + ". " + news.getContent(), source.getLanguage()));
         boolean useImage = !Boolean.FALSE.equals(source.getUseSourceImages()) && ImageUrlPolicy.isAcceptable(item.imageUrl());
         news.setImageUrl(useImage ? item.imageUrl() : null);
         news.setAuthor(TextUtil.truncate(Optional.ofNullable(item.author()).orElse(source.getName()), 100));
