@@ -4,6 +4,7 @@ import com.nexus.backend.dto.request.ImportSourceRequest;
 import com.nexus.backend.dto.response.ImportSourceResponse;
 import com.nexus.backend.entity.ImportSource;
 import com.nexus.backend.enums.NewsCategory;
+import com.nexus.backend.util.ContentLanguage;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +25,7 @@ public class ImportSourceMapper {
         source.setAutoPublish(!Boolean.FALSE.equals(request.getAutoPublish()));
         source.setActive(!Boolean.FALSE.equals(request.getActive()));
         source.setRemoteOnly(!news && Boolean.TRUE.equals(request.getRemoteOnly()));
+        source.setLanguage(ContentLanguage.orDefault(request.getLanguage()));
         source.setKeywords(request.getKeywords());
         source.setExcludeKeywords(request.getExcludeKeywords());
         source.setUseSourceImages(!Boolean.FALSE.equals(request.getUseSourceImages()));
@@ -38,6 +40,7 @@ public class ImportSourceMapper {
                 .type(source.getType())
                 .url(source.getUrl())
                 .newsCategory(source.getNewsCategory())
+                .language(source.getLanguage())
                 .autoPublish(source.getAutoPublish())
                 .active(source.getActive())
                 .remoteOnly(source.getRemoteOnly())

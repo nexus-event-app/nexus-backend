@@ -5,6 +5,7 @@ import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.dto.response.NewsResponse;
 import com.nexus.backend.entity.News;
 import com.nexus.backend.enums.NewsCategory;
+import com.nexus.backend.util.ContentLanguage;
 import com.nexus.backend.util.SlugUtil;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,7 @@ public class NewsMapper {
                 .author(news.getAuthor())
                 .category(news.getCategory())
                 .source(news.getSource())
+                .language(news.getLanguage())
                 .imported(news.getExternalId() != null)
                 .isActive(news.getIsActive())
                 .createdAt(news.getCreatedAt())
@@ -50,5 +52,6 @@ public class NewsMapper {
         news.setImageUrl(request.getImageUrl());
         news.setAuthor(request.getAuthor());
         news.setCategory(request.getCategory() != null ? request.getCategory() : NewsCategory.GENERAL);
+        news.setLanguage(ContentLanguage.orDefault(request.getLanguage()));
     }
 }

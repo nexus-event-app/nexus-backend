@@ -269,6 +269,54 @@ class ImportRunnerIntegrationTest {
         assertThat(updated.getLastMessage()).contains("503");
     }
 
+    @Test
+    void importedNewsTakeTheSourceLanguageAndCorrectingItUpdatesThem() throws Exception {
+        ImportSource source = source("Blog en inglés", ImportSourceType.RSS_NEWS, "https://feeds.example.com/en", false);
+        source.setLanguage("en");
+        sourceRepository.save(source);
+        when(feedClient.get(eq(source.getUrl()), anyString())).thenReturn(ProvidersTestFixtures.bytes("freecodecamp.xml"));
+        importRunner.run(source);
+        assertThat(newsRepository.findAll()).isNotEmpty().extracting(News::getLanguage).containsOnly("en");
+
+        // En realidad publicaba en castellano: al corregir la fuente se corrigen también sus noticias.
+        ImportSourceRequest request = new ImportSourceRequest();
+        request.setName(source.getName());
+        request.setType(source.getType());
+        request.setUrl(source.getUrl());
+        request.setNewsCategory(source.getNewsCategory());
+        request.setLanguage("es");
+        importSourceService.update(source.getId(), request);
+        assertThat(newsRepository.findAll()).extracting(News::getLanguage).containsOnly("es");
+    }
+
+    @Test
+    void theHomePagePrefersSpanishNewsAndTheListCanBeFilteredByLanguage() {
+        News oldSpanish = news("Noticia en castellano", "es");
+        News newEnglish = news("News in English", "en");
+        News newestEnglish = news("Latest news in English", "en");
+
+        assertThat(newsService.getLatestNews(2)).extracting("title")
+                .containsExactly(oldSpanish.getTitle(), newestEnglish.getTitle());
+        assertThat(newsService.getLatestNews(3)).extracting("title")
+                .containsExactly(oldSpanish.getTitle(), newestEnglish.getTitle(), newEnglish.getTitle());
+        assertThat(newsService.getPublicNews(null, null, "es", 0, 10).getContent()).extracting("title")
+                .containsExactly(oldSpanish.getTitle());
+        assertThat(newsService.getPublicNews(null, null, "en", 0, 10).getContent()).hasSize(2)
+                .extracting("language").containsOnly("en");
+        // Un idioma desconocido no filtra.
+        assertThat(newsService.getPublicNews(null, null, "fr", 0, 10).getContent()).hasSize(3);
+    }
+
+    private News news(String title, String language) {
+        News news = new News();
+        news.setTitle(title);
+        news.setContent("Contenido de " + title);
+        news.setCategory(NewsCategory.GENERAL);
+        news.setIsActive(true);
+        news.setLanguage(language);
+        return newsRepository.saveAndFlush(news);
+    }
+
     private ImportSource source(String name, ImportSourceType type, String url, boolean remoteOnly) {
         ImportSource source = new ImportSource();
         source.setName(name);

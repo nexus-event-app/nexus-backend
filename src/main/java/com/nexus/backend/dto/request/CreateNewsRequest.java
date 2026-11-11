@@ -1,5 +1,7 @@
 package com.nexus.backend.dto.request;
 
+import com.nexus.backend.util.ContentLanguage;
+
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.util.TextUtil;
 import jakarta.validation.constraints.NotBlank;
@@ -35,6 +37,10 @@ public class CreateNewsRequest {
     private String author;
 
     private NewsCategory category = NewsCategory.GENERAL;
+
+    /** Idioma del contenido: «es» (por defecto) o «en». */
+    @Pattern(regexp = ContentLanguage.PATTERN, message = "{validation.language.pattern}")
+    private String language;
 
     public void setTitle(String title) {
         this.title = TextUtil.cleanLine(title);

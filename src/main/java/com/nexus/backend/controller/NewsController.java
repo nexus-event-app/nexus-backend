@@ -27,8 +27,9 @@ public class NewsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "" + Pagination.DEFAULT_SIZE) int size,
             @RequestParam(required = false) NewsCategory category,
-            @RequestParam(required = false) String q) {
-        return ResponseEntity.ok(newsService.getPublicNews(category, q, page, size));
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String language) {
+        return ResponseEntity.ok(newsService.getPublicNews(category, q, language, page, size));
     }
 
     @GetMapping("/latest")

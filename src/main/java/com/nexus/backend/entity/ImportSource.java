@@ -66,6 +66,10 @@ public class ImportSource {
      * Palabras clave separadas por comas. Si hay alguna, solo se importa lo que contenga al menos una
      * en el título o el resumen (útil para feeds generalistas).
      */
+    /** Idioma en que publica la fuente: lo heredan sus noticias («es» o «en»). */
+    @Column(name = "language", nullable = false, length = 5)
+    private String language = "es";
+
     @Column(length = 500)
     private String keywords;
 

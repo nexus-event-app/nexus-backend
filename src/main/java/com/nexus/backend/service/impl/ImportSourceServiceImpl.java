@@ -64,10 +64,16 @@ public class ImportSourceServiceImpl implements ImportSourceService {
         }
         boolean stopUsingImages = !Boolean.FALSE.equals(source.getUseSourceImages())
                 && Boolean.FALSE.equals(request.getUseSourceImages());
+        String previousName = source.getName();
+        String previousLanguage = source.getLanguage();
         sourceMapper.updateEntity(source, request);
         ImportSource saved = sourceRepository.save(source);
         if (stopUsingImages) {
             newsRepository.clearImportedImages(saved.getName());
+        }
+        // Si se corrige el idioma de la fuente, sus noticias ya importadas pasan a tenerlo también.
+        if (!saved.getLanguage().equals(previousLanguage)) {
+            newsRepository.updateImportedLanguage(previousName, saved.getLanguage());
         }
         return toResponse(saved);
     }

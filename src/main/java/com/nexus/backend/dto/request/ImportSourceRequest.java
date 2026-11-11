@@ -1,5 +1,7 @@
 package com.nexus.backend.dto.request;
 
+import com.nexus.backend.util.ContentLanguage;
+
 import com.nexus.backend.enums.ImportSourceType;
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.util.TextUtil;
@@ -31,6 +33,10 @@ public class ImportSourceRequest {
     private String url;
 
     private NewsCategory newsCategory;
+
+    /** Idioma del contenido: «es» (por defecto) o «en». */
+    @Pattern(regexp = ContentLanguage.PATTERN, message = "{validation.language.pattern}")
+    private String language;
 
     private Boolean autoPublish = true;
 

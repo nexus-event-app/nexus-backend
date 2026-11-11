@@ -28,6 +28,15 @@ public final class DefaultImportSources {
             + "casino, préstamo, préstamos, hipoteca, criptomoneda, criptomonedas, bitcoin, NFT, aerolínea, "
             + "Palantir, Bezos, Elon Musk, Trump, elecciones, partido político, sindicatos, atraco, robo";
 
+    /** Fuentes en castellano añadidas para que haya noticias en español a diario (también en V14). */
+    static final String PARADIGMA_URL = "https://www.paradigmadigital.com/feed/";
+    static final String WELIVESECURITY_URL = "https://www.welivesecurity.com/es/rss/feed/";
+    static final String HIPERTEXTUAL_URL = "https://hipertextual.com/feed";
+
+    /** Ofertas y compras: abundan en los medios generalistas y no aportan a una comunidad junior. */
+    public static final String SHOPPING_EXCLUDED = "chollo, chollos, oferta, ofertas, descuento, rebaja, rebajas, "
+            + "Black Friday, Prime Day, precio mínimo, cupón";
+
     private DefaultImportSources() {
     }
 
@@ -36,8 +45,12 @@ public final class DefaultImportSources {
                 news("freeCodeCamp en español", "https://www.freecodecamp.org/espanol/news/rss/", NewsCategory.RECURSOS, true),
                 filtered(news("Genbeta", "https://www.genbeta.com/feedburner.xml", NewsCategory.GENERAL, true),
                         GENBETA_KEYWORDS, GENBETA_EXCLUDED),
-                inactive(withoutSourceImages(news("DEV Community · #beginners", "https://dev.to/feed/tag/beginners",
-                        NewsCategory.DESARROLLO, false))),
+                news("Paradigma Digital", PARADIGMA_URL, NewsCategory.DESARROLLO, true),
+                news("WeLiveSecurity en español", WELIVESECURITY_URL, NewsCategory.GENERAL, true),
+                filtered(news("Hipertextual", HIPERTEXTUAL_URL, NewsCategory.GENERAL, true),
+                        GENBETA_KEYWORDS, GENBETA_EXCLUDED + ", " + SHOPPING_EXCLUDED),
+                english(inactive(withoutSourceImages(news("DEV Community · #beginners", "https://dev.to/feed/tag/beginners",
+                        NewsCategory.DESARROLLO, false)))),
                 jobs("Get on Board · Programación", ImportSourceType.GETONBRD_JOBS,
                         "https://www.getonbrd.com/api/v0/categories/programming/jobs?per_page=100", false),
                 jobs("Get on Board · DevOps y QA", ImportSourceType.GETONBRD_JOBS,
@@ -57,6 +70,12 @@ public final class DefaultImportSources {
         source.setNewsCategory(category);
         source.setAutoPublish(autoPublish);
         source.setIntervalMinutes(180);
+        return source;
+    }
+
+    /** Fuente que publica en inglés: sus noticias se marcan como tales en la web. */
+    private static ImportSource english(ImportSource source) {
+        source.setLanguage("en");
         return source;
     }
 

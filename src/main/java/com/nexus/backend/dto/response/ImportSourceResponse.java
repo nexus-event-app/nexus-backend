@@ -21,6 +21,7 @@ public class ImportSourceResponse {
     private ImportSourceType type;
     private String url;
     private NewsCategory newsCategory;
+    private String language;
     private Boolean autoPublish;
     private Boolean active;
     private Boolean remoteOnly;

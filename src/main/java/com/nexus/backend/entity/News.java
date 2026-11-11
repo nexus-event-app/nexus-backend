@@ -59,6 +59,10 @@ public class News {
     private Boolean isActive = true;
 
     /** Origen de la noticia cuando se importa automáticamente (null para noticias manuales). */
+    /** Idioma del texto: «es» o «en» (ContentLanguage). */
+    @Column(name = "language", nullable = false, length = 5)
+    private String language = "es";
+
     @Column(name = "source", length = 100)
     private String source;
 

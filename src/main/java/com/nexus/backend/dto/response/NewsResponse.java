@@ -24,6 +24,8 @@ public class NewsResponse {
     private NewsCategory category;
     /** Nombre de la fuente si la noticia se importó automáticamente. */
     private String source;
+    /** Idioma del texto: «es» o «en». */
+    private String language;
     /** true si se importó de una fuente externa (solo resumen; no se indexa). */
     private Boolean imported;
     private Boolean isActive;
