@@ -19,11 +19,9 @@ import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -58,20 +56,14 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional(readOnly = true)
     public List<NewsResponse> getLatestNews(int limit) {
-        // La portada da prioridad al castellano: solo si no hay bastantes se completa con las de otros idiomas.
-        Pageable latest = Pagination.latest(limit);
-        List<News> spanish = newsRepository.findAll(
-                NewsSpecifications.isActive().and(NewsSpecifications.inLanguage(ContentLanguage.SPANISH)), latest)
-                .getContent();
-        List<News> result = new ArrayList<>(spanish);
-        if (result.size() < latest.getPageSize()) {
-            newsRepository.findAll(NewsSpecifications.isActive()
-                                    .and(Specification.not(NewsSpecifications.inLanguage(ContentLanguage.SPANISH))),
-                            Pagination.latest(latest.getPageSize() - result.size()))
-                    .getContent()
-                    .forEach(result::add);
-        }
-        return result.stream().map(newsMapper::toResponse).toList();
+        // La portada solo enseña noticias en castellano, aunque haya menos de las pedidas: las de otros idiomas están en
+        // la página de noticias, con su filtro de idioma.
+        return newsRepository.findAll(
+                        NewsSpecifications.isActive().and(NewsSpecifications.inLanguage(ContentLanguage.SPANISH)),
+                        Pagination.latest(limit))
+                .getContent().stream()
+                .map(newsMapper::toResponse)
+                .toList();
     }
 
     @Override

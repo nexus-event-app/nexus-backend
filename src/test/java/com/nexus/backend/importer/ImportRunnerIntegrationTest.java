@@ -316,21 +316,22 @@ class ImportRunnerIntegrationTest {
     }
 
     @Test
-    void theHomePagePrefersSpanishNewsAndTheListCanBeFilteredByLanguage() {
+    void theHomePageOnlyShowsSpanishNewsAndTheListCanBeFilteredByLanguage() {
         News oldSpanish = news("Noticia en castellano", "es");
-        News newEnglish = news("News in English", "en");
-        News newestEnglish = news("Latest news in English", "en");
+        news("News in English", "en");
+        news("Latest news in English", "en");
+        News newestSpanish = news("Última noticia en castellano", "es");
 
-        assertThat(newsService.getLatestNews(2)).extracting("title")
-                .containsExactly(oldSpanish.getTitle(), newestEnglish.getTitle());
+        // Solo castellano, aunque haya menos de las pedidas y las de inglés sean más recientes.
         assertThat(newsService.getLatestNews(3)).extracting("title")
-                .containsExactly(oldSpanish.getTitle(), newestEnglish.getTitle(), newEnglish.getTitle());
+                .containsExactly(newestSpanish.getTitle(), oldSpanish.getTitle());
+        assertThat(newsService.getLatestNews(1)).extracting("title").containsExactly(newestSpanish.getTitle());
         assertThat(newsService.getPublicNews(null, null, "es", 0, 10).getContent()).extracting("title")
-                .containsExactly(oldSpanish.getTitle());
+                .containsExactlyInAnyOrder(oldSpanish.getTitle(), newestSpanish.getTitle());
         assertThat(newsService.getPublicNews(null, null, "en", 0, 10).getContent()).hasSize(2)
                 .extracting("language").containsOnly("en");
         // Un idioma desconocido no filtra.
-        assertThat(newsService.getPublicNews(null, null, "fr", 0, 10).getContent()).hasSize(3);
+        assertThat(newsService.getPublicNews(null, null, "fr", 0, 10).getContent()).hasSize(4);
     }
 
     private News news(String title, String language) {
