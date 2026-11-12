@@ -31,6 +31,32 @@ public final class LanguageDetector {
             "into", "new", "not", "but", "if", "than", "more", "just", "has", "have", "do", "does", "get", "using",
             "use", "my", "i", "all", "out", "up", "so", "there", "here", "after", "before", "first");
 
+    /**
+     * Palabras que delatan otros idiomas que aparecen a veces en fuentes internacionales (DEV Community publica también
+     * en danés, alemán, portugués...). No se muestran: la web solo marca y filtra castellano e inglés. Se quitan las que
+     * también son castellanas o inglesas («le», «una», «men»...) para no confundirlas.
+     */
+    private static final Set<String> OTHER = Set.of(
+            // Alemán
+            "der", "die", "das", "und", "ist", "nicht", "mit", "ein", "eine", "ich", "sie", "auf", "fur", "auch", "wie",
+            "wir", "zu", "dem", "von", "sich", "oder", "aber", "wenn", "mehr", "nach", "uber", "bei", "sind", "wird",
+            // Francés
+            "des", "est", "une", "pour", "dans", "qui", "pas", "sur", "avec", "ce", "ces", "sont", "mais", "nous",
+            "vous", "il", "elle", "du", "aux", "ou", "plus", "tout", "comme", "cette", "faire", "leur", "votre", "vos",
+            "notre", "comment", "peut", "etre", "aussi", "chez", "tres",
+            // Portugués
+            "nao", "em", "da", "dos", "voce", "ao", "sao", "isso", "pelo", "pela", "seu",
+            "sua", "foi", "tem", "um", "uma", "quem", "muito", "ela", "ele", "entao", "voces",
+            // Italiano
+            "della", "che", "sono", "per", "non", "gli", "nel", "alla", "delle", "questo", "anche", "piu", "essere",
+            // Neerlandés
+            "het", "een", "van", "niet", "dat", "zijn", "voor", "met", "op", "ook", "wat", "je", "ik", "maar", "naar",
+            "bij", "worden",
+            // Danés, noruego y sueco
+            "og", "et", "er", "ikke", "det", "jeg", "til", "af", "pa", "som", "med", "har", "kan", "den", "att",
+            "och", "inte", "ar", "jag", "om", "hvad", "hvordan", "eller", "nar", "blive", "bliver", "efter", "sig",
+            "ogsa", "hvis", "noget", "kun");
+
     /** Ventaja mínima, en palabras, para decidir; con menos no se arriesga y se usa el idioma por defecto. */
     private static final int MIN_MARGIN = 2;
 
@@ -40,14 +66,34 @@ public final class LanguageDetector {
     private LanguageDetector() {
     }
 
-    /** {@code "es"} o {@code "en"} si el texto lo deja claro; vacío si no hay pistas suficientes. */
+    /** {@code "es"} o {@code "en"} si el texto lo deja claro; vacío si no hay pistas suficientes o es otro idioma. */
     public static Optional<String> detect(String text) {
-        if (text == null || text.isBlank()) {
+        Scores scores = score(text);
+        if (scores.isOther()) {
             return Optional.empty();
+        }
+        if (scores.spanish() - scores.english() >= MIN_MARGIN) {
+            return Optional.of(ContentLanguage.SPANISH);
+        }
+        if (scores.english() - scores.spanish() >= MIN_MARGIN) {
+            return Optional.of(ContentLanguage.ENGLISH);
+        }
+        return Optional.empty();
+    }
+
+    /** Si el texto está claramente en otro idioma (ni castellano ni inglés): esas noticias no se importan. */
+    public static boolean isOtherLanguage(String text) {
+        return score(text).isOther();
+    }
+
+    private static Scores score(String text) {
+        if (text == null || text.isBlank()) {
+            return new Scores(0, 0, 0);
         }
         // La «ñ» y los signos de apertura solo existen en castellano: valen más que cualquier palabra suelta.
         int spanish = countSpanishMarks(text);
         int english = 0;
+        int other = 0;
         String plain = MARKS.matcher(Normalizer.normalize(text.toLowerCase(Locale.ROOT), Normalizer.Form.NFD))
                 .replaceAll("");
         for (String word : NON_LETTERS.split(plain)) {
@@ -57,14 +103,17 @@ public final class LanguageDetector {
             if (ENGLISH.contains(word)) {
                 english++;
             }
+            if (OTHER.contains(word)) {
+                other++;
+            }
         }
-        if (spanish - english >= MIN_MARGIN) {
-            return Optional.of(ContentLanguage.SPANISH);
+        return new Scores(spanish, english, other);
+    }
+
+    private record Scores(int spanish, int english, int other) {
+        boolean isOther() {
+            return other - Math.max(spanish, english) >= MIN_MARGIN;
         }
-        if (english - spanish >= MIN_MARGIN) {
-            return Optional.of(ContentLanguage.ENGLISH);
-        }
-        return Optional.empty();
     }
 
     /** Idioma detectado o, si el texto no lo deja claro, el indicado (el de la fuente o el elegido al publicar). */

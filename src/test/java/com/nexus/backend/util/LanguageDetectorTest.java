@@ -38,6 +38,31 @@ class LanguageDetectorTest {
         assertThat(LanguageDetector.detect(text)).isEmpty();
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+            // El caso real: un artículo en danés de DEV Community, fuente marcada en inglés.
+            "Byg en enkel trælog med JavaScript og CSV. Et gammelt træ i haven kan ændre sig over tid. En gren bliver "
+                    + "beskadiget. Efter en storm opdager man måske noget, der ikke var der sidste år. Men hvordan",
+            "Wie man eine REST-API mit Spring Boot baut und warum das für Anfänger wichtig ist",
+            "Como criar sua primeira API com Node.js: um guia para quem não tem experiência",
+            "Comment créer votre premier site avec React : un guide pour les débutants qui veulent apprendre",
+            "Hoe je een eenvoudige website bouwt met HTML en CSS, ook als je net begint"})
+    void recognizesOtherLanguages(String text) {
+        assertThat(LanguageDetector.isOtherLanguage(text)).as(text).isTrue();
+        assertThat(LanguageDetector.detect(text)).as(text).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Cómo preparar tu primera entrevista técnica. Consejos para quien busca su primer empleo en el sector.",
+            "How to prepare for your first technical interview. Tips for people looking for their first job.",
+            "Why you should stop using var in JavaScript and what to do instead",
+            "Kubernetes 1.31 release notes: sidecar containers, AppArmor support and nftables for kube-proxy",
+            "Kubernetes 1.31"})
+    void doesNotTreatSpanishOrEnglishAsAnotherLanguage(String text) {
+        assertThat(LanguageDetector.isOtherLanguage(text)).as(text).isFalse();
+    }
+
     @Test
     void fallsBackToTheGivenLanguageWhenUndecided() {
         assertThat(LanguageDetector.detectOr("Kubernetes 1.31", "en")).isEqualTo("en");

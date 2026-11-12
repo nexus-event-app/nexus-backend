@@ -114,6 +114,8 @@ public class ImportRunner {
                 .filter(item -> !excluded.matches(item.title() + " " + item.summary()))
                 .filter(item -> item.publishedAt() == null || item.publishedAt().isAfter(oldest))
                 .filter(item -> item.link().length() <= 500)
+                // La web solo marca y filtra castellano e inglés: lo escrito en otro idioma se descarta.
+                .filter(item -> !LanguageDetector.isOtherLanguage(item.title() + ". " + item.summary()))
                 .sorted(Comparator.comparing(ImportedNews::publishedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
         List<ImportedNews> fresh = withoutKnown(candidates, ImportedNews::externalId,
