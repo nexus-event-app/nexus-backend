@@ -1,6 +1,8 @@
 package com.nexus.backend.importer;
 
+import com.nexus.backend.dto.request.CreateNewsRequest;
 import com.nexus.backend.dto.request.ImportSourceRequest;
+import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.entity.ImportSource;
 import com.nexus.backend.entity.JobOffer;
 import com.nexus.backend.entity.News;
@@ -313,6 +315,42 @@ class ImportRunnerIntegrationTest {
         request.setNewsCategory(source.getNewsCategory());
         request.setLanguage(language);
         return request;
+    }
+
+    @Test
+    void publishingAnImportedNewsFromThePanelKeepsItsLanguage() {
+        // Así llegaba el fallo: «Publicar» enviaba la noticia sin idioma y el servidor la pasaba a castellano.
+        News english = news("What is Docker and why should you learn it?", "en");
+        english.setExternalId("dev-1");
+        english.setIsActive(false);
+        newsRepository.saveAndFlush(english);
+
+        UpdateNewsRequest publish = new UpdateNewsRequest();
+        publish.setTitle(english.getTitle());
+        publish.setContent(english.getContent());
+        publish.setImageUrl("https://example.com/portada.png");
+        publish.setCategory(NewsCategory.GENERAL);
+        publish.setIsActive(true);
+        newsService.updateNews(english.getId(), publish);
+
+        assertThat(newsRepository.findById(english.getId()).orElseThrow())
+                .extracting(News::getLanguage, News::getIsActive).containsExactly("en", true);
+        assertThat(newsService.getPublicNews(null, null, "es", 0, 10).getContent()).isEmpty();
+        assertThat(newsService.getLatestNews(3)).isEmpty();
+    }
+
+    @Test
+    void aNewsCreatedWithoutLanguageTakesTheLanguageOfItsText() {
+        CreateNewsRequest request = new CreateNewsRequest();
+        request.setTitle("How to prepare for your first technical interview");
+        request.setContent("Tips for people who are looking for their first job in tech.");
+        request.setImageUrl("https://example.com/portada.png");
+        request.setCategory(NewsCategory.GENERAL);
+        assertThat(newsService.createNews(request).getLanguage()).isEqualTo("en");
+
+        request.setTitle("Cómo preparar tu primera entrevista técnica");
+        request.setContent("Consejos para quien busca su primer empleo en el sector.");
+        assertThat(newsService.createNews(request).getLanguage()).isEqualTo("es");
     }
 
     @Test

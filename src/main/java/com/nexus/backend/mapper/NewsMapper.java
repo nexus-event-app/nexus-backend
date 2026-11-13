@@ -6,6 +6,7 @@ import com.nexus.backend.dto.response.NewsResponse;
 import com.nexus.backend.entity.News;
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.util.ContentLanguage;
+import com.nexus.backend.util.LanguageDetector;
 import com.nexus.backend.util.SlugUtil;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +53,14 @@ public class NewsMapper {
         news.setImageUrl(request.getImageUrl());
         news.setAuthor(request.getAuthor());
         news.setCategory(request.getCategory() != null ? request.getCategory() : NewsCategory.GENERAL);
-        news.setLanguage(ContentLanguage.orDefault(request.getLanguage()));
+        // Idioma: el elegido si viene uno válido. Si no viene (p. ej. «Publicar» desde el panel), se conserva el que
+        // tenía la noticia; y si es nueva, se detecta por su texto. Nunca se pasa a castellano por defecto: así una
+        // noticia en inglés no acaba apareciendo con el filtro «Español» ni en la portada.
+        String chosen = ContentLanguage.orNull(request.getLanguage());
+        if (chosen != null) {
+            news.setLanguage(chosen);
+        } else if (news.getId() == null) {
+            news.setLanguage(LanguageDetector.detectOr(news.getTitle() + ". " + news.getContent(), null));
+        }
     }
 }
