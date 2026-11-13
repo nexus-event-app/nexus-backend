@@ -32,9 +32,16 @@ public final class HtmlText {
 
         StringBuilder out = new StringBuilder(html.length() / 2);
         body.traverse(new NodeVisitor() {
+            // Justo después de una viñeta, los bloques que abre el punto (un <p> o <div> dentro del <li>) no añaden
+            // saltos de línea: si no, la viñeta quedaría sola en una línea y su texto en la siguiente.
+            private boolean afterBullet;
+
             @Override
             public void head(Node node, int depth) {
                 if (node instanceof TextNode text) {
+                    if (!text.isBlank()) {
+                        afterBullet = false;
+                    }
                     out.append(text.text());
                 } else if (node instanceof Element element) {
                     String tag = element.normalName();
@@ -42,20 +49,30 @@ public final class HtmlText {
                         out.append('\n');
                     } else if (tag.equals("li")) {
                         out.append("\n• ");
-                    } else if (BLOCK_TAGS.contains(tag)) {
-                        out.append("\n\n");
+                        afterBullet = true;
+                    } else if (BLOCK_TAGS.contains(tag) && !afterBullet) {
+                        // Dentro de un punto, un segundo bloque va en la línea siguiente, sin línea en blanco.
+                        out.append(insideListItem(element) ? "\n" : "\n\n");
                     }
                 }
             }
 
             @Override
             public void tail(Node node, int depth) {
-                if (node instanceof Element element && BLOCK_TAGS.contains(element.normalName())) {
+                // Al cerrar un bloque dentro de un punto no se deja línea en blanco: el siguiente punto ya empieza en
+                // su propia línea.
+                if (node instanceof Element element && BLOCK_TAGS.contains(element.normalName())
+                        && !insideListItem(element)) {
                     out.append("\n\n");
                 }
             }
         });
-        return normalize(out.toString());
+        String text = out.toString();
+        return normalize(text);
+    }
+
+    private static boolean insideListItem(Element element) {
+        return element.parents().stream().anyMatch(parent -> parent.normalName().equals("li"));
     }
 
     /** Primera imagen https del HTML, si la hay. */
