@@ -2,19 +2,33 @@ package com.nexus.backend.mail;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 
 /**
- * En desarrollo (MAIL_ENABLED=false) no se envía nada: el email, con sus enlaces, se escribe en el log
- * para poder probar los flujos sin un servicio de correo.
+ * Sin servicio de correo (MAIL_ENABLED=false) no se envía nada. En desarrollo y en las pruebas el email, con sus
+ * enlaces, se escribe en el log para poder probar los flujos. En cualquier otro entorno solo se avisa: los enlaces
+ * (recuperar contraseña, verificar email) son secretos y el destinatario es un dato personal, y no deben acabar en
+ * los registros si alguien olvida configurar el correo.
  */
 @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "app.mail", name = "enabled", havingValue = "false", matchIfMissing = true)
 public class LoggingEmailSender implements EmailSender {
 
+    private final boolean showContent;
+
+    public LoggingEmailSender(Environment environment) {
+        this.showContent = environment.acceptsProfiles(Profiles.of("dev", "test"));
+    }
+
     @Override
     public void send(EmailMessage message) {
+        if (!showContent) {
+            log.warn("Email «{}» no enviado: el correo está desactivado (MAIL_ENABLED=false).", message.subject());
+            return;
+        }
         log.info("""
 
                 ===== EMAIL (no enviado: MAIL_ENABLED=false) =====

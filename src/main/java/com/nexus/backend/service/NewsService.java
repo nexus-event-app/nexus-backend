@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface NewsService {
 
-    PageResponse<NewsResponse> getPublicNews(NewsCategory category, String text, int page, int size);
 
     /** Igual, pero solo en un idioma («es» o «en»); null o un idioma desconocido no filtra. */
     PageResponse<NewsResponse> getPublicNews(NewsCategory category, String text, String language, int page, int size);

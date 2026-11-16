@@ -73,4 +73,9 @@ public class Testimonial {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    /** Aprobado por la moderación y visible en la web. */
+    public boolean isPublished() {
+        return Boolean.TRUE.equals(isActive) && !Boolean.TRUE.equals(isPending);
+    }
 }

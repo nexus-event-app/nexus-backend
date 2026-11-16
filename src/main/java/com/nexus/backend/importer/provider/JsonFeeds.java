@@ -6,8 +6,10 @@ import com.nexus.backend.importer.ImportException;
 import com.nexus.backend.util.TextUtil;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Stream;
@@ -73,5 +75,10 @@ final class JsonFeeds {
                 return null;
             }
         }
+    }
+
+    /** Fecha a partir de segundos desde 1970 (como la dan algunas APIs); null si falta (0 o negativo). */
+    static LocalDateTime epochSeconds(long seconds) {
+        return seconds <= 0 ? null : LocalDateTime.ofInstant(Instant.ofEpochSecond(seconds), ZoneId.systemDefault());
     }
 }

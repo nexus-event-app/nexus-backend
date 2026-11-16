@@ -7,7 +7,6 @@ import com.nexus.backend.entity.Testimonial;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ResourceNotFoundException;
-import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.TestimonialMapper;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.repository.UserRepository;
@@ -60,8 +59,7 @@ public class TestimonialServiceImpl implements TestimonialService {
             throw new ConflictException("error.testimonial.limit");
         }
 
-        User user = userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
+        User user = userRepository.getSessionUser(actor.getId());
         Testimonial saved = testimonialRepository.save(testimonialMapper.toEntity(request, user));
         return testimonialMapper.toResponse(saved);
     }

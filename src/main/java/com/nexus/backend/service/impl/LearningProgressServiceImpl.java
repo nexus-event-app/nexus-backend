@@ -3,7 +3,6 @@ package com.nexus.backend.service.impl;
 import com.nexus.backend.dto.response.LearningProgressResponse;
 import com.nexus.backend.entity.LearningProgress;
 import com.nexus.backend.exception.BadRequestException;
-import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.repository.LearningProgressRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.UserDetail;
@@ -49,8 +48,7 @@ public class LearningProgressServiceImpl implements LearningProgressService {
             throw new BadRequestException("error.learning.tooManySteps");
         }
         LearningProgress step = new LearningProgress();
-        step.setUser(userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound")));
+        step.setUser(userRepository.getSessionUser(actor.getId()));
         step.setPathId(pathId);
         step.setStepId(stepId);
         progressRepository.save(step);

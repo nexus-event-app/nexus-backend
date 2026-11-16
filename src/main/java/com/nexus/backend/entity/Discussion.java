@@ -83,4 +83,9 @@ public class Discussion {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    /** Visible en el foro (no la ha ocultado la moderación). */
+    public boolean isVisible() {
+        return Boolean.TRUE.equals(isActive);
+    }
 }

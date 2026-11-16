@@ -8,7 +8,6 @@ import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
-import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.CommentMapper;
 import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
@@ -72,8 +71,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentResponse createComment(CreateCommentRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
         Discussion discussion = findActiveDiscussion(request.getDiscussionId());
-        User author = userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
+        User author = userRepository.getSessionUser(actor.getId());
 
         Comment saved = commentRepository.save(commentMapper.toEntity(request, discussion, author));
         notificationService.notifyNewComment(saved);
@@ -114,8 +112,7 @@ public class CommentServiceImpl implements CommentService {
         } else {
             CommentLike like = new CommentLike();
             like.setComment(comment);
-            like.setUser(userRepository.findById(actor.getId())
-                    .orElseThrow(() -> new UnauthorizedException("error.user.notFound")));
+            like.setUser(userRepository.getSessionUser(actor.getId()));
             commentLikeRepository.save(like);
             liked = true;
         }
@@ -132,7 +129,7 @@ public class CommentServiceImpl implements CommentService {
     private Discussion findActiveDiscussion(Long discussionId) {
         Discussion discussion = discussionRepository.findById(discussionId)
                 .orElseThrow(() -> new ResourceNotFoundException(DISCUSSION_NOT_FOUND));
-        if (!Boolean.TRUE.equals(discussion.getIsActive())) {
+        if (!discussion.isVisible()) {
             throw new ResourceNotFoundException(DISCUSSION_NOT_FOUND);
         }
         return discussion;

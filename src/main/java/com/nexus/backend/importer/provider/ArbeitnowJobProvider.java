@@ -10,9 +10,6 @@ import com.nexus.backend.importer.FeedClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,7 +52,7 @@ public class ArbeitnowJobProvider implements JobFeedProvider {
                 contractType(jobTypes),
                 JsonFeeds.textList(job.path("tags")),
                 JsonFeeds.text(job, "url"),
-                toDateTime(job.path("created_at").asLong(0)),
+                JsonFeeds.epochSeconds(job.path("created_at").asLong(0)),
                 jobTypes,
                 false);
     }
@@ -78,9 +75,5 @@ public class ArbeitnowJobProvider implements JobFeedProvider {
             return ContractType.TEMPORARY;
         }
         return ContractType.FULL_TIME;
-    }
-
-    private static LocalDateTime toDateTime(long epochSeconds) {
-        return epochSeconds <= 0 ? null : LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.systemDefault());
     }
 }

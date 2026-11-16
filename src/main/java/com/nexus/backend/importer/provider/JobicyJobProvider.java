@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 /**
  * API pública de Jobicy (https://github.com/Jobicy/remote-jobs-api). Sus condiciones piden no consultarla más

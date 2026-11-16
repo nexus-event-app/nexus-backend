@@ -12,7 +12,6 @@ import com.nexus.backend.enums.DiscussionCategory;
 import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
-import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.DiscussionMapper;
 import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
@@ -109,7 +108,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Transactional
     public DiscussionResponse createDiscussion(CreateDiscussionRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
-        User author = loadUser(actor);
+        User author = userRepository.getSessionUser(actor.getId());
         Discussion saved = discussionRepository.save(discussionMapper.toEntity(request, author));
         return discussionMapper.toResponse(saved, 0, 0, false);
     }
@@ -204,7 +203,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         } else {
             DiscussionLike like = new DiscussionLike();
             like.setDiscussion(discussion);
-            like.setUser(loadUser(actor));
+            like.setUser(userRepository.getSessionUser(actor.getId()));
             discussionLikeRepository.save(like);
             liked = true;
         }
@@ -262,15 +261,10 @@ public class DiscussionServiceImpl implements DiscussionService {
 
     private Discussion findActive(Long id) {
         Discussion discussion = findById(id);
-        if (!Boolean.TRUE.equals(discussion.getIsActive())) {
+        if (!discussion.isVisible()) {
             throw new ResourceNotFoundException(NOT_FOUND_MESSAGE);
         }
         return discussion;
-    }
-
-    private User loadUser(UserDetail actor) {
-        return userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
     }
 
     private void assertCanManage(Discussion discussion, UserDetail actor) {

@@ -160,19 +160,15 @@ public class ReportServiceImpl implements ReportService {
     private Optional<Owner> findVisibleOwner(ReportTargetType type, Long id) {
         return switch (type) {
             case DISCUSSION -> discussionRepository.findById(id)
-                    .filter(discussion -> Boolean.TRUE.equals(discussion.getIsActive()))
+                    .filter(Discussion::isVisible)
                     .map(discussion -> new Owner(discussion.getAuthor().getId()));
             case COMMENT -> commentRepository.findById(id)
-                    .filter(comment -> Boolean.TRUE.equals(comment.getDiscussion().getIsActive()))
+                    .filter(comment -> comment.getDiscussion().isVisible())
                     .map(comment -> new Owner(comment.getAuthor().getId()));
             case TESTIMONIAL -> testimonialRepository.findById(id)
-                    .filter(ReportServiceImpl::isPublished)
+                    .filter(Testimonial::isPublished)
                     .map(testimonial -> new Owner(testimonial.getUser() == null ? null : testimonial.getUser().getId()));
         };
-    }
-
-    private static boolean isPublished(Testimonial testimonial) {
-        return Boolean.TRUE.equals(testimonial.getIsActive()) && !Boolean.TRUE.equals(testimonial.getIsPending());
     }
 
     private ReportCaseResponse toCase(ReportRepository.ReportedTarget row, Set<ReportStatus> statuses) {
@@ -198,20 +194,20 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private static Target describe(Discussion discussion) {
-        return new Target(true, Boolean.TRUE.equals(discussion.getIsActive()), discussion.getTitle(),
+        return new Target(true, discussion.isVisible(), discussion.getTitle(),
                 TextUtil.truncate(discussion.getContent(), EXCERPT_LENGTH), discussion.getAuthor().getId(),
                 discussion.getAuthor().getName(), discussion.getId(), SlugUtil.slugify(discussion.getTitle()));
     }
 
     private static Target describe(Comment comment) {
         Discussion discussion = comment.getDiscussion();
-        return new Target(true, Boolean.TRUE.equals(discussion.getIsActive()), discussion.getTitle(),
+        return new Target(true, discussion.isVisible(), discussion.getTitle(),
                 TextUtil.truncate(comment.getContent(), EXCERPT_LENGTH), comment.getAuthor().getId(),
                 comment.getAuthor().getName(), discussion.getId(), SlugUtil.slugify(discussion.getTitle()));
     }
 
     private static Target describe(Testimonial testimonial) {
-        return new Target(true, isPublished(testimonial), testimonial.getName(),
+        return new Target(true, testimonial.isPublished(), testimonial.getName(),
                 TextUtil.truncate(testimonial.getContent(), EXCERPT_LENGTH),
                 testimonial.getUser() == null ? null : testimonial.getUser().getId(), testimonial.getName(), null, null);
     }

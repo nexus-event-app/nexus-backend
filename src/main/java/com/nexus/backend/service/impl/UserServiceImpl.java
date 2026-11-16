@@ -6,7 +6,6 @@ import com.nexus.backend.dto.response.AuthResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.dto.response.UserResponse;
 import com.nexus.backend.entity.User;
-import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
@@ -15,6 +14,7 @@ import com.nexus.backend.mapper.UserMapper;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.repository.spec.UserSpecifications;
 import com.nexus.backend.security.JwtUtil;
+import com.nexus.backend.security.PasswordPolicy;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.UserService;
@@ -26,14 +26,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
-    private static final int BCRYPT_MAX_BYTES = 72;
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -44,9 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (request.getPassword().getBytes(StandardCharsets.UTF_8).length > BCRYPT_MAX_BYTES) {
-            throw new BadRequestException("error.password.tooLong");
-        }
+        PasswordPolicy.requireBcryptLength(request.getPassword());
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("error.account.exists");
         }
@@ -76,8 +70,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser(UserDetail principal) {
-        User user = userRepository.findById(principal.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
+        User user = userRepository.getSessionUser(principal.getId());
         return userMapper.toResponse(user);
     }
 

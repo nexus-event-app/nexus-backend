@@ -4,7 +4,6 @@ import com.nexus.backend.dto.request.CreateNewsRequest;
 import com.nexus.backend.dto.request.UpdateNewsRequest;
 import com.nexus.backend.dto.response.NewsResponse;
 import com.nexus.backend.dto.response.PageResponse;
-import com.nexus.backend.entity.ImportExclusion;
 import com.nexus.backend.entity.News;
 import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.exception.ResourceNotFoundException;
@@ -18,7 +17,6 @@ import com.nexus.backend.util.ContentLanguage;
 import com.nexus.backend.util.Pagination;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,12 +32,6 @@ public class NewsServiceImpl implements NewsService {
     private final ImportExclusionRepository importExclusionRepository;
     private final NewsMapper newsMapper;
     private final ArticleImageFinder articleImageFinder;
-
-    @Override
-    @Transactional(readOnly = true)
-    public PageResponse<NewsResponse> getPublicNews(NewsCategory category, String text, int page, int size) {
-        return getPublicNews(category, text, null, page, size);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -70,7 +62,7 @@ public class NewsServiceImpl implements NewsService {
     @Transactional(readOnly = true)
     public NewsResponse getPublicNewsById(Long id) {
         News news = findById(id);
-        if (!Boolean.TRUE.equals(news.getIsActive())) {
+        if (!news.isVisible()) {
             throw new ResourceNotFoundException(NOT_FOUND_MESSAGE);
         }
         return newsMapper.toResponse(news);
@@ -112,9 +104,7 @@ public class NewsServiceImpl implements NewsService {
     @Transactional
     public void deleteNews(Long id) {
         News news = findById(id);
-        if (news.getExternalId() != null) {
-            importExclusionRepository.save(new ImportExclusion(news.getExternalId()));
-        }
+        importExclusionRepository.excludeIfImported(news.getExternalId());
         newsRepository.delete(news);
     }
 

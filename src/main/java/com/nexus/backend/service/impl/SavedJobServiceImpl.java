@@ -35,7 +35,7 @@ public class SavedJobServiceImpl implements SavedJobService {
         LocalDateTime now = LocalDateTime.now();
         return PageResponse.from(savedJobRepository.findByUserId(actor.getId(), Pagination.newestFirst(page, size))
                 .map(saved -> new SavedJobResponse(
-                        jobMapper.toResponse(saved.getJob()), isPublished(saved.getJob(), now), saved.getCreatedAt())));
+                        jobMapper.toResponse(saved.getJob()), saved.getJob().isPublishedAt(now), saved.getCreatedAt())));
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SavedJobServiceImpl implements SavedJobService {
             return;
         }
         JobOffer job = jobOfferRepository.findById(jobId)
-                .filter(offer -> isPublished(offer, LocalDateTime.now()))
+                .filter(offer -> offer.isPublishedAt(LocalDateTime.now()))
                 .orElseThrow(() -> new ResourceNotFoundException("error.job.notFound"));
         if (savedJobRepository.countByUserId(actor.getId()) >= MAX_SAVED) {
             throw new ConflictException("error.savedJob.limit");
@@ -65,9 +65,5 @@ public class SavedJobServiceImpl implements SavedJobService {
     @Transactional
     public void remove(Long jobId, UserDetail actor) {
         savedJobRepository.deleteByUserIdAndJobId(actor.getId(), jobId);
-    }
-
-    private static boolean isPublished(JobOffer job, LocalDateTime now) {
-        return Boolean.TRUE.equals(job.getIsActive()) && (job.getExpiresAt() == null || job.getExpiresAt().isAfter(now));
     }
 }

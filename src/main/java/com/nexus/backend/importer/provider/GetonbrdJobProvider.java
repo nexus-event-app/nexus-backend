@@ -11,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Entities;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -86,7 +83,7 @@ public class GetonbrdJobProvider implements JobFeedProvider {
                 contractType(modality),
                 names(attributes.path("tags").path("data")),
                 JsonFeeds.text(job.path("links"), "public_url"),
-                toDateTime(attributes.path("published_at").asLong(0)),
+                JsonFeeds.epochSeconds(attributes.path("published_at").asLong(0)),
                 levelHints(attributes.path("seniority").path("data").path("id").asInt(0), modality),
                 true);
     }
@@ -163,9 +160,5 @@ public class GetonbrdJobProvider implements JobFeedProvider {
                 .map(tag -> JsonFeeds.text(tag.path("attributes"), "name"))
                 .filter(name -> name != null)
                 .toList();
-    }
-
-    private static LocalDateTime toDateTime(long epochSeconds) {
-        return epochSeconds <= 0 ? null : LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.systemDefault());
     }
 }

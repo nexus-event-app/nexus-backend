@@ -6,12 +6,12 @@ import com.nexus.backend.entity.UserToken;
 import com.nexus.backend.enums.UserTokenType;
 import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.EmailNotVerifiedException;
-import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mail.EmailRequestedEvent;
 import com.nexus.backend.mail.EmailTemplates;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.repository.UserTokenRepository;
 import com.nexus.backend.security.OneTimeTokens;
+import com.nexus.backend.security.PasswordPolicy;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +22,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Slf4j
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    private static final int BCRYPT_MAX_BYTES = 72;
     private static final String INVALID_LINK = "error.link.invalid";
 
     private final UserRepository userRepository;
@@ -75,9 +73,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
-        if (request.getPassword().getBytes(StandardCharsets.UTF_8).length > BCRYPT_MAX_BYTES) {
-            throw new BadRequestException("error.password.tooLong");
-        }
+        PasswordPolicy.requireBcryptLength(request.getPassword());
         UserToken token = consume(request.getToken(), UserTokenType.PASSWORD_RESET);
         User user = token.getUser();
         if (!user.isEnabled()) {
@@ -107,8 +103,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void resendEmailVerification(UserDetail actor) {
-        User user = userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
+        User user = userRepository.getSessionUser(actor.getId());
         if (user.isEmailVerified()) {
             throw new BadRequestException("error.email.alreadyVerified");
         }

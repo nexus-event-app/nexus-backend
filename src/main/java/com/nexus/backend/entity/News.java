@@ -86,4 +86,9 @@ public class News {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    /** Publicada en la web (las importadas sin publicación automática esperan revisión). */
+    public boolean isVisible() {
+        return Boolean.TRUE.equals(isActive);
+    }
 }

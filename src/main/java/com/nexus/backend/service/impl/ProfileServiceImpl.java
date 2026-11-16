@@ -7,7 +7,6 @@ import com.nexus.backend.dto.response.ProfileResponse;
 import com.nexus.backend.dto.response.TestimonialResponse;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.exception.ResourceNotFoundException;
-import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.TestimonialMapper;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.TestimonialRepository;
@@ -52,27 +51,27 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<DiscussionResponse> getOwnDiscussions(UserDetail actor, int page, int size) {
-        return discussionService.getDiscussionsByAuthor(loadUser(actor).getId(), page, size, actor);
+        return discussionService.getDiscussionsByAuthor(userRepository.getSessionUser(actor.getId()).getId(), page, size, actor);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<TestimonialResponse> getOwnTestimonials(UserDetail actor) {
-        return testimonialRepository.findPublishedByUserId(loadUser(actor).getId()).stream()
+        return testimonialRepository.findPublishedByUserId(userRepository.getSessionUser(actor.getId()).getId()).stream()
                 .map(testimonialMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProfileResponse getOwnProfile(UserDetail actor) {
-        return toResponse(loadUser(actor), true);
+        return toResponse(userRepository.getSessionUser(actor.getId()), true);
     }
 
     @Override
     @Transactional
     public ProfileResponse updateProfile(UpdateProfileRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
-        User user = loadUser(actor);
+        User user = userRepository.getSessionUser(actor.getId());
         user.setName(request.getName());
         user.setHeadline(request.getHeadline());
         user.setBio(request.getBio());
@@ -86,7 +85,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public ProfileResponse updateAvatar(MultipartFile file, UserDetail actor) {
         accountService.assertCanParticipate(actor);
-        User user = loadUser(actor);
+        User user = userRepository.getSessionUser(actor.getId());
         String previous = user.getAvatarUrl();
         String stored = avatarStorage.store(file);
         user.setAvatarUrl(stored);
@@ -99,7 +98,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public ProfileResponse removeAvatar(UserDetail actor) {
-        User user = loadUser(actor);
+        User user = userRepository.getSessionUser(actor.getId());
         String previous = user.getAvatarUrl();
         user.setAvatarUrl(null);
         ProfileResponse response = toResponse(userRepository.save(user), true);
@@ -112,11 +111,6 @@ public class ProfileServiceImpl implements ProfileService {
         return userRepository.findById(userId)
                 .filter(User::isEnabled)
                 .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
-    }
-
-    private User loadUser(UserDetail actor) {
-        return userRepository.findById(actor.getId())
-                .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
     }
 
     /** Con {@code withActivity} añade los contadores de actividad: solo para su dueño. */

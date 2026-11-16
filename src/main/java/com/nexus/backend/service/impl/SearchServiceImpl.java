@@ -47,7 +47,7 @@ public class SearchServiceImpl implements SearchService {
         int size = Math.min(Math.max(limit, 1), MAX_LIMIT);
         return new SearchResponse(
                 text,
-                Group.of(newsService.getPublicNews(null, text, 0, size)),
+                Group.of(newsService.getPublicNews(null, text, null, 0, size)),
                 Group.of(jobService.getPublicJobs(null, null, null, text, 0, size)),
                 Group.of(discussionService.getDiscussions(null, text, 0, size, viewer)),
                 people(text, size));

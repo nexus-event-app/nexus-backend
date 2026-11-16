@@ -4,7 +4,6 @@ import com.nexus.backend.dto.request.CreateJobRequest;
 import com.nexus.backend.dto.request.UpdateJobRequest;
 import com.nexus.backend.dto.response.JobResponse;
 import com.nexus.backend.dto.response.PageResponse;
-import com.nexus.backend.entity.ImportExclusion;
 import com.nexus.backend.entity.JobOffer;
 import com.nexus.backend.enums.ContractType;
 import com.nexus.backend.enums.JobLevel;
@@ -60,8 +59,7 @@ public class JobServiceImpl implements JobService {
     @Transactional(readOnly = true)
     public JobResponse getPublicJobById(Long id) {
         JobOffer job = findById(id);
-        boolean expired = job.getExpiresAt() != null && !job.getExpiresAt().isAfter(LocalDateTime.now());
-        if (!Boolean.TRUE.equals(job.getIsActive()) || expired) {
+        if (!job.isPublishedAt(LocalDateTime.now())) {
             throw new ResourceNotFoundException(NOT_FOUND_MESSAGE);
         }
         return jobMapper.toResponse(job);
@@ -96,9 +94,7 @@ public class JobServiceImpl implements JobService {
     @Transactional
     public void deleteJob(Long id) {
         JobOffer job = findById(id);
-        if (job.getExternalId() != null) {
-            importExclusionRepository.save(new ImportExclusion(job.getExternalId()));
-        }
+        importExclusionRepository.excludeIfImported(job.getExternalId());
         savedJobRepository.deleteAllByJobId(id);
         jobOfferRepository.delete(job);
     }

@@ -115,4 +115,9 @@ public class JobOffer {
         inSpain = SpainLocation.matches(location);
         updatedAt = LocalDateTime.now();
     }
+
+    /** Se muestra en la web: activa y sin caducar en ese momento. Equivale a JobSpecifications.isPublished(). */
+    public boolean isPublishedAt(LocalDateTime now) {
+        return Boolean.TRUE.equals(isActive) && (expiresAt == null || expiresAt.isAfter(now));
+    }
 }
