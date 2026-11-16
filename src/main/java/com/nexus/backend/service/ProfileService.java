@@ -26,4 +26,11 @@ public interface ProfileService {
     ProfileResponse updateAvatar(MultipartFile file, UserDetail actor);
 
     ProfileResponse removeAvatar(UserDetail actor);
+
+    /** Panel de administración: el perfil de cualquier cuenta (también desactivada), para revisarlo o corregirlo. */
+    ProfileResponse getProfileForAdmin(Long userId);
+
+    ProfileResponse updateProfileAsAdmin(Long userId, UpdateProfileRequest request);
+
+    ProfileResponse removeAvatarAsAdmin(Long userId);
 }

@@ -6,6 +6,7 @@ import com.nexus.backend.dto.response.AuthResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.dto.response.UserResponse;
 import com.nexus.backend.entity.User;
+import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
@@ -96,6 +97,23 @@ public class UserServiceImpl implements UserService {
         }
         target.setEnabled(enabled);
         log.info("Usuario id={} {} por admin id={}", target.getId(), enabled ? "activado" : "desactivado", actor.getId());
+        return userMapper.toResponse(userRepository.save(target));
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateRole(Long userId, User.Role role, UserDetail actor) {
+        User target = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
+        if (target.getId().equals(actor.getId())) {
+            throw new ForbiddenOperationException("error.user.selfRole");
+        }
+        // El panel da acceso a todo: solo a cuentas cuyo email está comprobado.
+        if (role == User.Role.ADMIN && !target.isEmailVerified()) {
+            throw new BadRequestException("error.user.adminNeedsVerifiedEmail");
+        }
+        target.setRole(role);
+        log.info("Usuario id={} pasa a {} por admin id={}", target.getId(), role, actor.getId());
         return userMapper.toResponse(userRepository.save(target));
     }
 

@@ -71,14 +71,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public ProfileResponse updateProfile(UpdateProfileRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
-        User user = userRepository.getSessionUser(actor.getId());
-        user.setName(request.getName());
-        user.setHeadline(request.getHeadline());
-        user.setBio(request.getBio());
-        user.setTechnologies(request.getTechnologies().isEmpty() ? null : String.join(SEPARATOR, request.getTechnologies()));
-        user.setGithubUrl(request.getGithubUrl());
-        user.setLinkedinUrl(request.getLinkedinUrl());
-        return toResponse(userRepository.save(user), true);
+        return applyProfile(userRepository.getSessionUser(actor.getId()), request, true);
     }
 
     @Override
@@ -98,12 +91,49 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public ProfileResponse removeAvatar(UserDetail actor) {
-        User user = userRepository.getSessionUser(actor.getId());
+        return clearAvatar(userRepository.getSessionUser(actor.getId()), true);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProfileResponse getProfileForAdmin(Long userId) {
+        return toResponse(findAny(userId), false);
+    }
+
+    @Override
+    @Transactional
+    public ProfileResponse updateProfileAsAdmin(Long userId, UpdateProfileRequest request) {
+        return applyProfile(findAny(userId), request, false);
+    }
+
+    @Override
+    @Transactional
+    public ProfileResponse removeAvatarAsAdmin(Long userId) {
+        return clearAvatar(findAny(userId), false);
+    }
+
+    /** Lo mismo para tu perfil y para el panel: guarda los datos públicos del perfil. */
+    private ProfileResponse applyProfile(User user, UpdateProfileRequest request, boolean withActivity) {
+        user.setName(request.getName());
+        user.setHeadline(request.getHeadline());
+        user.setBio(request.getBio());
+        user.setTechnologies(request.getTechnologies().isEmpty() ? null : String.join(SEPARATOR, request.getTechnologies()));
+        user.setGithubUrl(request.getGithubUrl());
+        user.setLinkedinUrl(request.getLinkedinUrl());
+        return toResponse(userRepository.save(user), withActivity);
+    }
+
+    /** Quita la foto; el archivo se borra solo si el cambio llega a guardarse. */
+    private ProfileResponse clearAvatar(User user, boolean withActivity) {
         String previous = user.getAvatarUrl();
         user.setAvatarUrl(null);
-        ProfileResponse response = toResponse(userRepository.save(user), true);
+        ProfileResponse response = toResponse(userRepository.save(user), withActivity);
         afterTransaction(() -> avatarStorage.delete(previous), () -> { });
         return response;
+    }
+
+    private User findAny(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
     }
 
     /** Las cuentas desactivadas no tienen perfil público. */
