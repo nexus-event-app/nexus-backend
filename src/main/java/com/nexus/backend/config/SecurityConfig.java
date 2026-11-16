@@ -109,7 +109,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/forgot-password",
-                                "/api/auth/reset-password", "/api/auth/verify-email").permitAll()
+                                "/api/auth/reset-password", "/api/auth/verify-email",
+                                "/api/auth/google/exchange", "/api/auth/google/pending", "/api/auth/google/complete").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/providers").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/resend-verification").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/auth/me", "/api/discussions/mine").authenticated()
                         .requestMatchers(HttpMethod.GET,

@@ -62,7 +62,9 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        // Las cuentas creadas con Google no tienen contraseña: con email y contraseña no se puede entrar en ellas.
+        if (user == null || user.getPassword() == null
+                || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("error.credentials.invalid");
         }
         if (!user.isEnabled()) {
@@ -104,7 +106,8 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(userRepository.save(target));
     }
 
-    private AuthResponse buildAuthResponse(User user) {
+    @Override
+    public AuthResponse buildAuthResponse(User user) {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
         return AuthResponse.builder()
                 .token(token)

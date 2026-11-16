@@ -32,8 +32,13 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false)
+    /** Hash de la contraseña; null en las cuentas que solo entran con Google. */
+    @Column
     private String password;
+
+    /** Identificador de la cuenta de Google vinculada («sub»): no cambia aunque cambie el email de Google. */
+    @Column(name = "google_subject", unique = true)
+    private String googleSubject;
 
     @Column(nullable = false, length = 50)
     private String name;
