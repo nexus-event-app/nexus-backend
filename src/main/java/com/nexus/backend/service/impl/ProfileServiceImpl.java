@@ -46,27 +46,26 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional(readOnly = true)
     public ProfileResponse getPublicProfile(Long userId) {
-        return toResponse(findVisible(userId));
+        return toResponse(findVisible(userId), false);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<DiscussionResponse> getDiscussions(Long userId, int page, int size, UserDetail viewer) {
-        findVisible(userId);
-        return discussionService.getDiscussionsByAuthor(userId, page, size, viewer);
+    public PageResponse<DiscussionResponse> getOwnDiscussions(UserDetail actor, int page, int size) {
+        return discussionService.getDiscussionsByAuthor(loadUser(actor).getId(), page, size, actor);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<TestimonialResponse> getTestimonials(Long userId) {
-        findVisible(userId);
-        return testimonialRepository.findPublishedByUserId(userId).stream().map(testimonialMapper::toResponse).toList();
+    public List<TestimonialResponse> getOwnTestimonials(UserDetail actor) {
+        return testimonialRepository.findPublishedByUserId(loadUser(actor).getId()).stream()
+                .map(testimonialMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public ProfileResponse getOwnProfile(UserDetail actor) {
-        return toResponse(loadUser(actor));
+        return toResponse(loadUser(actor), true);
     }
 
     @Override
@@ -80,7 +79,7 @@ public class ProfileServiceImpl implements ProfileService {
         user.setTechnologies(request.getTechnologies().isEmpty() ? null : String.join(SEPARATOR, request.getTechnologies()));
         user.setGithubUrl(request.getGithubUrl());
         user.setLinkedinUrl(request.getLinkedinUrl());
-        return toResponse(userRepository.save(user));
+        return toResponse(userRepository.save(user), true);
     }
 
     @Override
@@ -91,7 +90,7 @@ public class ProfileServiceImpl implements ProfileService {
         String previous = user.getAvatarUrl();
         String stored = avatarStorage.store(file);
         user.setAvatarUrl(stored);
-        ProfileResponse response = toResponse(userRepository.save(user));
+        ProfileResponse response = toResponse(userRepository.save(user), true);
         // La foto anterior se borra solo si el cambio llega a guardarse; si falla, se borra la nueva.
         afterTransaction(() -> avatarStorage.delete(previous), () -> avatarStorage.delete(stored));
         return response;
@@ -103,7 +102,7 @@ public class ProfileServiceImpl implements ProfileService {
         User user = loadUser(actor);
         String previous = user.getAvatarUrl();
         user.setAvatarUrl(null);
-        ProfileResponse response = toResponse(userRepository.save(user));
+        ProfileResponse response = toResponse(userRepository.save(user), true);
         afterTransaction(() -> avatarStorage.delete(previous), () -> { });
         return response;
     }
@@ -120,7 +119,8 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new UnauthorizedException("error.user.notFound"));
     }
 
-    private ProfileResponse toResponse(User user) {
+    /** Con {@code withActivity} añade los contadores de actividad: solo para su dueño. */
+    private ProfileResponse toResponse(User user, boolean withActivity) {
         List<String> technologies = user.getTechnologies() == null
                 ? List.of()
                 : Arrays.stream(user.getTechnologies().split(SEPARATOR)).map(String::trim).filter(s -> !s.isEmpty()).toList();
@@ -135,9 +135,9 @@ public class ProfileServiceImpl implements ProfileService {
                 user.getLinkedinUrl(),
                 user.getAvatarUrl(),
                 user.getCreatedAt(),
-                discussionRepository.count(DiscussionSpecifications.isActive()
-                        .and(DiscussionSpecifications.hasAuthor(user.getId()))),
-                testimonialRepository.countPublishedByUserId(user.getId()));
+                withActivity ? discussionRepository.count(DiscussionSpecifications.isActive()
+                        .and(DiscussionSpecifications.hasAuthor(user.getId()))) : null,
+                withActivity ? testimonialRepository.countPublishedByUserId(user.getId()) : null);
     }
 
     private static void afterTransaction(Runnable onCommit, Runnable onRollback) {

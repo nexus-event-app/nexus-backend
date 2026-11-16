@@ -115,27 +115,41 @@ class ProfileIntegrationTest {
         user.setEnabled(false);
         userRepository.save(user);
         mvc.perform(get("/api/users/" + user.getId())).andExpect(status().isNotFound());
-        mvc.perform(get("/api/users/" + user.getId() + "/discussions")).andExpect(status().isNotFound());
         mvc.perform(get("/api/users/999999")).andExpect(status().isNotFound());
     }
 
     @Test
-    void listsOnlyPublishedDiscussionsAndTestimonials() throws Exception {
+    void activityIsOnlyVisibleToItsOwner() throws Exception {
         User luis = user("Luis");
         discussion(luis, "Visible", true);
         discussion(luis, "Oculta", false);
         testimonial(luis, "Publicado y aprobado por el equipo de moderación de la comunidad.", true);
         testimonial(luis, "Pendiente de moderación todavía, no debería verse en el perfil público.", false);
 
+        // Quien visita el perfil solo ve lo que la persona ha puesto en él: ni su actividad ni cuánta tiene.
         mvc.perform(get("/api/users/" + luis.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Luis"))
+                .andExpect(jsonPath("$.discussionCount").doesNotExist())
+                .andExpect(jsonPath("$.testimonialCount").doesNotExist());
+        mvc.perform(get("/api/users/" + luis.getId() + "/discussions")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/users/" + luis.getId() + "/testimonials")).andExpect(status().isUnauthorized());
+        String other = bearer(user("Otra"));
+        mvc.perform(get("/api/users/" + luis.getId() + "/discussions").header("Authorization", other))
+                .andExpect(status().isNotFound());
+
+        // Su dueño la ve en su perfil (solo lo publicado).
+        String token = bearer(luis);
+        mvc.perform(get("/api/profile").header("Authorization", token))
                 .andExpect(jsonPath("$.discussionCount").value(1))
                 .andExpect(jsonPath("$.testimonialCount").value(1));
-        mvc.perform(get("/api/users/" + luis.getId() + "/discussions"))
+        mvc.perform(get("/api/profile/discussions").header("Authorization", token))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].title").value("Visible"));
-        mvc.perform(get("/api/users/" + luis.getId() + "/testimonials"))
+        mvc.perform(get("/api/profile/testimonials").header("Authorization", token))
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].authorId").value(luis.getId()));
+        mvc.perform(get("/api/profile/discussions")).andExpect(status().isUnauthorized());
     }
 
     @Test

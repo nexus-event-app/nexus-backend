@@ -14,9 +14,10 @@ public interface ProfileService {
 
     ProfileResponse getPublicProfile(Long userId);
 
-    PageResponse<DiscussionResponse> getDiscussions(Long userId, int page, int size, UserDetail viewer);
+    /** Actividad de la persona con sesión iniciada: solo la ve ella. */
+    PageResponse<DiscussionResponse> getOwnDiscussions(UserDetail actor, int page, int size);
 
-    List<TestimonialResponse> getTestimonials(Long userId);
+    List<TestimonialResponse> getOwnTestimonials(UserDetail actor);
 
     ProfileResponse getOwnProfile(UserDetail actor);
 

@@ -1,9 +1,13 @@
 package com.nexus.backend.controller;
 
 import com.nexus.backend.dto.request.UpdateProfileRequest;
+import com.nexus.backend.dto.response.DiscussionResponse;
+import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.dto.response.ProfileResponse;
+import com.nexus.backend.dto.response.TestimonialResponse;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.ProfileService;
+import com.nexus.backend.util.Pagination;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/** Perfil de la persona con sesión iniciada: consultarlo, editarlo y cambiar o quitar la foto. */
+import java.util.List;
+
+/** Perfil de la persona con sesión iniciada: consultarlo, editarlo, cambiar o quitar la foto y ver su actividad. */
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -29,6 +35,21 @@ public class ProfileController {
     @GetMapping
     public ResponseEntity<ProfileResponse> getProfile(@AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.ok(profileService.getOwnProfile(principal));
+    }
+
+    /** Sus discusiones: solo las ve ella, en su propio perfil. */
+    @GetMapping("/discussions")
+    public ResponseEntity<PageResponse<DiscussionResponse>> getDiscussions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "" + Pagination.DEFAULT_SIZE) int size,
+            @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(profileService.getOwnDiscussions(principal, page, size));
+    }
+
+    /** Sus testimonios publicados: solo los ve ella, en su propio perfil. */
+    @GetMapping("/testimonials")
+    public ResponseEntity<List<TestimonialResponse>> getTestimonials(@AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(profileService.getOwnTestimonials(principal));
     }
 
     @PutMapping
