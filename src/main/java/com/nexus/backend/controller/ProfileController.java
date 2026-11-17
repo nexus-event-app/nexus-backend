@@ -1,11 +1,13 @@
 package com.nexus.backend.controller;
 
+import com.nexus.backend.dto.request.DeleteAccountRequest;
 import com.nexus.backend.dto.request.UpdateProfileRequest;
 import com.nexus.backend.dto.response.DiscussionResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.dto.response.ProfileResponse;
 import com.nexus.backend.dto.response.TestimonialResponse;
 import com.nexus.backend.security.UserDetail;
+import com.nexus.backend.service.AccountDeletionService;
 import com.nexus.backend.service.ProfileService;
 import com.nexus.backend.util.Pagination;
 import jakarta.validation.Valid;
@@ -31,6 +33,7 @@ import java.util.List;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final AccountDeletionService accountDeletionService;
 
     @GetMapping
     public ResponseEntity<ProfileResponse> getProfile(@AuthenticationPrincipal UserDetail principal) {
@@ -69,5 +72,13 @@ public class ProfileController {
     @DeleteMapping("/avatar")
     public ResponseEntity<ProfileResponse> removeAvatar(@AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.ok(profileService.removeAvatar(principal));
+    }
+
+    /** Eliminar la propia cuenta. Pide la contraseña actual si la cuenta la tiene. */
+    @DeleteMapping
+    public ResponseEntity<Void> deleteAccount(@Valid @RequestBody(required = false) DeleteAccountRequest request,
+                                              @AuthenticationPrincipal UserDetail principal) {
+        accountDeletionService.deleteOwnAccount(request == null ? new DeleteAccountRequest() : request, principal);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -19,6 +19,8 @@ public class CommentResponse {
     private Long authorId;
     private String authorName;
     private String authorAvatarUrl;
+    /** La autora o el autor eliminó su cuenta: se muestra como «Cuenta eliminada», sin enlace a su perfil. */
+    private boolean authorDeleted;
     private Integer likesCount;
     private Boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;

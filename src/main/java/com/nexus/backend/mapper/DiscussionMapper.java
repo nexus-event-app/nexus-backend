@@ -39,6 +39,7 @@ public class DiscussionMapper {
                 .authorId(author.getId())
                 .authorName(author.getName())
                 .authorAvatarUrl(author.getAvatarUrl())
+                .authorDeleted(author.isDeleted())
                 .isActive(discussion.getIsActive())
                 .commentCount(commentCount)
                 .likesCount(likesCount)

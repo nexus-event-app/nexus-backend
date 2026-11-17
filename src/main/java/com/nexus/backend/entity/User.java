@@ -84,6 +84,10 @@ public class User {
     @Column(name = "avatar_url", length = 200)
     private String avatarUrl;
 
+    /** Cuándo pidió eliminar su cuenta. La fila se conserva anonimizada para que el foro no pierda sus hilos. */
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -108,5 +112,9 @@ public class User {
 
     public boolean isEmailVerified() {
         return emailVerifiedAt != null;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }

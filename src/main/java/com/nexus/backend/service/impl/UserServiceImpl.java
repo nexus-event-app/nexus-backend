@@ -87,6 +87,10 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateStatus(Long userId, boolean enabled, UserDetail actor) {
         User target = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
+        // Su dueña o dueño la eliminó: no se puede reactivar desde el panel (ya no tiene email ni datos).
+        if (target.isDeleted()) {
+            throw new ForbiddenOperationException("error.user.deleted");
+        }
         if (!enabled) {
             if (target.getId().equals(actor.getId())) {
                 throw new ForbiddenOperationException("error.user.selfDisable");

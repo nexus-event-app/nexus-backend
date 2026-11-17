@@ -31,6 +31,8 @@ public class UserMapper {
                 .enabled(user.isEnabled())
                 .emailVerified(user.isEmailVerified())
                 .avatarUrl(user.getAvatarUrl())
+                .hasPassword(user.getPassword() != null)
+                .deleted(user.isDeleted())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

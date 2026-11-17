@@ -157,6 +157,9 @@ cd /opt/primercommit/nexus-backend/deploy
   scp -r root@203.0.113.10:/opt/primercommit/copias ~/Desktop/copias-primercommit
   ```
 
+  Guarda solo las recientes y borra las antiguas: si alguien elimina su cuenta, sus datos no deben seguir en copias
+  viejas (la política de privacidad promete un máximo de 14 días, como las del servidor).
+
 - **Restaurar una copia** (sustituye lo que haya en la base de datos):
 
   ```bash

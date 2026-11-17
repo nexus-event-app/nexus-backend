@@ -37,4 +37,7 @@ public interface TestimonialRepository extends JpaRepository<Testimonial, Long> 
     long countPublishedByUserId(@Param("userId") Long userId);
 
     boolean existsByUserIdAndCreatedAtAfter(Long userId, LocalDateTime since);
+
+    @Query("select t.id from Testimonial t where t.user.id = :userId")
+    List<Long> findIdsByUserId(@Param("userId") Long userId);
 }

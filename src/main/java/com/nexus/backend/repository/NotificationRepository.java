@@ -34,4 +34,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("delete from Notification n where n.type = :type and n.comment.id = :commentId")
     void deleteByTypeAndCommentId(@Param("type") NotificationType type, @Param("commentId") Long commentId);
+
+    /** Las que recibió y las que generó (una respuesta suya, un «me gusta»...): sin la cuenta, no tienen sentido. */
+    @Modifying
+    @Query("delete from Notification n where n.recipient.id = :userId or n.actor.id = :userId")
+    void deleteAllInvolving(@Param("userId") Long userId);
 }

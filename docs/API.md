@@ -36,7 +36,8 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 
 ## 3. DTOs de respuesta
 ### UserResponse
-`{ id, name, email, role: "USER"|"ADMIN", enabled: boolean, emailVerified: boolean, createdAt }`
+`{ id, name, email, role: "USER"|"ADMIN", enabled: boolean, emailVerified: boolean, avatarUrl, hasPassword: boolean, deleted: boolean, createdAt }`
+`hasPassword` es `false` en cuentas creadas con Google sin contraseña; `deleted`, `true` si su titular eliminó la cuenta.
 ### AuthResponse
 `{ token, user: UserResponse }`
 ### NewsResponse
@@ -51,11 +52,11 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 - `level`: `INTERN | JUNIOR | MID`
 - `source` y `expiresAt` pueden ser `null`. `tags` se guarda como texto separado por comas y se expone como array.
 ### DiscussionResponse
-`{ id, slug, title, content, category, authorId, authorName, isActive, commentCount, likesCount, isLikedByCurrentUser, createdAt, updatedAt }`
+`{ id, slug, title, content, category, authorId, authorName, authorDeleted, isActive, commentCount, likesCount, isLikedByCurrentUser, createdAt, updatedAt }`
 `category`: `AYUDA_TECNICA | RECURSOS | EXPERIENCIAS | NETWORKING | GENERAL`
-`isLikedByCurrentUser` es `false` si no hay sesión.
+`isLikedByCurrentUser` es `false` si no hay sesión. `authorDeleted` es `true` si quien escribió eliminó su cuenta (se muestra «Cuenta eliminada», sin enlace a su perfil); igual en `CommentResponse`.
 ### CommentResponse
-`{ id, content, discussionId, authorId, authorName, likesCount, isLikedByCurrentUser, createdAt, updatedAt }`
+`{ id, content, discussionId, authorId, authorName, authorDeleted, likesCount, isLikedByCurrentUser, createdAt, updatedAt }`
 ### TestimonialResponse
 `{ id, name, role, location, content, isActive, isPending, isHighlighted, createdAt, updatedAt }`
 ### ImportSourceResponse (admin)
@@ -107,6 +108,7 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | Método | Ruta | Notas |
 |---|---|---|
 | GET | `/api/auth/me` | `UserResponse` |
+| DELETE | `/api/profile` | 204; elimina la propia cuenta. Cuerpo `{ password }` si la cuenta tiene contraseña (400 si falta o no es correcta); 403 para ADMIN. Borra testimonios, ofertas guardadas, progreso, notificaciones y foto; las discusiones y respuestas se quedan firmadas como «Cuenta eliminada» y el email queda libre |
 | POST | `/api/auth/resend-verification` | 202; envía un nuevo enlace de verificación e invalida el anterior. 400 si el email ya está verificado |
 | GET | `/api/discussions/mine?page&size` | `PageResponse<DiscussionResponse>` |
 | POST | `/api/discussions` | 201 `DiscussionResponse` |

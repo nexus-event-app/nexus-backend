@@ -132,8 +132,11 @@ public class ProfileServiceImpl implements ProfileService {
         return response;
     }
 
+    /** Panel: cualquier cuenta menos las eliminadas por su titular, que ya no tienen perfil que revisar. */
     private User findAny(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
+        return userRepository.findById(userId)
+                .filter(user -> !user.isDeleted())
+                .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
     }
 
     /** Las cuentas desactivadas no tienen perfil público. */

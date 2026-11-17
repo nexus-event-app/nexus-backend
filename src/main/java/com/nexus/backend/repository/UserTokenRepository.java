@@ -23,4 +23,8 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     @Modifying
     @Query("delete from UserToken t where t.expiresAt < :before")
     int deleteExpiredBefore(@Param("before") LocalDateTime before);
+
+    @Modifying
+    @Query("delete from UserToken t where t.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 }

@@ -19,4 +19,8 @@ public interface LearningProgressRepository extends JpaRepository<LearningProgre
     @Modifying
     @Query("delete from LearningProgress p where p.user.id = :userId and p.pathId = :pathId and p.stepId = :stepId")
     void deleteStep(@Param("userId") Long userId, @Param("pathId") String pathId, @Param("stepId") String stepId);
+
+    @Modifying
+    @Query("delete from LearningProgress p where p.user.id = :userId")
+    void deleteAllByUserId(@Param("userId") Long userId);
 }
