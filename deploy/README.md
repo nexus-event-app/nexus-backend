@@ -55,15 +55,17 @@ Recomendado: **Hetzner Cloud** (centros de datos en la UE, buena relación preci
 
 ### 3. Email (para verificar cuentas y recuperar contraseñas)
 
-Recomendado: **Brevo** (tiene plan gratuito suficiente para la beta).
+Los emails salen de la **cuenta de Gmail del proyecto**, con una «contraseña de aplicación»: gratis, sin dar ninguna
+dirección postal y con un límite de unos 500 al día, de sobra para la beta.
 
-1. Crea la cuenta y, en «Senders, Domains & Dedicated IPs», añade tu dominio. Brevo te dará unos registros DNS
-   (SPF, DKIM...): créalos en el panel del dominio, igual que los de antes.
-2. En «SMTP & API» crea una **clave SMTP**. Apunta el usuario (login) y la clave: van en el `.env` del servidor,
-   nunca en el chat ni en el código.
+1. Con la sesión iniciada en la cuenta del proyecto, en myaccount.google.com → «Seguridad», activa la
+   **verificación en dos pasos**.
+2. Entra en myaccount.google.com/apppasswords, crea una con el nombre `Primer Commit web` y guarda las 16 letras en
+   la app «Contraseñas» del Mac. Google solo la enseña una vez; si se pierde, se borra y se crea otra.
+3. Va en el `.env` del servidor (`MAIL_USERNAME` y `MAIL_PASSWORD`), nunca en el chat ni en el código.
 
-> Si el email no estuviera listo el lunes, se puede lanzar igualmente con `REQUIRE_VERIFIED_EMAIL=false` (la gente
-> podrá publicar sin confirmar el correo) y activarlo después.
+> Más adelante, si quieres enviar desde `hola@tu-dominio`, se puede cambiar a un proveedor como Brevo: solo cambian
+> las líneas `MAIL_*` del `.env`. Brevo pide una dirección postal (se puede usar un apartado de correos).
 
 ### 4. Google (opcional)
 
@@ -111,7 +113,7 @@ nano /opt/primercommit/nexus-backend/deploy/.env
 ```
 
 Rellena: `DOMAIN`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` (tu cuenta de administradora; contraseña larga y única), los datos
-de email de Brevo, los de Google si los tienes y `VITE_LEGAL_OWNER_NAME`, `VITE_LEGAL_EMAIL` y
+de email de Gmail, los de Google si los tienes y `VITE_LEGAL_OWNER_NAME`, `VITE_LEGAL_EMAIL` y
 `VITE_LEGAL_HOSTING_PROVIDER` (por ejemplo, `Hetzner Online GmbH (Alemania)`). No toques `POSTGRES_PASSWORD` ni
 `JWT_SECRET`: ya están generados. Guarda con `Ctrl+O`, `Intro`, y sal con `Ctrl+X`.
 
