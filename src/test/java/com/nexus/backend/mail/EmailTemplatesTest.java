@@ -52,6 +52,19 @@ class EmailTemplatesTest {
         assertThat(message.text()).contains("Hi Ana,").contains("https://primercommit.test/en/verify-email?token=TOKEN");
     }
 
+    @Test
+    void theTestimonialAlertIsInSpanishAndALineBreakInTheNameCannotBreakTheSubject() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("en"));
+
+        EmailMessage message = templates.newTestimonial("admin@test.com", "Marta\r\nBcc: otra@test.com", null, " ",
+                "Gracias a todas.");
+
+        assertThat(message.subject()).isEqualTo("Nuevo testimonio de Marta Bcc: otra@test.com para revisar")
+                .doesNotContain("\n").doesNotContain("\r");
+        assertThat(message.html()).contains("<html lang=\"es\">").contains("https://primercommit.test/admin/testimonios");
+        assertThat(message.text()).contains("Gracias a todas.");
+    }
+
     private static ResourceBundleMessageSource messageSource() {
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
         source.setBasename("messages");

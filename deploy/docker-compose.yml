@@ -50,6 +50,7 @@ services:
       # Sin MAIL_FROM, el remitente es «Primer Commit» con la propia cuenta de envío (Gmail lo exige así).
       MAIL_FROM: ${MAIL_FROM:-Primer Commit <${MAIL_USERNAME:-no-reply@localhost}>}
       REQUIRE_VERIFIED_EMAIL: ${REQUIRE_VERIFIED_EMAIL:-true}
+      MODERATION_EMAIL: ${MODERATION_EMAIL:-}
       IMPORT_ENABLED: ${IMPORT_ENABLED:-true}
       JAVA_OPTS: -XX:MaxRAMPercentage=60
     volumes:

@@ -7,6 +7,7 @@ import com.nexus.backend.entity.Testimonial;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.mail.ModerationAlerts;
 import com.nexus.backend.mapper.TestimonialMapper;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.repository.UserRepository;
@@ -37,6 +38,7 @@ public class TestimonialServiceImpl implements TestimonialService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final TestimonialMapper testimonialMapper;
+    private final ModerationAlerts moderationAlerts;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,6 +63,8 @@ public class TestimonialServiceImpl implements TestimonialService {
 
         User user = userRepository.getSessionUser(actor.getId());
         Testimonial saved = testimonialRepository.save(testimonialMapper.toEntity(request, user));
+        // Aviso por email para revisarlo pronto: hasta que se apruebe, no se publica.
+        moderationAlerts.newTestimonial(saved);
         return testimonialMapper.toResponse(saved);
     }
 

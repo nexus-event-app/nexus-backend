@@ -118,7 +118,7 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | POST | `/api/comments` | 201 `CommentResponse` |
 | DELETE | `/api/comments/{id}` | 204; solo autor o ADMIN |
 | POST | `/api/comments/{id}/like` | alterna like → `CommentResponse` |
-| POST | `/api/testimonials` | 201 `TestimonialResponse`; queda `isPending=true`, `isActive=false`; máximo uno cada 24 h por usuario (409 si no) |
+| POST | `/api/testimonials` | 201 `TestimonialResponse`; queda `isPending=true`, `isActive=false`; máximo uno cada 24 h por usuario (409 si no). Avisa por email a `MODERATION_EMAIL` (o, si no hay, a las cuentas de administración) con el texto y el enlace al panel |
 
 ### Solo ADMIN (`/api/admin/**`)
 | Método | Ruta | Notas |

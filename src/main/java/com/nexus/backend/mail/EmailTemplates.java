@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * Emails de cuenta, en texto plano y HTML sencillo compatible con los clientes de correo. Se redactan en el idioma de la
+ * Emails de cuenta (y avisos de moderación), en texto plano y HTML sencillo compatible con los clientes de correo. Se redactan en el idioma de la
  * petición que los provoca (cabecera Accept-Language) y los enlaces apuntan a la versión de la web en ese idioma.
  */
 @Component
@@ -42,6 +44,56 @@ public class EmailTemplates {
                 messages.get(locale, "mail.reset.action"),
                 link(locale, "/restablecer-contrasena", token),
                 messages.get(locale, "mail.reset.note"));
+    }
+
+    /**
+     * Aviso a quien administra: hay un testimonio nuevo esperando. Va en castellano, como el panel, y trae el texto
+     * completo para leerlo desde el móvil; se publica o se rechaza en el panel, con la sesión iniciada.
+     */
+    public EmailMessage newTestimonial(String to, String author, String role, String location, String content) {
+        Locale locale = Locale.forLanguageTag("es");
+        String brand = messages.get(locale, "mail.brand");
+        String who = oneLine(author);
+        String subject = messages.get(locale, "mail.testimonial.subject", who);
+        String intro = messages.get(locale, "mail.testimonial.intro", who);
+        String action = messages.get(locale, "mail.testimonial.action");
+        String note = messages.get(locale, "mail.testimonial.note", brand);
+        String details = Stream.of(role, location)
+                .filter(value -> value != null && !value.isBlank()).map(EmailTemplates::oneLine)
+                .collect(Collectors.joining(" · "));
+        String link = publicUrl + "/admin/testimonios";
+
+        String text = intro + "\n\n" + who + (details.isEmpty() ? "" : " (" + details + ")") + ":\n\n" + content
+                + "\n\n" + action + ": " + link + "\n\n" + note + "\n";
+
+        String safeLink = HtmlUtils.htmlEscape(link);
+        String quote = HtmlUtils.htmlEscape(content).replace("\r\n", "\n").replace("\n", "<br>");
+        String html = """
+                <!doctype html>
+                <html lang="es"><body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,Helvetica,sans-serif;color:#0f172a">
+                <table role="presentation" width="100%%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;padding:32px">
+                <tr><td>
+                <p style="margin:0 0 24px;font-size:20px;font-weight:bold;color:#4f46e5">%s</p>
+                <p style="margin:0 0 20px;font-size:16px;line-height:1.5">%s</p>
+                <blockquote style="margin:0 0 24px;padding:16px 20px;background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px">
+                <p style="margin:0 0 12px;font-size:16px;line-height:1.6">%s</p>
+                <p style="margin:0;font-size:14px;color:#475569"><strong style="color:#0f172a">%s</strong>%s</p>
+                </blockquote>
+                <p style="margin:0 0 24px"><a href="%s" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px">%s</a></p>
+                <p style="margin:0;font-size:13px;color:#475569;line-height:1.5">%s</p>
+                </td></tr></table>
+                </td></tr></table>
+                </body></html>
+                """.formatted(brand, HtmlUtils.htmlEscape(intro), quote, HtmlUtils.htmlEscape(who),
+                details.isEmpty() ? "" : " · " + HtmlUtils.htmlEscape(details), safeLink, HtmlUtils.htmlEscape(action),
+                HtmlUtils.htmlEscape(note));
+        return new EmailMessage(to, subject, text, html);
+    }
+
+    /** Sin saltos de línea: lo que escribe una persona no puede romper el asunto ni la cabecera del email. */
+    private static String oneLine(String value) {
+        return value == null ? "" : value.replaceAll("[\\r\\n]+", " ").trim();
     }
 
     private String link(Locale locale, String path, String token) {
