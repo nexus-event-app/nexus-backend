@@ -35,7 +35,8 @@ public final class Languages {
             Map.entry("buscar", Map.of("ca", "cerca", "en", "search")),
             Map.entry("sobre-el-proyecto", Map.of("ca", "sobre-el-projecte", "en", "about")),
             Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications")),
-            Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths")));
+            Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths")),
+            Map.entry("glosario", Map.of("ca", "glossari", "en", "glossary")));
 
     /**
      * Subsecciones fijas que también se traducen (el resto de segundos segmentos son identificadores como
