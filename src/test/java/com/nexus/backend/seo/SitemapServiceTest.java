@@ -47,6 +47,9 @@ class SitemapServiceTest {
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/feina\"");
         assertThat(block(SITE + "/ca/forum")).isNotNull();
         assertThat(block(SITE + "/en/news")).contains("hreflang=\"ca\" href=\"" + SITE + "/ca/noticies\"");
+        // Eventos, en los tres idiomas.
+        assertThat(block(SITE + "/eventos")).contains("hreflang=\"ca\" href=\"" + SITE + "/ca/esdeveniments\"",
+                "hreflang=\"en\" href=\"" + SITE + "/en/events\"");
         // El glosario, en los tres idiomas.
         assertThat(block(SITE + "/glosario")).contains("hreflang=\"en\" href=\"" + SITE + "/en/glossary\"",
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/glossari\"");

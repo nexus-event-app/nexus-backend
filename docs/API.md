@@ -85,6 +85,7 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 | Método | Ruta | Respuesta |
 |---|---|---|
 | GET | `/api/news?page&size&category&q` | `PageResponse<NewsResponse>` (solo activas) |
+| GET | `/api/events?page&size&forWomen&mode` | `PageResponse<EventResponse>`: próximos eventos de la comunidad (desde hoy, hora de España), del más cercano al más lejano. `EventResponse`: `{ id, title, description, url, host, date, time, mode: ONLINE\|PRESENCIAL, city, forWomen, mine }`; nunca dice quién lo compartió (`mine` solo es `true` para esa persona, para que pueda borrarlo) |
 | GET | `/api/news/categories?language` | `NewsCategory[]`: temas con alguna noticia publicada (en ese idioma, o en todos), en el orden de los filtros; la web oculta los demás |
 | GET | `/api/news/latest?limit` (por defecto 3, máx 12) | `NewsResponse[]` |
 | GET | `/api/news/{id}` | `NewsResponse` (404 si no existe o está inactiva) |
@@ -119,6 +120,8 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | POST | `/api/comments` | 201 `CommentResponse` |
 | DELETE | `/api/comments/{id}` | 204; solo autor o ADMIN |
 | POST | `/api/comments/{id}/like` | alterna like → `CommentResponse` |
+| POST | `/api/events` | 201 `EventResponse`; se publica al momento. Pide email verificado, enlace `https://`, fecha de hoy en adelante y ciudad si es presencial; máximo 5 al día por persona (409) y sin duplicados (mismo enlace y fecha: 409). Avisa por email a `MODERATION_EMAIL` |
+| DELETE | `/api/events/{id}` | 204; quien lo compartió o ADMIN (p. ej., si está repetido) |
 | POST | `/api/testimonials` | 201 `TestimonialResponse`; queda `isPending=true`, `isActive=false`; máximo uno cada 24 h por usuario (409 si no). Avisa por email a `MODERATION_EMAIL` (o, si no hay, a las cuentas de administración) con el texto y el enlace al panel |
 
 ### Solo ADMIN (`/api/admin/**`)
@@ -132,6 +135,7 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | GET | `/api/admin/discussions?page&size&q` | incluye inactivas |
 | GET | `/api/admin/testimonials` | `TestimonialResponse[]` de todos, pendientes incluidos |
 | PUT | `/api/admin/testimonials/{id}` | aprobar, ocultar o destacar |
+| GET | `/api/admin/events?page&size` | `PageResponse<AdminEventResponse>`: todos los eventos (también ocultos y pasados), con `active`, `past` y `authorName`; se borran con `DELETE /api/events/{id}`. Los reportes aceptan `targetType: EVENT` |
 | DELETE | `/api/admin/testimonials/{id}` | |
 | GET | `/api/admin/users?page&size&q` | `PageResponse<UserResponse>` |
 | PUT | `/api/admin/users/{id}/status` | `{enabled}`; un admin no puede desactivarse a sí mismo ni a otro ADMIN |

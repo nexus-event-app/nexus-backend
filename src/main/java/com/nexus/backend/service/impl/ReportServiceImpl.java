@@ -5,6 +5,7 @@ import com.nexus.backend.dto.request.ResolveReportRequest;
 import com.nexus.backend.dto.response.ReportCaseResponse;
 import com.nexus.backend.dto.response.ReportCaseResponse.Target;
 import com.nexus.backend.entity.Comment;
+import com.nexus.backend.entity.CommunityEvent;
 import com.nexus.backend.entity.Discussion;
 import com.nexus.backend.entity.Report;
 import com.nexus.backend.entity.Testimonial;
@@ -16,6 +17,7 @@ import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.repository.CommentRepository;
+import com.nexus.backend.repository.CommunityEventRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.ReportRepository;
 import com.nexus.backend.repository.TestimonialRepository;
@@ -24,6 +26,7 @@ import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.CommentService;
 import com.nexus.backend.service.DiscussionService;
+import com.nexus.backend.service.EventService;
 import com.nexus.backend.service.ReportService;
 import com.nexus.backend.service.TestimonialService;
 import com.nexus.backend.util.SlugUtil;
@@ -62,6 +65,8 @@ public class ReportServiceImpl implements ReportService {
     private final DiscussionService discussionService;
     private final CommentService commentService;
     private final TestimonialService testimonialService;
+    private final EventService eventService;
+    private final CommunityEventRepository eventRepository;
 
     /** Contenido reportable que se puede ver: quién lo escribió (null si fue un testimonio sin cuenta). */
     private record Owner(Long userId) {
@@ -135,6 +140,7 @@ public class ReportServiceImpl implements ReportService {
         switch (type) {
             case DISCUSSION -> discussionRepository.findById(id).ifPresent(discussion -> discussion.setIsActive(false));
             case TESTIMONIAL -> testimonialRepository.findById(id).ifPresent(testimonial -> testimonial.setIsActive(false));
+            case EVENT -> eventService.hide(id);
             // Los comentarios no se pueden ocultar, solo borrar.
             case COMMENT -> throw new BadRequestException("error.report.cannotHideComment");
         }
@@ -145,6 +151,7 @@ public class ReportServiceImpl implements ReportService {
             case DISCUSSION -> discussionService.deleteDiscussion(id, actor);
             case COMMENT -> commentService.deleteComment(id, actor);
             case TESTIMONIAL -> testimonialService.deleteTestimonial(id);
+            case EVENT -> eventService.delete(id, actor);
         }
     }
 
@@ -153,6 +160,7 @@ public class ReportServiceImpl implements ReportService {
             case DISCUSSION -> discussionRepository.existsById(id);
             case COMMENT -> commentRepository.existsById(id);
             case TESTIMONIAL -> testimonialRepository.existsById(id);
+            case EVENT -> eventRepository.existsById(id);
         };
     }
 
@@ -168,6 +176,9 @@ public class ReportServiceImpl implements ReportService {
             case TESTIMONIAL -> testimonialRepository.findById(id)
                     .filter(Testimonial::isPublished)
                     .map(testimonial -> new Owner(testimonial.getUser() == null ? null : testimonial.getUser().getId()));
+            case EVENT -> eventRepository.findById(id)
+                    .filter(event -> eventService.isVisible(event.getId()))
+                    .map(event -> new Owner(event.getAuthor().getId()));
         };
     }
 
@@ -190,6 +201,7 @@ public class ReportServiceImpl implements ReportService {
             case DISCUSSION -> discussionRepository.findById(id).map(ReportServiceImpl::describe).orElseGet(Target::missing);
             case COMMENT -> commentRepository.findById(id).map(ReportServiceImpl::describe).orElseGet(Target::missing);
             case TESTIMONIAL -> testimonialRepository.findById(id).map(ReportServiceImpl::describe).orElseGet(Target::missing);
+            case EVENT -> eventRepository.findById(id).map(ReportServiceImpl::describe).orElseGet(Target::missing);
         };
     }
 
@@ -210,5 +222,12 @@ public class ReportServiceImpl implements ReportService {
         return new Target(true, testimonial.isPublished(), testimonial.getName(),
                 TextUtil.truncate(testimonial.getContent(), EXCERPT_LENGTH),
                 testimonial.getUser() == null ? null : testimonial.getUser().getId(), testimonial.getName(), null, null);
+    }
+
+    /** Para moderar, quien lo compartió sí se ve (en la web pública, no). */
+    private static Target describe(CommunityEvent event) {
+        return new Target(true, event.isActive(), event.getTitle(),
+                TextUtil.truncate(event.getDescription() + " — " + event.getUrl(), EXCERPT_LENGTH),
+                event.getAuthor().getId(), event.getAuthor().getName(), null, null);
     }
 }

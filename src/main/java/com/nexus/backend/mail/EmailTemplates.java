@@ -18,6 +18,9 @@ import java.util.stream.Stream;
 @Component
 public class EmailTemplates {
 
+    /** Los avisos de moderación van en castellano, como el panel de administración. */
+    private static final Locale MODERATION_LOCALE = Locale.forLanguageTag("es");
+
     private final Messages messages;
     private final String publicUrl;
 
@@ -51,18 +54,37 @@ public class EmailTemplates {
      * completo para leerlo desde el móvil; se publica o se rechaza en el panel, con la sesión iniciada.
      */
     public EmailMessage newTestimonial(String to, String author, String role, String location, String content) {
-        Locale locale = Locale.forLanguageTag("es");
-        String brand = messages.get(locale, "mail.brand");
+        Locale locale = MODERATION_LOCALE;
         String who = oneLine(author);
-        String subject = messages.get(locale, "mail.testimonial.subject", who);
-        String intro = messages.get(locale, "mail.testimonial.intro", who);
-        String action = messages.get(locale, "mail.testimonial.action");
-        String note = messages.get(locale, "mail.testimonial.note", brand);
-        String details = Stream.of(role, location)
-                .filter(value -> value != null && !value.isBlank()).map(EmailTemplates::oneLine)
-                .collect(Collectors.joining(" · "));
-        String link = publicUrl + "/admin/testimonios";
+        return moderationAlert(to, messages.get(locale, "mail.testimonial.subject", who),
+                messages.get(locale, "mail.testimonial.intro", who), who, joinDetails(role, location), content,
+                "/admin/testimonios", messages.get(locale, "mail.testimonial.action"),
+                messages.get(locale, "mail.testimonial.note", messages.get(locale, "mail.brand")));
+    }
 
+    /**
+     * Aviso de un evento nuevo de la comunidad. Ya está publicado: el email sirve para revisarlo (repetidos, spam) y
+     * borrarlo desde el panel si hace falta.
+     */
+    public EmailMessage newEvent(String to, String title, String when, String where, boolean forWomen, String description,
+                                 String url) {
+        Locale locale = MODERATION_LOCALE;
+        String what = oneLine(title);
+        String women = forWomen ? messages.get(locale, "mail.event.women") : null;
+        return moderationAlert(to, messages.get(locale, "mail.event.subject", what),
+                messages.get(locale, "mail.event.intro"), what, joinDetails(when, where, women),
+                description + "\n\n" + url, "/admin/eventos", messages.get(locale, "mail.event.action"),
+                messages.get(locale, "mail.event.note", messages.get(locale, "mail.brand")));
+    }
+
+    /**
+     * Aviso para quien administra: un texto destacado (lo que alguien ha escrito, escapado y con sus saltos de línea),
+     * quién o qué es, y un botón al panel. Va en castellano, como el panel.
+     */
+    private EmailMessage moderationAlert(String to, String subject, String intro, String who, String details,
+                                         String content, String adminPath, String action, String note) {
+        String brand = messages.get(MODERATION_LOCALE, "mail.brand");
+        String link = publicUrl + adminPath;
         String text = intro + "\n\n" + who + (details.isEmpty() ? "" : " (" + details + ")") + ":\n\n" + content
                 + "\n\n" + action + ": " + link + "\n\n" + note + "\n";
 
@@ -89,6 +111,11 @@ public class EmailTemplates {
                 details.isEmpty() ? "" : " · " + HtmlUtils.htmlEscape(details), safeLink, HtmlUtils.htmlEscape(action),
                 HtmlUtils.htmlEscape(note));
         return new EmailMessage(to, subject, text, html);
+    }
+
+    private static String joinDetails(String... values) {
+        return Stream.of(values).filter(value -> value != null && !value.isBlank()).map(EmailTemplates::oneLine)
+                .collect(Collectors.joining(" · "));
     }
 
     /** Sin saltos de línea: lo que escribe una persona no puede romper el asunto ni la cabecera del email. */

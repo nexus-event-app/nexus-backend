@@ -53,11 +53,13 @@ class LanguagesTest {
                 Map.entry("sobre-el-proyecto", Map.of("ca", "sobre-el-projecte", "en", "about")),
                 Map.entry("notificaciones", Map.of("ca", "notificacions", "en", "notifications")),
                 Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths")),
-                Map.entry("glosario", Map.of("ca", "glossari", "en", "glossary"))));
+                Map.entry("glosario", Map.of("ca", "glossari", "en", "glossary")),
+                Map.entry("eventos", Map.of("ca", "esdeveniments", "en", "events"))));
         assertThat(Languages.SUBSEGMENTS).containsExactlyInAnyOrderEntriesOf(Map.of(
                 "foro", Map.of("nueva", Map.of("ca", "nova", "en", "new")),
                 "empleo", Map.of("guardadas", Map.of("ca", "desades", "en", "saved")),
                 "perfil", Map.of("editar", Map.of("ca", "edita", "en", "edit")),
+                "eventos", Map.of("nuevo", Map.of("ca", "nou", "en", "new")),
                 "rutas", Map.of(
                         "datos", Map.of("ca", "dades", "en", "data"),
                         "ia", Map.of("ca", "ia", "en", "ai"))));

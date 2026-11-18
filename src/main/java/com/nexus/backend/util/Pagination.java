@@ -37,6 +37,11 @@ public final class Pagination {
         return spainFirst(0, latestSize(limit));
     }
 
+    /** Sin orden propio: lo pone la consulta (p. ej., los eventos por fecha). */
+    public static Pageable unsorted(int page, int size) {
+        return page(page, size, Sort.unsorted());
+    }
+
     public static Pageable latest(int limit) {
         return newestFirst(0, latestSize(limit));
     }
