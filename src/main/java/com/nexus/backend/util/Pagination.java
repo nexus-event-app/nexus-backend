@@ -37,6 +37,11 @@ public final class Pagination {
         return spainFirst(0, latestSize(limit));
     }
 
+    /** Agenda: del evento más cercano al más lejano. */
+    public static Pageable soonestFirst(int page, int size) {
+        return page(page, size, Sort.by(Sort.Order.asc("startsOn"), Sort.Order.asc("startTime"), Sort.Order.asc("id")));
+    }
+
     /** Sin orden propio: lo pone la consulta (p. ej., los eventos por fecha). */
     public static Pageable unsorted(int page, int size) {
         return page(page, size, Sort.unsorted());

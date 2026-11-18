@@ -1,7 +1,8 @@
 package com.nexus.backend.service.impl;
 
-import com.nexus.backend.dto.request.CreateEventRequest;
+import com.nexus.backend.dto.request.EventRequest;
 import com.nexus.backend.dto.response.AdminEventResponse;
+import com.nexus.backend.dto.response.EventDayResponse;
 import com.nexus.backend.dto.response.EventResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.entity.CommunityEvent;
@@ -17,6 +18,7 @@ import com.nexus.backend.mail.ModerationAlerts;
 import com.nexus.backend.repository.CommunityEventRepository;
 import com.nexus.backend.repository.ReportRepository;
 import com.nexus.backend.repository.UserRepository;
+import com.nexus.backend.repository.spec.EventSpecifications;
 import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.EventService;
@@ -31,7 +33,14 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Eventos que comparte la comunidad. Se publican al momento (con límite diario y sin duplicados) y la moderación llega
@@ -46,6 +55,8 @@ public class EventServiceImpl implements EventService {
     /** Para que nadie llene la lista: eventos que una persona puede compartir en 24 horas. */
     static final int DAILY_LIMIT = 5;
     static final int KEEP_PAST_DAYS = 90;
+    /** El calendario pide un mes (con los días que asoman de los meses de al lado): unas seis semanas. */
+    static final int MAX_CALENDAR_DAYS = 62;
 
     private final CommunityEventRepository eventRepository;
     private final ReportRepository reportRepository;
@@ -56,45 +67,81 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<EventResponse> getUpcoming(Boolean forWomen, EventMode mode, int page, int size,
-                                                   UserDetail viewer) {
+    public PageResponse<EventResponse> getUpcoming(Filter filter, int page, int size, UserDetail viewer) {
         Long viewerId = viewer == null ? null : viewer.getId();
-        return PageResponse.from(eventRepository
-                .findUpcoming(today(), forWomen, mode, Pagination.unsorted(page, size))
+        var spec = EventSpecifications.upcoming(today())
+                .and(EventSpecifications.forWomen(filter.forWomen()))
+                .and(EventSpecifications.mode(filter.mode()))
+                .and(EventSpecifications.inCity(filter.city()))
+                .and(EventSpecifications.onDay(filter.day()));
+        return PageResponse.from(eventRepository.findAll(spec, Pagination.soonestFirst(page, size))
                 .map(event -> toResponse(event, viewerId)));
     }
 
     @Override
-    @Transactional
-    public EventResponse create(CreateEventRequest request, UserDetail actor) {
-        accountService.assertCanParticipate(actor);
-        String city = blankToNull(request.getCity());
-        if (request.getMode() == EventMode.PRESENCIAL && city == null) {
-            throw new BadRequestException("error.event.cityRequired");
+    @Transactional(readOnly = true)
+    public List<EventDayResponse> getCalendar(LocalDate from, LocalDate to) {
+        if (from == null || to == null || to.isBefore(from) || ChronoUnit.DAYS.between(from, to) > MAX_CALENDAR_DAYS) {
+            throw new BadRequestException("error.event.rangeTooLong");
         }
-        String url = request.getUrl().trim();
+        // Los días pasados no salen: sus eventos ya no se ven en la agenda.
+        LocalDate start = from.isBefore(today()) ? today() : from;
+        if (to.isBefore(start)) {
+            return List.of();
+        }
+        Map<LocalDate, EventDayResponse> days = new TreeMap<>();
+        for (CommunityEvent event : eventRepository.findByActiveTrueAndStartsOnBetween(start, to)) {
+            days.merge(event.getStartsOn(), new EventDayResponse(event.getStartsOn(), 1, event.isForWomen()),
+                    (a, b) -> new EventDayResponse(a.date(), a.count() + 1, a.forWomen() || b.forWomen()));
+        }
+        return new ArrayList<>(days.values());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getCities() {
+        // Una sola entrada por ciudad aunque se haya escrito distinto («madrid», «Madrid »): la primera forma vista.
+        Map<String, String> cities = new LinkedHashMap<>();
+        eventRepository.findUpcomingCities(today(), EventMode.PRESENCIAL).stream()
+                .filter(city -> !city.isBlank())
+                .map(String::trim)
+                .forEach(city -> cities.putIfAbsent(city.toLowerCase(Locale.ROOT), city));
+        return cities.values().stream().sorted(Comparator.comparing(city -> city.toLowerCase(Locale.ROOT))).toList();
+    }
+
+    @Override
+    @Transactional
+    public EventResponse create(EventRequest request, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
+        if (request.getDate().isBefore(today())) {
+            throw new BadRequestException("validation.event.date.future");
+        }
+        assertCityWhenInPerson(request);
         if (eventRepository.countByAuthorIdAndCreatedAtAfter(actor.getId(), LocalDateTime.now(clock).minusHours(24))
                 >= DAILY_LIMIT) {
             throw new ConflictException("error.event.limit");
         }
-        if (eventRepository.existsByUrlAndStartsOnAndActiveTrue(url, request.getDate())) {
+        if (eventRepository.existsByUrlAndStartsOnAndActiveTrue(request.getUrl().trim(), request.getDate())) {
             throw new ConflictException("error.event.duplicate");
         }
 
         CommunityEvent event = new CommunityEvent();
-        event.setTitle(request.getTitle().trim());
-        event.setDescription(request.getDescription().trim());
-        event.setUrl(url);
-        event.setStartsOn(request.getDate());
-        event.setStartTime(request.getTime());
-        event.setMode(request.getMode());
-        event.setCity(request.getMode() == EventMode.ONLINE ? null : city);
-        event.setForWomen(request.isForWomen());
+        apply(event, request);
         event.setAuthor(userRepository.getSessionUser(actor.getId()));
         CommunityEvent saved = eventRepository.save(event);
         moderationAlerts.newEvent(saved);
         log.info("Evento id={} compartido por usuario id={}", saved.getId(), actor.getId());
         return toResponse(saved, actor.getId());
+    }
+
+    @Override
+    @Transactional
+    public AdminEventResponse update(Long id, EventRequest request) {
+        assertCityWhenInPerson(request);
+        CommunityEvent event = find(id);
+        apply(event, request);
+        log.info("Evento id={} corregido desde el panel", id);
+        return toAdminResponse(eventRepository.save(event), today());
     }
 
     @Override
@@ -115,10 +162,7 @@ public class EventServiceImpl implements EventService {
     public PageResponse<AdminEventResponse> getAllForModeration(int page, int size) {
         LocalDate today = today();
         return PageResponse.from(eventRepository.findAllForModeration(Pagination.unsorted(page, size))
-                .map(event -> new AdminEventResponse(event.getId(), event.getTitle(), event.getDescription(),
-                        event.getUrl(), host(event.getUrl()), event.getStartsOn(), event.getStartTime(),
-                        event.getMode(), event.getCity(), event.isForWomen(), event.isActive(),
-                        event.getStartsOn().isBefore(today), event.getAuthor().getName(), event.getCreatedAt())));
+                .map(event -> toAdminResponse(event, today)));
     }
 
     @Override
@@ -147,10 +191,37 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("error.event.notFound"));
     }
 
+    private static void assertCityWhenInPerson(EventRequest request) {
+        if (request.getMode() == EventMode.PRESENCIAL && blankToNull(request.getCity()) == null) {
+            throw new BadRequestException("error.event.cityRequired");
+        }
+    }
+
+    /** Lo mismo al compartir y al corregir: textos sin espacios de más; un evento online no lleva ciudad ni dirección. */
+    private static void apply(CommunityEvent event, EventRequest request) {
+        boolean online = request.getMode() == EventMode.ONLINE;
+        event.setTitle(request.getTitle().trim());
+        event.setDescription(request.getDescription().trim());
+        event.setUrl(request.getUrl().trim());
+        event.setStartsOn(request.getDate());
+        event.setStartTime(request.getTime());
+        event.setMode(request.getMode());
+        event.setCity(online ? null : blankToNull(request.getCity()));
+        event.setAddress(online ? null : blankToNull(request.getAddress()));
+        event.setForWomen(request.isForWomen());
+    }
+
     private EventResponse toResponse(CommunityEvent event, Long viewerId) {
         return new EventResponse(event.getId(), event.getTitle(), event.getDescription(), event.getUrl(),
                 host(event.getUrl()), event.getStartsOn(), event.getStartTime(), event.getMode(), event.getCity(),
-                event.isForWomen(), viewerId != null && viewerId.equals(event.getAuthor().getId()));
+                event.getAddress(), event.isForWomen(), viewerId != null && viewerId.equals(event.getAuthor().getId()));
+    }
+
+    private static AdminEventResponse toAdminResponse(CommunityEvent event, LocalDate today) {
+        return new AdminEventResponse(event.getId(), event.getTitle(), event.getDescription(), event.getUrl(),
+                host(event.getUrl()), event.getStartsOn(), event.getStartTime(), event.getMode(), event.getCity(),
+                event.getAddress(), event.isForWomen(), event.isActive(), event.getStartsOn().isBefore(today),
+                event.getAuthor().getName(), event.getCreatedAt());
     }
 
     /** «https://www.meetup.com/grupo/...» → «meetup.com». */

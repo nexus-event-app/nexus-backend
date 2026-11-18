@@ -1,6 +1,7 @@
 package com.nexus.backend.controller;
 
-import com.nexus.backend.dto.request.CreateEventRequest;
+import com.nexus.backend.dto.request.EventRequest;
+import com.nexus.backend.dto.response.EventDayResponse;
 import com.nexus.backend.dto.response.EventResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.enums.EventMode;
@@ -9,6 +10,7 @@ import com.nexus.backend.service.EventService;
 import com.nexus.backend.util.Pagination;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /** Eventos de la comunidad: verlos es público; compartirlos y borrar los propios, con sesión. */
 @RestController
@@ -35,12 +40,29 @@ public class EventController {
             @RequestParam(defaultValue = "" + Pagination.DEFAULT_SIZE) int size,
             @RequestParam(required = false) Boolean forWomen,
             @RequestParam(required = false) EventMode mode,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day,
             @AuthenticationPrincipal UserDetail principal) {
-        return ResponseEntity.ok(eventService.getUpcoming(forWomen, mode, page, size, principal));
+        return ResponseEntity.ok(eventService.getUpcoming(new EventService.Filter(forWomen, mode, city, day), page, size,
+                principal));
+    }
+
+    /** Días con eventos entre dos fechas, para marcar el calendario. */
+    @GetMapping("/calendar")
+    public ResponseEntity<List<EventDayResponse>> getCalendar(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return ResponseEntity.ok(eventService.getCalendar(from, to));
+    }
+
+    /** Ciudades con eventos presenciales próximos, para el filtro. */
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities() {
+        return ResponseEntity.ok(eventService.getCities());
     }
 
     @PostMapping
-    public ResponseEntity<EventResponse> create(@Valid @RequestBody CreateEventRequest request,
+    public ResponseEntity<EventResponse> create(@Valid @RequestBody EventRequest request,
                                                 @AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(request, principal));
     }

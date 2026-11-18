@@ -56,6 +56,10 @@ public class CommunityEvent {
     @Column(length = 80)
     private String city;
 
+    /** Dirección exacta, opcional (solo en los presenciales). */
+    @Column(length = 200)
+    private String address;
+
     /** Organizado por y para mujeres: sale en su propio bloque. */
     @Column(name = "for_women", nullable = false)
     private boolean forWomen;

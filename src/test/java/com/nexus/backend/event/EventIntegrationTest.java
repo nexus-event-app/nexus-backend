@@ -35,9 +35,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -103,6 +105,7 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].title").value("Meetup de React en Valencia"))
                 .andExpect(jsonPath("$.content[0].city").value("Valencia"))
+                .andExpect(jsonPath("$.content[0].address").value("Calle Mayor, 1"))
                 // Sin sesión no es «mío», y nunca se dice quién lo compartió.
                 .andExpect(jsonPath("$.content[0].mine").value(false))
                 .andExpect(jsonPath("$.content[0].author").doesNotExist())
@@ -132,6 +135,75 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content[*].title", contains("Hoy mismo")));
         mvc.perform(get("/api/events").param("mode", "PRESENCIAL"))
                 .andExpect(jsonPath("$.content[*].title", contains("Dentro de una semana")));
+    }
+
+    @Test
+    void filtersByCityWithoutCaringAboutCaseAndByDay() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        saved(ana, "En Madrid", TODAY.plusDays(2), EventMode.PRESENCIAL, false, true, "Madrid");
+        saved(ana, "En Barcelona", TODAY.plusDays(2), EventMode.PRESENCIAL, false, true, "Barcelona");
+        saved(ana, "En madrid, otro día", TODAY.plusDays(5), EventMode.PRESENCIAL, true, true, "madrid ");
+        saved(ana, "Online", TODAY.plusDays(2), EventMode.ONLINE, false, true);
+
+        mvc.perform(get("/api/events").param("city", "MADRID"))
+                .andExpect(jsonPath("$.content[*].title", contains("En Madrid", "En madrid, otro día")));
+        mvc.perform(get("/api/events").param("day", TODAY.plusDays(2).toString()))
+                .andExpect(jsonPath("$.content", hasSize(3)));
+        mvc.perform(get("/api/events").param("day", TODAY.plusDays(2).toString()).param("city", "barcelona"))
+                .andExpect(jsonPath("$.content[*].title", contains("En Barcelona")));
+        // Una entrada por ciudad aunque esté escrita distinto, en orden alfabético.
+        mvc.perform(get("/api/events/cities")).andExpect(jsonPath("$", contains("Barcelona", "Madrid")));
+    }
+
+    @Test
+    void theCalendarMarksTheDaysWithEventsAndWhetherAnyIsForWomen() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        saved(ana, "Pasado", TODAY.minusDays(1), EventMode.ONLINE, false, true);
+        saved(ana, "Uno", TODAY.plusDays(1), EventMode.ONLINE, false, true);
+        saved(ana, "Dos, de mujeres", TODAY.plusDays(1), EventMode.ONLINE, true, true);
+        saved(ana, "Oculto", TODAY.plusDays(3), EventMode.ONLINE, false, false);
+        saved(ana, "Tres", TODAY.plusDays(4), EventMode.ONLINE, false, true);
+
+        mvc.perform(get("/api/events/calendar").param("from", TODAY.minusDays(7).toString())
+                        .param("to", TODAY.plusDays(30).toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].date").value(TODAY.plusDays(1).toString()))
+                .andExpect(jsonPath("$[0].count").value(2))
+                .andExpect(jsonPath("$[0].forWomen").value(true))
+                .andExpect(jsonPath("$[1].date").value(TODAY.plusDays(4).toString()))
+                .andExpect(jsonPath("$[1].forWomen").value(false));
+        mvc.perform(get("/api/events/calendar").param("from", TODAY.toString())
+                        .param("to", TODAY.plusDays(200).toString()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void anAdministratorCanFixAnEventFromThePanel() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        User admin = user("Admin", User.Role.ADMIN, true);
+        CommunityEvent typo = saved(ana, "Meetup de Reakt", TODAY.plusDays(1), EventMode.PRESENCIAL, false, true,
+                "Doofinder C. de Cronos, 63 · Madrid");
+        Map<String, Object> fixed = event("Meetup de React", TODAY.plusDays(2), "PRESENCIAL", "Madrid", false);
+        fixed.put("address", "C. de Cronos, 63 (Doofinder)");
+
+        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", bearer(ana))
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(fixed)))
+                .andExpect(status().isForbidden());
+        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(fixed)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Meetup de React"))
+                .andExpect(jsonPath("$.city").value("Madrid"))
+                .andExpect(jsonPath("$.address").value("C. de Cronos, 63 (Doofinder)"))
+                .andExpect(jsonPath("$.authorName").value("Ana"));
+
+        // Si pasa a online, se quedan sin ciudad ni dirección.
+        Map<String, Object> online = event("Meetup de React", TODAY.plusDays(2), "ONLINE", "Madrid", false);
+        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(online)))
+                .andExpect(jsonPath("$.city").value(nullValue()))
+                .andExpect(jsonPath("$.address").value(nullValue()));
     }
 
     @Test
@@ -238,19 +310,25 @@ class EventIntegrationTest {
         body.put("time", "19:00");
         body.put("mode", mode);
         body.put("city", city);
+        body.put("address", city == null ? null : "Calle Mayor, 1");
         body.put("forWomen", forWomen);
         return body;
     }
 
     private CommunityEvent saved(User author, String title, LocalDate date, EventMode mode, boolean forWomen,
                                  boolean active) {
+        return saved(author, title, date, mode, forWomen, active, "Madrid");
+    }
+
+    private CommunityEvent saved(User author, String title, LocalDate date, EventMode mode, boolean forWomen,
+                                 boolean active, String city) {
         CommunityEvent event = new CommunityEvent();
         event.setTitle(title);
         event.setDescription("Descripción de prueba del evento.");
         event.setUrl("https://www.meetup.com/" + UUID.randomUUID());
         event.setStartsOn(date);
         event.setMode(mode);
-        event.setCity(mode == EventMode.PRESENCIAL ? "Madrid" : null);
+        event.setCity(mode == EventMode.PRESENCIAL ? city : null);
         event.setForWomen(forWomen);
         event.setActive(active);
         event.setAuthor(author);

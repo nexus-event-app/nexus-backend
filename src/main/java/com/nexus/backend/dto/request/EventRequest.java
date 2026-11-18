@@ -1,7 +1,6 @@
 package com.nexus.backend.dto.request;
 
 import com.nexus.backend.enums.EventMode;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -13,11 +12,14 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/** Lo mínimo para compartir un evento: enlace para apuntarse, título, fecha, dónde y una descripción corta. */
+/**
+ * Lo mínimo para compartir un evento (o corregirlo desde el panel): enlace para apuntarse, título, fecha, dónde y una
+ * descripción corta. Que la fecha no haya pasado se comprueba al compartirlo: el panel puede corregir cualquiera.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateEventRequest {
+public class EventRequest {
 
     @NotBlank(message = "{validation.event.url.required}")
     @Size(max = 500, message = "{validation.url.max500}")
@@ -33,7 +35,6 @@ public class CreateEventRequest {
     private String description;
 
     @NotNull(message = "{validation.event.date.required}")
-    @FutureOrPresent(message = "{validation.event.date.future}")
     private LocalDate date;
 
     private LocalTime time;
@@ -43,6 +44,9 @@ public class CreateEventRequest {
 
     @Size(max = 80, message = "{validation.event.city.size}")
     private String city;
+
+    @Size(max = 200, message = "{validation.event.address.size}")
+    private String address;
 
     private boolean forWomen;
 }

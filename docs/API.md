@@ -85,7 +85,9 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 | Método | Ruta | Respuesta |
 |---|---|---|
 | GET | `/api/news?page&size&category&q` | `PageResponse<NewsResponse>` (solo activas) |
-| GET | `/api/events?page&size&forWomen&mode` | `PageResponse<EventResponse>`: próximos eventos de la comunidad (desde hoy, hora de España), del más cercano al más lejano. `EventResponse`: `{ id, title, description, url, host, date, time, mode: ONLINE\|PRESENCIAL, city, forWomen, mine }`; nunca dice quién lo compartió (`mine` solo es `true` para esa persona, para que pueda borrarlo) |
+| GET | `/api/events?page&size&forWomen&mode&city&day` | `PageResponse<EventResponse>`: próximos eventos de la comunidad (desde hoy, hora de España), del más cercano al más lejano; `city` sin distinguir mayúsculas, `day` = `AAAA-MM-DD`. `EventResponse`: `{ id, title, description, url, host, date, time, mode: ONLINE\|PRESENCIAL, city, address, forWomen, mine }`; nunca dice quién lo compartió (`mine` solo es `true` para esa persona, para que pueda borrarlo) |
+| GET | `/api/events/calendar?from&to` | `[{ date, count, forWomen }]`: días con eventos visibles entre dos fechas (máx. 62 días; 400 si no), para el calendario |
+| GET | `/api/events/cities` | ciudades con eventos presenciales próximos, sin repetir y en orden |
 | GET | `/api/news/categories?language` | `NewsCategory[]`: temas con alguna noticia publicada (en ese idioma, o en todos), en el orden de los filtros; la web oculta los demás |
 | GET | `/api/news/latest?limit` (por defecto 3, máx 12) | `NewsResponse[]` |
 | GET | `/api/news/{id}` | `NewsResponse` (404 si no existe o está inactiva) |
@@ -136,6 +138,7 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | GET | `/api/admin/testimonials` | `TestimonialResponse[]` de todos, pendientes incluidos |
 | PUT | `/api/admin/testimonials/{id}` | aprobar, ocultar o destacar |
 | GET | `/api/admin/events?page&size` | `PageResponse<AdminEventResponse>`: todos los eventos (también ocultos y pasados), con `active`, `past` y `authorName`; se borran con `DELETE /api/events/{id}`. Los reportes aceptan `targetType: EVENT` |
+| PUT | `/api/admin/events/{id}` | corregir un evento (mismos campos que al compartirlo, cualquier fecha) → `AdminEventResponse` |
 | DELETE | `/api/admin/testimonials/{id}` | |
 | GET | `/api/admin/users?page&size&q` | `PageResponse<UserResponse>` |
 | PUT | `/api/admin/users/{id}/status` | `{enabled}`; un admin no puede desactivarse a sí mismo ni a otro ADMIN |

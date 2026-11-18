@@ -10,5 +10,6 @@ import java.time.LocalTime;
  * puede borrarlo. {@code host} es el dominio del enlace, para que se sepa adónde lleva «Apuntarme».
  */
 public record EventResponse(Long id, String title, String description, String url, String host, LocalDate date,
-                            LocalTime time, EventMode mode, String city, boolean forWomen, boolean mine) {
+                            LocalTime time, EventMode mode, String city, String address, boolean forWomen,
+                            boolean mine) {
 }
