@@ -52,6 +52,8 @@ services:
       REQUIRE_VERIFIED_EMAIL: ${REQUIRE_VERIFIED_EMAIL:-true}
       MODERATION_EMAIL: ${MODERATION_EMAIL:-}
       IMPORT_ENABLED: ${IMPORT_ENABLED:-true}
+      ADZUNA_APP_ID: ${ADZUNA_APP_ID:-}
+      ADZUNA_APP_KEY: ${ADZUNA_APP_KEY:-}
       JAVA_OPTS: -XX:MaxRAMPercentage=60
     volumes:
       - uploads:/app/uploads

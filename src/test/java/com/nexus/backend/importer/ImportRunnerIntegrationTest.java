@@ -35,10 +35,13 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(properties = {"app.import.news-max-age-days=36500", "app.import.job-max-age-days=36500"})
+@SpringBootTest(properties = {"app.import.news-max-age-days=36500", "app.import.job-max-age-days=36500",
+        "app.import.adzuna.app-id=id-de-prueba", "app.import.adzuna.app-key=clave-de-prueba"})
 @ActiveProfiles("test")
 class ImportRunnerIntegrationTest {
 
@@ -250,6 +253,24 @@ class ImportRunnerIntegrationTest {
                 .noneMatch(title -> title.startsWith("Semi Senior"));
         assertThat(jobs).filteredOn(job -> job.getTitle().startsWith("Práctica"))
                 .singleElement().extracting(JobOffer::getLevel).isEqualTo(JobLevel.INTERN);
+    }
+
+    @Test
+    void importsAdzunaJobsFromSpainWithTheirLevelAndKeepsTheKeysOutOfTheSource() throws Exception {
+        ImportSource adzuna = source("Adzuna · España", ImportSourceType.ADZUNA_JOBS,
+                "https://api.example.com/v1/api/jobs/es/search?category=it-jobs&what_or=junior", false);
+        when(feedClient.get(anyString(), anyString())).thenReturn(ProvidersTestFixtures.bytes("adzuna.json"));
+
+        importRunner.run(adzuna);
+
+        assertThat(jobOfferRepository.findAll()).extracting(JobOffer::getTitle, JobOffer::getLevel, JobOffer::getSource)
+                .containsExactlyInAnyOrder(
+                        tuple("Desarrollador/a Junior Java - Teletrabajo", JobLevel.JUNIOR, "Adzuna · España"),
+                        tuple("Becario/a de Data Analytics", JobLevel.INTERN, "Adzuna · España"),
+                        tuple("Soporte técnico junior", JobLevel.JUNIOR, "Adzuna · España"));
+        // Las claves solo viajan en la petición: la URL guardada de la fuente (la que se ve en el panel) no las lleva.
+        verify(feedClient).get(contains("app_key=clave-de-prueba"), anyString());
+        assertThat(adzuna.getUrl()).doesNotContain("clave");
     }
 
     @Test

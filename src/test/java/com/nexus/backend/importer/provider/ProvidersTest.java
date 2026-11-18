@@ -23,6 +23,7 @@ class ProvidersTest {
     private final RemotiveJobProvider remotive = new RemotiveJobProvider(null, objectMapper);
     private final ArbeitnowJobProvider arbeitnow = new ArbeitnowJobProvider(null, objectMapper);
     private final GetonbrdJobProvider getonbrd = new GetonbrdJobProvider(null, objectMapper);
+    private final AdzunaJobProvider adzuna = new AdzunaJobProvider(null, objectMapper, "ID", "CLAVE");
 
     @Test
     void parsesRealRssFeedWithMediaImages() throws IOException {
@@ -49,6 +50,46 @@ class ProvidersTest {
         assertThat(entry.summary()).isEqualTo("Primer párrafo con enlace.\n\nSegundo párrafo.");
         assertThat(entry.imageUrl()).isEqualTo("https://blog.example.com/img.png");
         assertThat(entry.author()).isEqualTo("Ana López");
+    }
+
+    @Test
+    void parsesAdzunaJobsFromSpainAndDeducesModeAndContract() throws IOException {
+        List<ImportedJob> jobs = adzuna.parse(objectMapper.readTree(fixture("adzuna.json")));
+
+        assertThat(jobs).hasSize(3);
+        ImportedJob java = jobs.getFirst();
+        assertThat(java.externalId()).isEqualTo("adzuna:5123456789");
+        assertThat(java.company()).isEqualTo("Acme Software");
+        assertThat(java.location()).isEqualTo("Madrid, Comunidad de Madrid");
+        assertThat(java.workMode()).isEqualTo(WorkMode.REMOTE);
+        assertThat(java.contractType()).isEqualTo(ContractType.FULL_TIME);
+        assertThat(java.applyUrl()).startsWith("https://www.adzuna.es/land/ad/");
+        assertThat(java.publishedAt()).isNotNull();
+        assertThat(java.techSource()).isTrue();
+
+        ImportedJob becario = jobs.get(1);
+        assertThat(becario.company()).isEqualTo("Empresa confidencial");
+        assertThat(becario.workMode()).isEqualTo(WorkMode.HYBRID);
+        assertThat(becario.contractType()).isEqualTo(ContractType.INTERNSHIP);
+
+        assertThat(jobs.get(2)).extracting(ImportedJob::workMode, ImportedJob::contractType)
+                .containsExactly(WorkMode.ONSITE, ContractType.TEMPORARY);
+    }
+
+    @Test
+    void adzunaKeysAreAddedToTheRequestNotStoredInTheSource() {
+        String url = AdzunaJobProvider.pageUrl(
+                "https://api.adzuna.com/v1/api/jobs/es/search?category=it-jobs&what_or=junior", 2, "mi id", "mi+clave");
+        assertThat(url).isEqualTo("https://api.adzuna.com/v1/api/jobs/es/search/2?category=it-jobs&what_or=junior"
+                + "&app_id=mi+id&app_key=mi%2Bclave&results_per_page=50&sort_by=date");
+    }
+
+    @Test
+    void withoutAdzunaKeysTheSourceSaysWhatIsMissing() {
+        AdzunaJobProvider withoutKeys = new AdzunaJobProvider(null, objectMapper, "", " ");
+        assertThatThrownBy(() -> withoutKeys.fetch(null))
+                .isInstanceOf(ImportException.class)
+                .hasMessageContaining("ADZUNA_APP_ID");
     }
 
     @Test

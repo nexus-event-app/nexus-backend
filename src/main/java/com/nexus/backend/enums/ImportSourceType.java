@@ -15,7 +15,12 @@ public enum ImportSourceType {
     /** API pública de Jobicy: empleo en remoto; sus condiciones piden no consultarla más de una vez por hora. */
     JOBICY_JOBS(false, 360, 60),
     /** API pública de Get on Board: empleo tech en español con nivel explícito. */
-    GETONBRD_JOBS(false, 120, 5);
+    GETONBRD_JOBS(false, 120, 5),
+    /**
+     * API de Adzuna: ofertas de España en castellano. Pide claves (ADZUNA_APP_ID y ADZUNA_APP_KEY) y el plan gratuito
+     * tiene un cupo mensual: cada 6 horas, con 2 páginas por vez, son unas 240 consultas al mes.
+     */
+    ADZUNA_JOBS(false, 360, 60);
 
     private final boolean news;
     private final int minIntervalMinutes;

@@ -40,6 +40,13 @@ public final class DefaultImportSources {
     private DefaultImportSources() {
     }
 
+    /**
+     * Ofertas de informática en España que piden prácticas o nivel junior (Adzuna busca cualquiera de las palabras).
+     * Las claves no van aquí: el proveedor las añade desde ADZUNA_APP_ID y ADZUNA_APP_KEY.
+     */
+    static final String ADZUNA_SPAIN_URL = "https://api.adzuna.com/v1/api/jobs/es/search?category=it-jobs"
+            + "&what_or=junior%20becario%20becaria%20practicas%20trainee%20intern%20internship&max_days_old=30";
+
     /** Fuentes añadidas en noviembre de 2026 para tener más temas (en el panel: «Añadir fuentes recomendadas»). */
     static final String XATAKA_IA_URL = "https://www.xataka.com/tag/inteligencia-artificial/rss2.xml";
     static final String MUYLINUX_URL = "https://www.muylinux.com/feed/";
@@ -90,7 +97,8 @@ public final class DefaultImportSources {
                         "https://remotive.com/api/remote-jobs?category=software-dev&search=junior", false),
                 jobs("Jobicy · Europa", ImportSourceType.JOBICY_JOBS,
                         "https://jobicy.com/api/v2/remote-jobs?count=100&geo=europe&industry=dev", false),
-                jobs("Arbeitnow", ImportSourceType.ARBEITNOW_JOBS, "https://www.arbeitnow.com/api/job-board-api", true));
+                jobs("Arbeitnow", ImportSourceType.ARBEITNOW_JOBS, "https://www.arbeitnow.com/api/job-board-api", true),
+                jobs("Adzuna · España", ImportSourceType.ADZUNA_JOBS, ADZUNA_SPAIN_URL, false));
     }
 
     /** Las fuentes en inglés se crean sin publicación automática para que un admin revise lo importado. */

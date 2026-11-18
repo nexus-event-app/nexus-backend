@@ -113,7 +113,7 @@ nano /opt/primercommit/nexus-backend/deploy/.env
 ```
 
 Rellena: `DOMAIN`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` (tu cuenta de administradora; contraseña larga y única), los datos
-de email de Gmail, `MODERATION_EMAIL` (la dirección del proyecto: ahí llega el aviso de cada testimonio nuevo), los de Google si los tienes y `VITE_LEGAL_OWNER_NAME`, `VITE_LEGAL_EMAIL` y
+de email de Gmail, `MODERATION_EMAIL` (la dirección del proyecto: ahí llega el aviso de cada testimonio nuevo), `ADZUNA_APP_ID` y `ADZUNA_APP_KEY` (ofertas de empleo de España: las mismas claves que tienes en tu Mac), los de Google si los tienes y `VITE_LEGAL_OWNER_NAME`, `VITE_LEGAL_EMAIL` y
 `VITE_LEGAL_HOSTING_PROVIDER` (por ejemplo, `Hetzner Online GmbH (Alemania)`). No toques `POSTGRES_PASSWORD` ni
 `JWT_SECRET`: ya están generados. Guarda con `Ctrl+O`, `Intro`, y sal con `Ctrl+X`.
 

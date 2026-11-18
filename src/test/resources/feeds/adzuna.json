@@ -1,0 +1,48 @@
+{
+  "__CLASS__": "Adzuna::API::Response::JobSearchResults",
+  "count": 1093,
+  "mean": 26500,
+  "results": [
+    {
+      "__CLASS__": "Adzuna::API::Response::Job",
+      "id": "5123456789",
+      "title": "Desarrollador/a Junior Java - Teletrabajo",
+      "description": "Buscamos una persona desarrolladora junior con ganas de aprender Java y Spring Boot. Trabajo en remoto desde cualquier punto de España…",
+      "created": "2026-11-15T09:12:33Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/5123456789?se=abc&v=1",
+      "company": { "__CLASS__": "Adzuna::API::Response::Company", "display_name": "Acme Software" },
+      "location": { "__CLASS__": "Adzuna::API::Response::Location", "display_name": "Madrid, Comunidad de Madrid", "area": ["España", "Comunidad de Madrid", "Madrid"] },
+      "category": { "__CLASS__": "Adzuna::API::Response::Category", "tag": "it-jobs", "label": "Empleos de TI" },
+      "contract_time": "full_time",
+      "contract_type": "permanent",
+      "salary_min": 22000,
+      "salary_max": 26000
+    },
+    {
+      "id": "5123456790",
+      "title": "Becario/a de Data Analytics",
+      "description": "Prácticas en el equipo de datos en modalidad híbrida, con convenio universitario.",
+      "created": "2026-11-14T08:00:00Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/5123456790?se=abc&v=1",
+      "location": { "display_name": "Barcelona, Cataluña" },
+      "category": { "tag": "it-jobs", "label": "Empleos de TI" },
+      "contract_time": "part_time"
+    },
+    {
+      "id": "5123456791",
+      "title": "Soporte técnico junior",
+      "description": "Atención a usuarios y mantenimiento de equipos en nuestra oficina.",
+      "created": "2026-11-13T10:30:00Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/5123456791?se=abc&v=1",
+      "company": { "display_name": "Servicios TIC Norte" },
+      "location": { "display_name": "A Coruña, Galicia" },
+      "category": { "tag": "it-jobs", "label": "Empleos de TI" },
+      "contract_type": "contract"
+    },
+    {
+      "id": "5123456792",
+      "title": "Sin enlace: se descarta",
+      "category": { "tag": "it-jobs" }
+    }
+  ]
+}
