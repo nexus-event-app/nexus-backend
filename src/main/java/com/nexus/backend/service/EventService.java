@@ -3,6 +3,7 @@ package com.nexus.backend.service;
 import com.nexus.backend.dto.request.EventRequest;
 import com.nexus.backend.dto.response.AdminEventResponse;
 import com.nexus.backend.dto.response.EventDayResponse;
+import com.nexus.backend.dto.response.EventInterestResponse;
 import com.nexus.backend.dto.response.EventResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.enums.EventMode;
@@ -27,6 +28,9 @@ public interface EventService {
     List<String> getCities();
 
     EventResponse create(EventRequest request, UserDetail actor);
+
+    /** «Me apunto»: lo marca o lo quita (solo en eventos visibles) y devuelve el número actualizado. */
+    EventInterestResponse toggleInterest(Long id, UserDetail actor);
 
     /** Panel: corregir un evento (cualquier fecha, por si hubo un error al compartirlo). */
     AdminEventResponse update(Long id, EventRequest request);

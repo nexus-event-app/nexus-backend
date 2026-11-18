@@ -7,6 +7,7 @@ import com.nexus.backend.enums.EventMode;
 import com.nexus.backend.mail.EmailMessage;
 import com.nexus.backend.mail.EmailSender;
 import com.nexus.backend.repository.CommunityEventRepository;
+import com.nexus.backend.repository.EventInterestRepository;
 import com.nexus.backend.repository.ReportRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.JwtUtil;
@@ -83,10 +84,13 @@ class EventIntegrationTest {
     private JwtUtil jwtUtil;
     @Autowired
     private CapturingEmailSender mail;
+    @Autowired
+    private EventInterestRepository interestRepository;
 
     @BeforeEach
     void clean() {
         reportRepository.deleteAll();
+        interestRepository.deleteAll();
         eventRepository.deleteAll();
         mail.sent.clear();
     }
@@ -294,6 +298,83 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content[0].active").value(false))
                 .andExpect(jsonPath("$.content[0].authorName").value("Ana"));
         mvc.perform(get("/api/admin/events").header("Authorization", bearer(ana))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void whenTheCityCarriesTheAddressOnlyTheCityIsKeptAndTheRestGoesToTheAddress() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        Map<String, Object> pasted = event("Meetup de Java", TODAY.plusDays(2), "PRESENCIAL",
+                "Doofinder C. de Cronos, 63 · Madrid", false);
+        pasted.put("address", null);
+        create(ana, pasted)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.city").value("Madrid"))
+                .andExpect(jsonPath("$.address").value("Doofinder C. de Cronos, 63 · Madrid"));
+
+        // Con dirección propia, la dirección se respeta.
+        Map<String, Object> withAddress = event("Taller de Git", TODAY.plusDays(3), "PRESENCIAL",
+                "Calle Pelai 12, Barcelona", false);
+        withAddress.put("url", "https://www.meetup.com/git/events/1/");
+        create(ana, withAddress)
+                .andExpect(jsonPath("$.city").value("Barcelona"))
+                .andExpect(jsonPath("$.address").value("Calle Mayor, 1"));
+
+        mvc.perform(get("/api/events/cities")).andExpect(jsonPath("$", contains("Barcelona", "Madrid")));
+    }
+
+    @Test
+    void meApuntoShowsHowManyPeopleAreInterestedWithoutSayingWho() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        User bea = user("Bea", User.Role.USER, true);
+        User carla = user("Carla", User.Role.USER, true);
+        CommunityEvent meetup = saved(ana, "Meetup", TODAY.plusDays(2), EventMode.ONLINE, false, true);
+        String interest = "/api/events/" + meetup.getId() + "/interest";
+
+        mvc.perform(post(interest)).andExpect(status().isUnauthorized());
+        mvc.perform(post(interest).header("Authorization", bearer(bea)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count").value(1))
+                .andExpect(jsonPath("$.interested").value(true));
+        mvc.perform(post(interest).header("Authorization", bearer(carla)))
+                .andExpect(jsonPath("$.count").value(2));
+
+        mvc.perform(get("/api/events").header("Authorization", bearer(bea)))
+                .andExpect(jsonPath("$.content[0].interestedCount").value(2))
+                .andExpect(jsonPath("$.content[0].interested").value(true));
+        mvc.perform(get("/api/events"))
+                .andExpect(jsonPath("$.content[0].interestedCount").value(2))
+                .andExpect(jsonPath("$.content[0].interested").value(false))
+                .andExpect(jsonPath("$.content[0].interestedUsers").doesNotExist());
+
+        // Pulsarlo otra vez lo quita.
+        mvc.perform(post(interest).header("Authorization", bearer(bea)))
+                .andExpect(jsonPath("$.count").value(1))
+                .andExpect(jsonPath("$.interested").value(false));
+        mvc.perform(get("/api/events").header("Authorization", bearer(bea)))
+                .andExpect(jsonPath("$.content[0].interestedCount").value(1))
+                .andExpect(jsonPath("$.content[0].interested").value(false));
+    }
+
+    @Test
+    void meApuntoOnlyWorksOnVisibleEventsAndWithAVerifiedAccount() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        CommunityEvent hidden = saved(ana, "Oculto", TODAY.plusDays(1), EventMode.ONLINE, false, false);
+        CommunityEvent past = saved(ana, "Pasado", TODAY.minusDays(1), EventMode.ONLINE, false, true);
+        CommunityEvent open = saved(ana, "Abierto", TODAY.plusDays(1), EventMode.ONLINE, false, true);
+
+        mvc.perform(post("/api/events/" + hidden.getId() + "/interest").header("Authorization", bearer(ana)))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/api/events/" + past.getId() + "/interest").header("Authorization", bearer(ana)))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/api/events/" + open.getId() + "/interest")
+                        .header("Authorization", bearer(user("Sin verificar", User.Role.USER, false))))
+                .andExpect(status().isForbidden());
+        // Al borrar el evento se van sus «Me apunto».
+        mvc.perform(post("/api/events/" + open.getId() + "/interest").header("Authorization", bearer(ana)))
+                .andExpect(status().isOk());
+        mvc.perform(delete("/api/events/" + open.getId()).header("Authorization", bearer(ana)))
+                .andExpect(status().isNoContent());
+        assertThat(interestRepository.count()).isZero();
     }
 
     private ResultActions create(User author, Map<String, Object> body) throws Exception {

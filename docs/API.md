@@ -85,7 +85,7 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 | Método | Ruta | Respuesta |
 |---|---|---|
 | GET | `/api/news?page&size&category&q` | `PageResponse<NewsResponse>` (solo activas) |
-| GET | `/api/events?page&size&forWomen&mode&city&day` | `PageResponse<EventResponse>`: próximos eventos de la comunidad (desde hoy, hora de España), del más cercano al más lejano; `city` sin distinguir mayúsculas, `day` = `AAAA-MM-DD`. `EventResponse`: `{ id, title, description, url, host, date, time, mode: ONLINE\|PRESENCIAL, city, address, forWomen, mine }`; nunca dice quién lo compartió (`mine` solo es `true` para esa persona, para que pueda borrarlo) |
+| GET | `/api/events?page&size&forWomen&mode&city&day` | `PageResponse<EventResponse>`: próximos eventos de la comunidad (desde hoy, hora de España), del más cercano al más lejano; `city` sin distinguir mayúsculas, `day` = `AAAA-MM-DD`. `EventResponse`: `{ id, title, description, url, host, date, time, mode: ONLINE\|PRESENCIAL, city, address, forWomen, mine, interestedCount, interested }`; nunca dice quién lo compartió (`mine` solo es `true` para esa persona, para que pueda borrarlo) ni quién se apunta (solo cuántos; `interested`: si quien mira es una). Si la ciudad llega con la dirección («C. de Cronos, 63 · Madrid»), se guarda solo la ciudad y el texto pasa a `address` |
 | GET | `/api/events/calendar?from&to` | `[{ date, count, forWomen }]`: días con eventos visibles entre dos fechas (máx. 62 días; 400 si no), para el calendario |
 | GET | `/api/events/cities` | ciudades con eventos presenciales próximos, sin repetir y en orden |
 | GET | `/api/news/categories?language` | `NewsCategory[]`: temas con alguna noticia publicada (en ese idioma, o en todos), en el orden de los filtros; la web oculta los demás |
@@ -123,6 +123,7 @@ En los GET de discusiones y comentarios, si llega un token válido se rellena `i
 | DELETE | `/api/comments/{id}` | 204; solo autor o ADMIN |
 | POST | `/api/comments/{id}/like` | alterna like → `CommentResponse` |
 | POST | `/api/events` | 201 `EventResponse`; se publica al momento. Pide email verificado, enlace `https://`, fecha de hoy en adelante y ciudad si es presencial; máximo 5 al día por persona (409) y sin duplicados (mismo enlace y fecha: 409). Avisa por email a `MODERATION_EMAIL` |
+| POST | `/api/events/{id}/interest` | «Me apunto»: lo marca o lo quita → `{ count, interested }`. Email verificado; 404 si el evento no está visible o ya pasó |
 | DELETE | `/api/events/{id}` | 204; quien lo compartió o ADMIN (p. ej., si está repetido) |
 | POST | `/api/testimonials` | 201 `TestimonialResponse`; queda `isPending=true`, `isActive=false`; máximo uno cada 24 h por usuario (409 si no). Avisa por email a `MODERATION_EMAIL` (o, si no hay, a las cuentas de administración) con el texto y el enlace al panel |
 

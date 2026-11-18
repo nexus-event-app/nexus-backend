@@ -3,9 +3,11 @@ package com.nexus.backend.service.impl;
 import com.nexus.backend.dto.request.EventRequest;
 import com.nexus.backend.dto.response.AdminEventResponse;
 import com.nexus.backend.dto.response.EventDayResponse;
+import com.nexus.backend.dto.response.EventInterestResponse;
 import com.nexus.backend.dto.response.EventResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.entity.CommunityEvent;
+import com.nexus.backend.entity.EventInterest;
 import com.nexus.backend.enums.EventMode;
 import com.nexus.backend.enums.ReportAction;
 import com.nexus.backend.enums.ReportStatus;
@@ -16,6 +18,7 @@ import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mail.ModerationAlerts;
 import com.nexus.backend.repository.CommunityEventRepository;
+import com.nexus.backend.repository.EventInterestRepository;
 import com.nexus.backend.repository.ReportRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.repository.spec.EventSpecifications;
@@ -23,6 +26,7 @@ import com.nexus.backend.security.UserDetail;
 import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.EventService;
 import com.nexus.backend.util.Pagination;
+import com.nexus.backend.util.SpanishCities;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -59,6 +63,7 @@ public class EventServiceImpl implements EventService {
     static final int MAX_CALENDAR_DAYS = 62;
 
     private final CommunityEventRepository eventRepository;
+    private final EventInterestRepository interestRepository;
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final AccountService accountService;
@@ -74,8 +79,19 @@ public class EventServiceImpl implements EventService {
                 .and(EventSpecifications.mode(filter.mode()))
                 .and(EventSpecifications.inCity(filter.city()))
                 .and(EventSpecifications.onDay(filter.day()));
-        return PageResponse.from(eventRepository.findAll(spec, Pagination.soonestFirst(page, size))
-                .map(event -> toResponse(event, viewerId)));
+        var events = eventRepository.findAll(spec, Pagination.soonestFirst(page, size));
+        // Los «Me apunto» de toda la página en dos consultas, no una por tarjeta.
+        List<Long> ids = events.getContent().stream().map(CommunityEvent::getId).toList();
+        Map<Long, Long> counts = new java.util.HashMap<>();
+        java.util.Set<Long> mine = new java.util.HashSet<>();
+        if (!ids.isEmpty()) {
+            interestRepository.countByEventIds(ids).forEach(row -> counts.put((Long) row[0], (Long) row[1]));
+            if (viewerId != null) {
+                mine.addAll(interestRepository.findEventIdsOfUser(viewerId, ids));
+            }
+        }
+        return PageResponse.from(events.map(event -> toResponse(event, viewerId,
+                counts.getOrDefault(event.getId(), 0L), mine.contains(event.getId()))));
     }
 
     @Override
@@ -131,7 +147,26 @@ public class EventServiceImpl implements EventService {
         CommunityEvent saved = eventRepository.save(event);
         moderationAlerts.newEvent(saved);
         log.info("Evento id={} compartido por usuario id={}", saved.getId(), actor.getId());
-        return toResponse(saved, actor.getId());
+        return toResponse(saved, actor.getId(), 0, false);
+    }
+
+    @Override
+    @Transactional
+    public EventInterestResponse toggleInterest(Long id, UserDetail actor) {
+        accountService.assertCanParticipate(actor);
+        CommunityEvent event = find(id);
+        if (!event.isVisibleOn(today())) {
+            throw new ResourceNotFoundException("error.event.notFound");
+        }
+        boolean interested;
+        if (interestRepository.existsByEventIdAndUserId(id, actor.getId())) {
+            interestRepository.deleteOne(id, actor.getId());
+            interested = false;
+        } else {
+            interestRepository.save(new EventInterest(id, actor.getId()));
+            interested = true;
+        }
+        return new EventInterestResponse(interestRepository.countByEventId(id), interested);
     }
 
     @Override
@@ -206,15 +241,26 @@ public class EventServiceImpl implements EventService {
         event.setStartsOn(request.getDate());
         event.setStartTime(request.getTime());
         event.setMode(request.getMode());
-        event.setCity(online ? null : blankToNull(request.getCity()));
-        event.setAddress(online ? null : blankToNull(request.getAddress()));
+        String city = online ? null : blankToNull(request.getCity());
+        String address = online ? null : blankToNull(request.getAddress());
+        // Si en la ciudad viene una dirección («C. de Cronos, 63 · Madrid»), se queda la ciudad y el resto, como dirección.
+        if (city != null && SpanishCities.looksLikeAddress(city)) {
+            String fullText = city;
+            city = SpanishCities.find(fullText).orElse(city);
+            if (address == null && !city.equals(fullText)) {
+                address = fullText.length() > 200 ? fullText.substring(0, 200) : fullText;
+            }
+        }
+        event.setCity(city);
+        event.setAddress(address);
         event.setForWomen(request.isForWomen());
     }
 
-    private EventResponse toResponse(CommunityEvent event, Long viewerId) {
+    private EventResponse toResponse(CommunityEvent event, Long viewerId, long interestedCount, boolean interested) {
         return new EventResponse(event.getId(), event.getTitle(), event.getDescription(), event.getUrl(),
                 host(event.getUrl()), event.getStartsOn(), event.getStartTime(), event.getMode(), event.getCity(),
-                event.getAddress(), event.isForWomen(), viewerId != null && viewerId.equals(event.getAuthor().getId()));
+                event.getAddress(), event.isForWomen(), viewerId != null && viewerId.equals(event.getAuthor().getId()),
+                interestedCount, interested);
     }
 
     private static AdminEventResponse toAdminResponse(CommunityEvent event, LocalDate today) {

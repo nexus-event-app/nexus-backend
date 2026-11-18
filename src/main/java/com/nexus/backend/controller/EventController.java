@@ -2,6 +2,7 @@ package com.nexus.backend.controller;
 
 import com.nexus.backend.dto.request.EventRequest;
 import com.nexus.backend.dto.response.EventDayResponse;
+import com.nexus.backend.dto.response.EventInterestResponse;
 import com.nexus.backend.dto.response.EventResponse;
 import com.nexus.backend.dto.response.PageResponse;
 import com.nexus.backend.enums.EventMode;
@@ -65,6 +66,13 @@ public class EventController {
     public ResponseEntity<EventResponse> create(@Valid @RequestBody EventRequest request,
                                                 @AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(request, principal));
+    }
+
+    /** «Me apunto»: lo marca o lo quita. */
+    @PostMapping("/{id}/interest")
+    public ResponseEntity<EventInterestResponse> toggleInterest(@PathVariable Long id,
+                                                                @AuthenticationPrincipal UserDetail principal) {
+        return ResponseEntity.ok(eventService.toggleInterest(id, principal));
     }
 
     @DeleteMapping("/{id}")
