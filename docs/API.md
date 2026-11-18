@@ -43,7 +43,7 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 ### NewsResponse
 `{ id, slug, title, content, sourceUrl, imageUrl, author, category, source, imported, isActive, createdAt, updatedAt }`
 `source` es el nombre de la fuente de importación (o `null`); `imported` es `true` si la noticia se importó (su `content` es solo un resumen).
-`category`: `DESARROLLO | ENTREVISTAS | NETWORKING | RECURSOS | GENERAL`
+`category`: `IA | PROGRAMACION | DATOS | CIBERSEGURIDAD | SISTEMAS | CARRERA | GENERAL`. Las importadas se clasifican por su contenido (`NewsClassifier`); si no encajan en ningún tema, se quedan con la categoría de su fuente.
 ### JobResponse
 `{ id, slug, title, company, description, location, workMode, contractType, level, tags: string[], applyUrl, source, imported, isActive, publishedAt, expiresAt, createdAt, updatedAt }`
 - `imported`: `true` si la oferta viene de una fuente externa (el frontend no la indexa ni la marca como JobPosting).
@@ -85,6 +85,7 @@ Los mensajes de error, de validación y los emails salen en el idioma de `Accept
 | Método | Ruta | Respuesta |
 |---|---|---|
 | GET | `/api/news?page&size&category&q` | `PageResponse<NewsResponse>` (solo activas) |
+| GET | `/api/news/categories?language` | `NewsCategory[]`: temas con alguna noticia publicada (en ese idioma, o en todos), en el orden de los filtros; la web oculta los demás |
 | GET | `/api/news/latest?limit` (por defecto 3, máx 12) | `NewsResponse[]` |
 | GET | `/api/news/{id}` | `NewsResponse` (404 si no existe o está inactiva) |
 | GET | `/api/jobs?page&size&level&workMode&contractType&q` | `PageResponse<JobResponse>` (activas y no caducadas) |

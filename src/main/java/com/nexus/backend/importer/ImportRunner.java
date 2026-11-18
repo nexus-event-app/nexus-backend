@@ -4,7 +4,6 @@ import com.nexus.backend.entity.ImportSource;
 import com.nexus.backend.entity.JobOffer;
 import com.nexus.backend.entity.News;
 import com.nexus.backend.enums.JobLevel;
-import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.enums.WorkMode;
 import com.nexus.backend.importer.provider.ImportedJob;
 import com.nexus.backend.importer.provider.ImportedNews;
@@ -189,7 +188,8 @@ public class ImportRunner {
         boolean useImage = !Boolean.FALSE.equals(source.getUseSourceImages()) && ImageUrlPolicy.isAcceptable(item.imageUrl());
         news.setImageUrl(useImage ? item.imageUrl() : null);
         news.setAuthor(TextUtil.truncate(Optional.ofNullable(item.author()).orElse(source.getName()), 100));
-        news.setCategory(Optional.ofNullable(source.getNewsCategory()).orElse(NewsCategory.GENERAL));
+        // El tema sale del contenido; si no está claro, el de la fuente.
+        news.setCategory(NewsClassifier.classify(news.getTitle(), news.getContent(), source.getNewsCategory()));
         news.setIsActive(Boolean.TRUE.equals(source.getAutoPublish()));
         news.setSource(source.getName());
         news.setExternalId(item.externalId());

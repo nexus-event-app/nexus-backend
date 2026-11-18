@@ -82,9 +82,13 @@ class ImportRunnerIntegrationTest {
         assertThat(first.imported()).isEqualTo(3);
 
         List<News> saved = newsRepository.findAll();
+        // El tema sale del contenido de cada noticia, no de la fuente.
+        assertThat(saved).extracting(News::getTitle, News::getCategory).containsExactlyInAnyOrder(
+                tuple("Escalabilidad en el desarrollo de aplicaciones", NewsCategory.PROGRAMACION),
+                tuple("Cómo iniciar tu carrera en tecnología con freeCodeCamp - Charla completa", NewsCategory.CARRERA),
+                tuple("Aprende SQL - Curso desde cero en español", NewsCategory.DATOS));
         assertThat(saved).allSatisfy(news -> {
             assertThat(news.getSource()).isEqualTo("freeCodeCamp");
-            assertThat(news.getCategory()).isEqualTo(NewsCategory.RECURSOS);
             assertThat(news.getIsActive()).isTrue();
             assertThat(news.getExternalId()).startsWith("rss:");
         });
@@ -387,7 +391,7 @@ class ImportRunnerIntegrationTest {
         source.setName(name);
         source.setType(type);
         source.setUrl(url);
-        source.setNewsCategory(type.isNews() ? NewsCategory.RECURSOS : null);
+        source.setNewsCategory(type.isNews() ? NewsCategory.PROGRAMACION : null);
         source.setRemoteOnly(remoteOnly);
         source.setIntervalMinutes(type.getMinIntervalMinutes());
         return sourceRepository.save(source);

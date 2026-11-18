@@ -47,6 +47,12 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<NewsCategory> getPublishedCategories(String language) {
+        return newsRepository.findPublishedCategories(ContentLanguage.orNull(language)).stream().sorted().toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<NewsResponse> getLatestNews(int limit) {
         // La portada solo enseña noticias en castellano, aunque haya menos de las pedidas: las de otros idiomas están en
         // la página de noticias, con su filtro de idioma.

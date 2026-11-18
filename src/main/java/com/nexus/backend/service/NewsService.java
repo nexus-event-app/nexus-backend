@@ -19,6 +19,9 @@ public interface NewsService {
 
     NewsResponse getPublicNewsById(Long id);
 
+    /** Temas que tienen noticias publicadas, en el orden de los filtros; null o un idioma desconocido: todos. */
+    List<NewsCategory> getPublishedCategories(String language);
+
     PageResponse<NewsResponse> getAllNews(NewsCategory category, String text, int page, int size);
 
     NewsResponse createNews(CreateNewsRequest request);

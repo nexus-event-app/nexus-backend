@@ -78,7 +78,7 @@ class PostgresMigrationTest {
         News news = new News();
         news.setTitle("Noticia en PostgreSQL");
         news.setContent("Contenido");
-        news.setCategory(NewsCategory.DESARROLLO);
+        news.setCategory(NewsCategory.PROGRAMACION);
         news.setExternalId("rss:test");
         newsRepository.save(news);
         assertThat(newsRepository.findExistingExternalIds(Set.of("rss:test", "rss:otro"))).containsExactly("rss:test");

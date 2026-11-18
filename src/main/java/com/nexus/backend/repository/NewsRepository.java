@@ -1,6 +1,7 @@
 package com.nexus.backend.repository;
 
 import com.nexus.backend.entity.News;
+import com.nexus.backend.enums.NewsCategory;
 import com.nexus.backend.repository.projection.SitemapEntry;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,4 +40,8 @@ public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificat
     @Modifying
     @Query("update News n set n.imageUrl = :imageUrl where n.id = :id and n.imageUrl is null")
     int updateImageUrl(@Param("id") Long id, @Param("imageUrl") String imageUrl);
+
+    /** Temas con alguna noticia publicada (en un idioma, o en todos con null), para no enseñar filtros vacíos. */
+    @Query("select distinct n.category from News n where n.isActive = true and (:language is null or n.language = :language)")
+    List<NewsCategory> findPublishedCategories(@Param("language") String language);
 }

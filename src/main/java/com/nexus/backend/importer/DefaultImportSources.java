@@ -18,7 +18,7 @@ public final class DefaultImportSources {
      * «Microsoft» porque dejan pasar noticias de empresas que no son de tecnología.
      */
     public static final String GENBETA_KEYWORDS = "programación, programador, desarrollador, desarrolladora, "
-            + "software, código, código abierto, open source, GitHub, Python, JavaScript, TypeScript, Java, Rust, "
+            + "software, código fuente, código abierto, open source, GitHub, Python, JavaScript, TypeScript, Java, Rust, "
             + "Linux, Docker, DevOps, API, framework, algoritmo, base de datos, bases de datos, SQL, PostgreSQL, "
             + "MongoDB, ciberseguridad, vulnerabilidad, modelo de lenguaje, LLM, machine learning, "
             + "aprendizaje automático, agentes de IA, IA generativa, nube, cloud, developer, ingeniero de software";
@@ -40,17 +40,46 @@ public final class DefaultImportSources {
     private DefaultImportSources() {
     }
 
+    /** Fuentes añadidas en noviembre de 2026 para tener más temas (en el panel: «Añadir fuentes recomendadas»). */
+    static final String XATAKA_IA_URL = "https://www.xataka.com/tag/inteligencia-artificial/rss2.xml";
+    static final String MUYLINUX_URL = "https://www.muylinux.com/feed/";
+    static final String MUYCOMPUTERPRO_URL = "https://www.muycomputerpro.com/feed";
+    static final String ELPAIS_TECNOLOGIA_URL =
+            "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada";
+    static final String GOOGLE_BLOG_ES_URL = "https://blog.google/intl/es-es/rss/";
+
+    /**
+     * Recomendadas. Las que publican mucho (Xataka IA, MuyComputerPro) y todas las de inglés se crean sin publicación
+     * automática: lo importado espera a que alguien lo revise en el panel. El tema de cada noticia se decide por su
+     * contenido; la categoría de la fuente es solo el valor por defecto.
+     */
     public static List<ImportSource> create() {
         return List.of(
-                news("freeCodeCamp en español", "https://www.freecodecamp.org/espanol/news/rss/", NewsCategory.RECURSOS, true),
+                news("freeCodeCamp en español", "https://www.freecodecamp.org/espanol/news/rss/", NewsCategory.PROGRAMACION, true),
                 filtered(news("Genbeta", "https://www.genbeta.com/feedburner.xml", NewsCategory.GENERAL, true),
                         GENBETA_KEYWORDS, GENBETA_EXCLUDED),
-                news("Paradigma Digital", PARADIGMA_URL, NewsCategory.DESARROLLO, true),
-                news("WeLiveSecurity en español", WELIVESECURITY_URL, NewsCategory.GENERAL, true),
+                news("Paradigma Digital", PARADIGMA_URL, NewsCategory.PROGRAMACION, true),
+                news("WeLiveSecurity en español", WELIVESECURITY_URL, NewsCategory.CIBERSEGURIDAD, true),
                 filtered(news("Hipertextual", HIPERTEXTUAL_URL, NewsCategory.GENERAL, true),
                         GENBETA_KEYWORDS, GENBETA_EXCLUDED + ", " + SHOPPING_EXCLUDED),
+                filtered(news("Xataka · Inteligencia artificial", XATAKA_IA_URL, NewsCategory.IA, false),
+                        null, GENBETA_EXCLUDED + ", " + SHOPPING_EXCLUDED),
+                news("MuyLinux", MUYLINUX_URL, NewsCategory.SISTEMAS, true),
+                filtered(news("MuyComputerPro", MUYCOMPUTERPRO_URL, NewsCategory.GENERAL, false),
+                        GENBETA_KEYWORDS, GENBETA_EXCLUDED + ", " + SHOPPING_EXCLUDED),
+                filtered(news("El País · Tecnología", ELPAIS_TECNOLOGIA_URL, NewsCategory.GENERAL, true),
+                        GENBETA_KEYWORDS, GENBETA_EXCLUDED),
+                news("Blog de Google en España", GOOGLE_BLOG_ES_URL, NewsCategory.GENERAL, true),
                 english(inactive(withoutSourceImages(news("DEV Community · #beginners", "https://dev.to/feed/tag/beginners",
-                        NewsCategory.DESARROLLO, false)))),
+                        NewsCategory.PROGRAMACION, false)))),
+                english(news("GitHub Blog", "https://github.blog/feed/", NewsCategory.PROGRAMACION, false)),
+                english(news("Stack Overflow Blog", "https://stackoverflow.blog/feed/", NewsCategory.PROGRAMACION, false)),
+                english(news("freeCodeCamp (English)", "https://www.freecodecamp.org/news/rss/", NewsCategory.PROGRAMACION, false)),
+                english(news("Hugging Face Blog", "https://huggingface.co/blog/feed.xml", NewsCategory.IA, false)),
+                english(news("PostgreSQL News", "https://www.postgresql.org/news.rss", NewsCategory.DATOS, false)),
+                english(news("Python Insider", "https://blog.python.org/feeds/posts/default?alt=rss", NewsCategory.PROGRAMACION, false)),
+                english(news("JetBrains Blog", "https://blog.jetbrains.com/feed/", NewsCategory.PROGRAMACION, false)),
+                english(news("CSS-Tricks", "https://css-tricks.com/feed/", NewsCategory.PROGRAMACION, false)),
                 jobs("Get on Board · Programación", ImportSourceType.GETONBRD_JOBS,
                         "https://www.getonbrd.com/api/v0/categories/programming/jobs?per_page=100", false),
                 jobs("Get on Board · DevOps y QA", ImportSourceType.GETONBRD_JOBS,
