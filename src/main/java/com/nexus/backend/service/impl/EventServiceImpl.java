@@ -133,8 +133,9 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("validation.event.date.future");
         }
         assertCityWhenInPerson(request);
-        if (eventRepository.countByAuthorIdAndCreatedAtAfter(actor.getId(), LocalDateTime.now(clock).minusHours(24))
-                >= DAILY_LIMIT) {
+        // El límite diario frena el spam; la administración no lo tiene.
+        if (!actor.isAdmin() && eventRepository.countByAuthorIdAndCreatedAtAfter(actor.getId(),
+                LocalDateTime.now(clock).minusHours(24)) >= DAILY_LIMIT) {
             throw new ConflictException("error.event.limit");
         }
         if (eventRepository.existsByUrlAndStartsOnAndActiveTrue(request.getUrl().trim(), request.getDate())) {
@@ -145,7 +146,10 @@ public class EventServiceImpl implements EventService {
         apply(event, request);
         event.setAuthor(userRepository.getSessionUser(actor.getId()));
         CommunityEvent saved = eventRepository.save(event);
-        moderationAlerts.newEvent(saved);
+        if (!actor.isAdmin()) {
+            // Lo que publica la administración no hace falta revisarlo: sin aviso por email.
+            moderationAlerts.newEvent(saved);
+        }
         log.info("Evento id={} compartido por usuario id={}", saved.getId(), actor.getId());
         return toResponse(saved, actor.getId(), 0, false);
     }

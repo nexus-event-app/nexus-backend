@@ -57,14 +57,22 @@ public class TestimonialServiceImpl implements TestimonialService {
     public TestimonialResponse createTestimonial(CreateTestimonialRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
         LocalDateTime since = LocalDateTime.now().minusHours(24);
-        if (testimonialRepository.existsByUserIdAndCreatedAtAfter(actor.getId(), since)) {
+        if (!actor.isAdmin() && testimonialRepository.existsByUserIdAndCreatedAtAfter(actor.getId(), since)) {
             throw new ConflictException("error.testimonial.limit");
         }
 
         User user = userRepository.getSessionUser(actor.getId());
-        Testimonial saved = testimonialRepository.save(testimonialMapper.toEntity(request, user));
-        // Aviso por email para revisarlo pronto: hasta que se apruebe, no se publica.
-        moderationAlerts.newTestimonial(saved);
+        Testimonial testimonial = testimonialMapper.toEntity(request, user);
+        if (actor.isAdmin()) {
+            // El de la administración se publica al momento: no tiene que aprobárselo a sí misma.
+            testimonial.setIsActive(true);
+            testimonial.setIsPending(false);
+        }
+        Testimonial saved = testimonialRepository.save(testimonial);
+        if (!actor.isAdmin()) {
+            // Aviso por email para revisarlo pronto: hasta que se apruebe, no se publica.
+            moderationAlerts.newTestimonial(saved);
+        }
         return testimonialMapper.toResponse(saved);
     }
 

@@ -11,7 +11,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.nexus.backend.security.UserDetail;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -64,8 +67,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        Optional<Rule> rule = findRule(request.getMethod(), request.getServletPath());
+        Optional<Rule> rule = findRule(request.getMethod(), pathOf(request));
         if (rule.isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // La administración no tiene límites (va después del filtro JWT, así que ya se sabe quién es).
+        if (isAdmin()) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -82,6 +91,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
         response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds));
         apiErrorWriter.write(request, response, HttpStatus.TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS",
                 "error.tooManyRequests");
+    }
+
+    /** Ruta dentro de la aplicación (sin el contexto). No depende de cómo se mapee el servlet. */
+    private static String pathOf(HttpServletRequest request) {
+        return request.getRequestURI().substring(request.getContextPath().length());
+    }
+
+    private static boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getPrincipal() instanceof UserDetail user && user.isAdmin();
     }
 
     private Optional<Rule> findRule(String method, String path) {

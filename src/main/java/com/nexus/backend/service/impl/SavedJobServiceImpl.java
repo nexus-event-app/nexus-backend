@@ -54,7 +54,7 @@ public class SavedJobServiceImpl implements SavedJobService {
         JobOffer job = jobOfferRepository.findById(jobId)
                 .filter(offer -> offer.isPublishedAt(LocalDateTime.now()))
                 .orElseThrow(() -> new ResourceNotFoundException("error.job.notFound"));
-        if (savedJobRepository.countByUserId(actor.getId()) >= MAX_SAVED) {
+        if (!actor.isAdmin() && savedJobRepository.countByUserId(actor.getId()) >= MAX_SAVED) {
             throw new ConflictException("error.savedJob.limit");
         }
         savedJobRepository.save(new SavedJob(userRepository.getReferenceById(actor.getId()), job));

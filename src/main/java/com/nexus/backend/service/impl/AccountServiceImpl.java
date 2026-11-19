@@ -112,6 +112,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void assertCanParticipate(UserDetail actor) {
+        // La administración siempre puede publicar: su cuenta nunca debe quedarse bloqueada.
+        if (actor.isAdmin()) {
+            return;
+        }
         if (requireVerifiedEmail && !actor.getUser().isEmailVerified()) {
             throw new EmailNotVerifiedException();
         }

@@ -44,7 +44,7 @@ public class LearningProgressServiceImpl implements LearningProgressService {
         if (progressRepository.existsByUserIdAndPathIdAndStepId(actor.getId(), pathId, stepId)) {
             return;
         }
-        if (progressRepository.countByUserId(actor.getId()) >= MAX_STEPS_PER_USER) {
+        if (!actor.isAdmin() && progressRepository.countByUserId(actor.getId()) >= MAX_STEPS_PER_USER) {
             throw new BadRequestException("error.learning.tooManySteps");
         }
         LearningProgress step = new LearningProgress();

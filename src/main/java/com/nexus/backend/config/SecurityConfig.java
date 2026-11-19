@@ -131,7 +131,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/discussions/*", "/api/comments/*").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
+                .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
