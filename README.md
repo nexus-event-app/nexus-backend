@@ -1,183 +1,272 @@
+<div align="center">
+
 # Primer Commit · Backend
 
-API REST de **Primer Commit**, una comunidad tech en español para perfiles junior: noticias, ofertas de empleo, foro y testimonios, con panel de administración y SEO (sitemap y robots) servidos desde el propio backend.
+**API REST de [Primer Commit](https://primercommit.es), la comunidad para quienes dan sus primeros pasos en
+tecnología.**
 
-- Spring Boot 3.5, Java 21, Spring Security (JWT sin estado), Spring Data JPA
-- H2 en archivo para desarrollo, PostgreSQL en producción
-- Contrato completo de la API en [`docs/API.md`](docs/API.md)
+Noticias y ofertas importadas automáticamente, foro, eventos, rutas de aprendizaje, testimonios, perfiles,
+notificaciones, panel de administración y SEO, en castellano, catalán e inglés.
 
-## Requisitos
+[**primercommit.es**](https://primercommit.es) · [Frontend](https://github.com/nexus-event-app/nexus-frontend) ·
+[Contrato de la API](docs/API.md) · [Guía de despliegue](deploy/README.md)
 
-- JDK 21 y Maven 3.9 (o el wrapper `./mvnw`)
-- Docker (opcional)
-- PostgreSQL 14+ para el perfil `prod`
+[![CI](https://github.com/nexus-event-app/nexus-backend/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/nexus-event-app/nexus-backend/actions/workflows/ci.yml)
+![Java 21](https://img.shields.io/badge/Java-21-e76f00?logo=openjdk&logoColor=white)
+![Spring Boot 3.5](https://img.shields.io/badge/Spring_Boot-3.5-6db33f?logo=springboot&logoColor=white)
+![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169e1?logo=postgresql&logoColor=white)
+![Flyway](https://img.shields.io/badge/migraciones-Flyway-cc0200?logo=flyway&logoColor=white)
+![Estado: beta](https://img.shields.io/badge/estado-beta-f59e0b)
+
+</div>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nexus-event-app/nexus-frontend/dev/docs/screenshots/portada.webp" alt="Portada de Primer Commit" width="820" />
+</p>
+
+---
+
+## Índice
+
+- [Visión general](#visión-general)
+- [Funcionalidades](#funcionalidades)
+- [Arquitectura](#arquitectura)
+- [Puesta en marcha](#puesta-en-marcha)
+- [Variables de entorno](#variables-de-entorno)
+- [Base de datos y migraciones](#base-de-datos-y-migraciones)
+- [Pruebas y CI](#pruebas-y-ci)
+- [API](#api)
+- [Importación automática](#importación-automática)
+- [Cuentas y emails](#cuentas-y-emails)
+- [Idiomas](#idiomas)
+- [Seguridad y privacidad](#seguridad-y-privacidad)
+- [Despliegue](#despliegue)
+
+## Visión general
+
+| | |
+| --- | --- |
+| **Lenguaje y framework** | Java 21 · Spring Boot 3.5 (Web, Security, Data JPA, Validation, Mail, Actuator) |
+| **Autenticación** | JWT sin estado · inicio de sesión con Google (OAuth 2.0) |
+| **Base de datos** | PostgreSQL en producción · H2 en archivo para desarrollo · esquema con Flyway |
+| **Importación** | RSS/Atom y APIs públicas de empleo (Adzuna, Get on Board, Remotive, Jobicy, Arbeitnow) |
+| **Pruebas** | JUnit 5 · Spring Boot Test · MockMvc · migraciones verificadas en PostgreSQL real |
+| **Despliegue** | Docker Compose (PostgreSQL, backend, frontend y Caddy con HTTPS automático) |
+
+## Funcionalidades
+
+- **Noticias** importadas de fuentes de confianza y **clasificadas por tema** automáticamente (IA, programación,
+  ciberseguridad, carrera...), con detección de idioma, búsqueda y relacionadas.
+- **Empleo junior y prácticas** con prioridad para España (Adzuna) y filtros por nivel, modalidad y contrato;
+  clasificador de nivel en varios idiomas, caducidad automática y ofertas guardadas.
+- **Foro**: discusiones, comentarios, «me gusta», mejor respuesta, edición, borrado y **reportes** con cola de
+  moderación.
+- **Eventos** compartidos por la comunidad: calendario, filtros por modalidad, ciudad y día, bloque para comunidades
+  de mujeres, «Voy» (cuántos van, nunca quién), límite diario, sin duplicados y aviso por email a moderación.
+- **Rutas de aprendizaje** con progreso por persona.
+- **Testimonios** con moderación previa y aviso por email.
+- **Perfiles públicos** que solo muestran lo que la persona pone en ellos.
+- **Notificaciones** de respuestas y mejores respuestas, y **búsqueda global**.
+- **Cuentas**: registro con verificación de email, recuperación de contraseña, Google, borrado de la propia cuenta
+  (con anonimización en el foro).
+- **Panel de administración**: métricas, moderación de todo el contenido, usuarios, reportes y fuentes de
+  importación. La administración no tiene límites de publicación.
+- **SEO**: `sitemap.xml` y `robots.txt` con las URLs de los tres idiomas y `hreflang`.
+
+## Arquitectura
+
+```
+src/main/java/com/nexus/backend
+├── config/       Seguridad, límite de peticiones, CORS, reloj (Europe/Madrid), admin inicial
+├── controller/   Endpoints públicos, de usuario y de administración (Admin*)
+├── dto/          Peticiones y respuestas (PageResponse, AuthResponse...)
+├── entity/       Entidades JPA con índices
+├── enums/        Categorías, modalidades, niveles, tipos de reporte
+├── exception/    Excepciones de dominio y GlobalExceptionHandler (errores JSON traducidos)
+├── i18n/         Idiomas y tabla de rutas por idioma
+├── importer/     Proveedores RSS y de empleo, clasificadores, cliente HTTP seguro y planificador
+├── mail/         Envío en segundo plano y plantillas de email
+├── mapper/       Entidad ↔ DTO
+├── repository/   Repositorios, Specifications y proyecciones
+├── security/     JWT, filtros, política de contraseñas, tokens de un solo uso y Google
+├── seo/          sitemap.xml y robots.txt
+├── service/      Interfaces y service/impl con la lógica de negocio
+└── util/         Slugs, texto, paginación, ciudades españolas
+src/main/java/db/migration   Migraciones Flyway en Java (cuando hace falta lógica)
+src/main/resources/db/migration   Migraciones Flyway en SQL
+deploy/           Docker Compose, Caddy, scripts de preparación, actualización y copias
+```
+
+Capas claras: los controladores solo validan y delegan; la lógica vive en los servicios; el acceso a datos, en
+repositorios con `Specification` para los filtros. Los errores se lanzan con una **clave** de mensaje y se traducen
+en `GlobalExceptionHandler`.
+
+## Puesta en marcha
+
+Requisitos: **JDK 21** (o solo Docker). Maven no hace falta: el proyecto trae el wrapper `./mvnw`.
+
+```bash
+export ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='Cambiame123'   # opcional: crea el primer admin
+./mvnw spring-boot:run -Dmaven.test.skip=true
+```
+
+La API queda en `http://localhost:8080`. Con el perfil `dev` la base de datos es H2 en `./data/nexusdb` (no se
+versiona) y la consola H2 está en `/h2-console`. En desarrollo no se imprimen las consultas SQL; para depurar, arranca
+con `SHOW_SQL=true` o `LOG_LEVEL=DEBUG`.
+
+Para tener la web completa, arranca también el [frontend](https://github.com/nexus-event-app/nexus-frontend)
+(`npm run dev`), que hace de proxy de `/api` hacia este backend.
 
 ## Variables de entorno
 
-Hay una plantilla completa en [`.env.example`](.env.example).
+Plantilla completa en [`.env.example`](.env.example) (desarrollo) y [`deploy/.env.example`](deploy/.env.example)
+(producción). Los secretos **nunca** van en el repositorio.
 
 | Variable | Descripción | Por defecto |
-|---|---|---|
+| --- | --- | --- |
 | `SPRING_PROFILES_ACTIVE` | `dev` o `prod` | `dev` |
-| `JWT_SECRET` | Secreto de firma (mín. 32 bytes). **Obligatorio fuera de dev/test** | en dev se genera uno aleatorio |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Crean el primer ADMIN al arrancar si no existe | sin admin |
-| `APP_PUBLIC_URL` | URL pública del frontend (sitemap, robots) | `http://localhost:5173` |
-| `CORS_ALLOWED_ORIGINS` | Orígenes CORS separados por comas | `http://localhost:5173` |
-| `SPRING_DATASOURCE_URL/USERNAME/PASSWORD` | PostgreSQL (perfil `prod`) | obligatorias en prod |
-| `FORWARD_HEADERS_STRATEGY` | `none` o `native` (detrás de un proxy de confianza) | `none` |
+| `JWT_SECRET` | Secreto de firma (mín. 32 bytes). **Obligatorio fuera de dev/test** | aleatorio en dev |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Crean el primer administrador al arrancar si no existe | sin admin |
+| `APP_PUBLIC_URL` | URL pública de la web (sitemap, robots, enlaces de los emails) | `http://localhost:5173` |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos, separados por comas | `http://localhost:5173` |
+| `SPRING_DATASOURCE_URL`, `_USERNAME`, `_PASSWORD` | PostgreSQL (perfil `prod`) | obligatorias en prod |
+| `FORWARD_HEADERS_STRATEGY` | `native` detrás de un proxy de confianza (IP real para el límite de peticiones) | `none` |
 | `UPLOAD_DIR` | Directorio de imágenes subidas | `./uploads` |
-| `MAIL_ENABLED` | Envía emails por SMTP. Con `false` se escriben en el log | `false` |
-| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` | Servidor SMTP del proveedor (Brevo, Resend, Amazon SES...) | puerto `587` |
-| `MAIL_FROM` | Remitente, p. ej. `Primer Commit <hola@tu-dominio.com>` | `Primer Commit <no-reply@localhost>` |
-| `REQUIRE_VERIFIED_EMAIL` | Exige email verificado para publicar en el foro y enviar testimonios | `true` |
-| `IMPORT_ENABLED` | Activa la importación automática programada | `true` |
-| `IMPORT_CHECK_INTERVAL` | Cada cuánto se revisa qué fuentes toca ejecutar (ISO-8601) | `PT15M` |
-| `IMPORT_INITIAL_DELAY` | Espera tras arrancar antes de la primera revisión | `PT1M` |
-| `IMPORT_SEED_DEFAULTS` | Crea las fuentes por defecto si no hay ninguna | `true` |
+| `MAIL_ENABLED` | Envía emails por SMTP; con `false` se escriben en el log | `false` |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Servidor SMTP y remitente | puerto `587` |
+| `MODERATION_EMAIL` | Recibe el aviso de cada testimonio y evento nuevo | administradores |
+| `REQUIRE_VERIFIED_EMAIL` | Exige email verificado para publicar | `true` |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Activan «Continuar con Google»; sin ellas, el botón no aparece | vacías |
+| `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` | Ofertas de empleo de España (Adzuna) | vacías |
+| `IMPORT_ENABLED` | Activa la importación programada | `true` |
+| `IMPORT_CHECK_INTERVAL`, `IMPORT_INITIAL_DELAY` | Frecuencia y espera inicial (ISO-8601) | `PT15M`, `PT1M` |
+| `IMPORT_SEED_DEFAULTS` | Crea las fuentes recomendadas si no hay ninguna | `true` |
 
-## Arranque en desarrollo
+## Base de datos y migraciones
 
-```bash
-export ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='Cambiame123' # opcional
-./mvnw spring-boot:run
-```
-
-Con el perfil `dev` la base de datos es H2 en `./data/nexusdb` (no se versiona) y la consola H2 está en `/h2-console`.
-
-Para que el arranque sea rápido y la terminal se lea bien, en desarrollo **no se imprimen las consultas SQL** y el nivel de log es `INFO`. Si necesitas depurar, arranca con `SHOW_SQL=true` (consultas SQL) o `LOG_LEVEL=DEBUG` (más detalle de la aplicación). Para arrancar sin compilar los tests, que no hacen falta para usar la web:
-
-```bash
-./mvnw spring-boot:run -Dmaven.test.skip=true
-``` La API queda en `http://localhost:8080`.
-
-Si ya tenías una base de datos H2 creada antes de introducir Flyway, bórrala (`rm -r data/`) antes de arrancar: Flyway necesita crear el esquema desde cero.
-
-## Base de datos y migraciones (Flyway)
-
-El esquema lo crea y actualiza [Flyway](https://documentation.red-gate.com/flyway) al arrancar, con los scripts de `src/main/resources/db/migration`. Hibernate solo valida que las entidades coinciden con las tablas (`ddl-auto=validate`), así que nunca modifica la base de datos por su cuenta.
+[Flyway](https://documentation.red-gate.com/flyway) crea y actualiza el esquema al arrancar. Hibernate solo valida
+que las entidades coinciden con las tablas (`ddl-auto=validate`), así que nunca modifica la base de datos por su
+cuenta.
 
 Para cambiar el esquema:
 
-1. Crea un script nuevo con el siguiente número de versión, por ejemplo `V2__perfil_de_usuario.sql`. **Nunca edites un script que ya se haya aplicado** en algún entorno: Flyway lo detecta y no arranca.
-2. Escribe SQL compatible con PostgreSQL y H2 (tipos estándar: `varchar`, `text`, `boolean`, `bigint`, `timestamp(6)`).
-3. Actualiza la entidad y ejecuta `./mvnw verify`: si el script y la entidad no coinciden, los tests fallan.
+1. Crea un script con el siguiente número de versión (`V28__lo_que_hace.sql`), o una migración en Java en
+   `src/main/java/db/migration` si hace falta lógica. **Nunca edites un script ya aplicado.**
+2. Escribe SQL compatible con PostgreSQL y H2.
+3. Actualiza la entidad y ejecuta `./mvnw verify`: si no coinciden, las pruebas fallan.
 
-Los enums se guardan como `varchar` sin `CHECK` (`@JdbcTypeCode(SqlTypes.VARCHAR)` en las entidades), así que añadir un valor nuevo a un enum no requiere migración.
+Los enums se guardan como `varchar` sin `CHECK`, así que añadir un valor no requiere migración.
 
-## Tests
-
-```bash
-./mvnw test
-```
-
-Usan el perfil `test` (H2 en memoria con las migraciones de Flyway y un secreto JWT de prueba).
-
-`PostgresMigrationTest` aplica las migraciones sobre un PostgreSQL real y solo se ejecuta si defines `NEXUS_TEST_POSTGRES_URL` (por defecto usuario y contraseña `nexus`; cámbialos con `NEXUS_TEST_POSTGRES_USER` y `NEXUS_TEST_POSTGRES_PASSWORD`). Vacía esa base de datos al empezar, así que usa una exclusiva para tests:
+## Pruebas y CI
 
 ```bash
-NEXUS_TEST_POSTGRES_URL=jdbc:postgresql://localhost:5432/nexus_test ./mvnw test
+./mvnw verify
 ```
 
-## Docker
+- **~280 pruebas**: integración de cada área con MockMvc (permisos, validaciones, privacidad, límites), servicios,
+  importadores, clasificadores, emails, SEO y migraciones en Java.
+- Perfil `test`: H2 en memoria con las migraciones de Flyway.
+- `PostgresMigrationTest` aplica todas las migraciones sobre un **PostgreSQL real** si defines
+  `NEXUS_TEST_POSTGRES_URL` (usa una base de datos exclusiva: se vacía al empezar):
+
+  ```bash
+  NEXUS_TEST_POSTGRES_URL=jdbc:postgresql://localhost:5432/nexus_test ./mvnw verify
+  ```
+
+- `MessageBundlesTest` comprueba que los tres idiomas tienen las mismas claves y `LanguagesTest`, que la tabla de
+  rutas coincide con la del frontend.
+- **Integración continua** (GitHub Actions) en cada push y pull request, con PostgreSQL de servicio.
+
+## API
+
+El contrato completo (rutas, DTOs, errores y paginación) está en [`docs/API.md`](docs/API.md).
+
+| Área | Rutas principales |
+| --- | --- |
+| Cuentas | `/api/auth/register`, `login`, `me`, `verify-email`, `forgot-password`, `reset-password`, `providers` · `/api/oauth2/authorize/google` |
+| Perfil | `/api/profile` (ver, editar, foto, borrar cuenta) · `/api/users/{id}` (perfil público) |
+| Noticias | `GET /api/news`, `/api/news/latest`, `/api/news/categories`, `/api/news/{id}` |
+| Empleo | `GET /api/jobs`, `/api/jobs/latest`, `/api/jobs/{id}` · `/api/saved-jobs` |
+| Foro | `/api/discussions` (CRUD, «me gusta», mejor respuesta) · `/api/comments` |
+| Eventos | `GET /api/events`, `/api/events/calendar`, `/api/events/cities` · `POST /api/events`, `/api/events/{id}/interest` |
+| Rutas | `/api/learning/progress` |
+| Comunidad | `/api/testimonials` · `/api/reports` · `/api/notifications` · `/api/search` |
+| Administración | `/api/admin/stats`, `news`, `jobs`, `discussions`, `testimonials`, `events`, `reports`, `users`, `uploads/image`, `import-sources` |
+| SEO | `/sitemap.xml`, `/robots.txt` |
+
+Listas paginadas con `page` (desde 0) y `size` (por defecto 12, máximo 50). Errores siempre en JSON
+`{ status, error, message, fieldErrors }`, en el idioma de la petición.
+
+## Importación automática
+
+El paquete `importer/` consulta periódicamente las fuentes y guarda lo nuevo como noticias u ofertas. Se gestionan en
+el panel (`/admin/importacion`).
+
+| Tipo | Qué importa |
+| --- | --- |
+| `RSS_NEWS` | Cualquier feed RSS 2.0 o Atom, con clasificación automática por tema |
+| `ADZUNA_JOBS` | Ofertas junior y prácticas de España |
+| `GETONBRD_JOBS`, `REMOTIVE_JOBS`, `JOBICY_JOBS`, `ARBEITNOW_JOBS` | APIs públicas de empleo tech, respetando sus límites de consulta |
+
+- **Noticias:** solo un resumen en texto plano, la imagen y el enlace al original; filtros por palabras clave y
+  exclusiones; detección de idioma.
+- **Empleo:** solo prácticas y junior del sector tech; caducan y se limpian solas.
+- **Sin duplicados**, y lo que borra la administración no vuelve a importarse.
+- **Atribución:** lo importado se marca con su fuente, enlaza al original y no entra en el sitemap.
+- **Seguridad:** solo URLs públicas `http(s)` (también en cada redirección), tiempo y tamaño máximos, XML sin
+  DOCTYPE y HTML convertido a texto plano con jsoup.
+
+## Cuentas y emails
+
+- Verificación de email (enlace válido 48 h): hasta verificar se puede leer, pero no publicar (`EMAIL_NOT_VERIFIED`).
+- Recuperación de contraseña con enlace de un solo uso (1 h); la respuesta es la misma exista o no la cuenta. Al
+  cambiarla, los JWT anteriores dejan de valer.
+- Los tokens tienen 256 bits aleatorios y solo se guarda su hash SHA-256.
+- Los emails se envían en segundo plano, tras confirmar la transacción. En desarrollo (`MAIL_ENABLED=false`)
+  aparecen en la consola con su enlace.
+
+## Idiomas
+
+El servidor responde en el idioma de `Accept-Language` (castellano, catalán o inglés; castellano por defecto):
+errores y validaciones (`messages*.properties`), emails y sitemap. Las URLs de catalán e inglés llevan la sección
+traducida (`/ca/noticies`, `/en/jobs`) según la tabla de `i18n/Languages`, que coincide con la del frontend. El
+contenido escrito por la comunidad o importado no se traduce.
+
+## Seguridad y privacidad
+
+- Identidad solo por JWT; el filtro recarga a la persona en cada petición, así que desactivar o borrar una cuenta
+  invalida sus sesiones al momento.
+- El registro público siempre crea usuarios normales; la administración solo se crea desde variables de entorno.
+- Contraseñas con BCrypt y política de longitud; límite de peticiones por IP en login, registro y publicaciones.
+- El contenido de usuario se guarda como texto plano. Subida de imágenes solo para administración, con lista blanca
+  de tipos, comprobación de firma y nombres aleatorios.
+- **Privacidad:** la actividad de cada persona solo la ve ella; los perfiles públicos muestran solo lo que la persona
+  ha puesto; los eventos no dicen quién los compartió ni quién va. Borrar la cuenta elimina los datos personales y
+  deja el foro anonimizado.
+- Sin datos personales en el código: los datos legales y los secretos viven solo en el `.env` del servidor.
+
+## Despliegue
+
+Todo está preparado en [`deploy/`](deploy/README.md) para un servidor Ubuntu con Docker (probado en un Hetzner Cloud
+CPX12 de 2 GB):
+
+- `docker-compose.yml`: PostgreSQL, backend, frontend y **Caddy**, que pone y renueva el certificado HTTPS solo.
+- `preparar-servidor.sh`: Docker, cortafuegos, actualizaciones de seguridad, memoria de reserva, código y secretos
+  generados, en un solo comando.
+- `actualizar.sh`: publica lo último de la rama `dev` (hace copia antes y no tumba la web si la compilación falla).
+- `copia-seguridad.sh`: copia de la base de datos y las imágenes cada noche, durante 14 días.
+
+Imagen suelta del backend:
 
 ```bash
 docker build -t nexus-backend .
 docker run --rm -p 8080:8080 --env-file .env -v nexus-uploads:/app/uploads nexus-backend
 ```
 
-La imagen es multi-etapa, se ejecuta con un usuario sin privilegios, arranca con el perfil `prod` y comprueba su salud en `/actuator/health`.
+Multi-etapa, usuario sin privilegios, perfil `prod` y healthcheck en `/actuator/health`.
 
-Detrás de nginx u otro proxy de confianza define `FORWARD_HEADERS_STRATEGY=native` para que el límite de peticiones use la IP real del cliente. No actives esta opción si el backend está expuesto directamente.
+---
 
-## Estructura
-
-```
-src/main/java/com/nexus/backend
-├── config/       SecurityConfig, RateLimitFilter, WebConfig, AdminInitializer
-├── controller/   endpoints públicos, de usuario y de administración (Admin*)
-├── dto/          request / response (PageResponse, AuthResponse...)
-├── entity/       entidades JPA con índices
-├── enums/        categorías, modalidades, niveles
-├── exception/    excepciones de dominio y GlobalExceptionHandler
-├── importer/     importación automática: proveedores, clasificador, cliente HTTP y planificador
-├── mapper/       entidad <-> DTO
-├── repository/   repositorios, specifications y proyecciones
-├── security/     JWT, filtro y UserDetail
-├── seo/          sitemap.xml y robots.txt
-├── service/      interfaces y service/impl
-└── util/         SlugUtil, TextUtil, Pagination
-```
-
-## Endpoints (resumen)
-
-| Área | Rutas |
-|---|---|
-| Auth | `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me` |
-| Noticias | `GET /api/news`, `/api/news/latest`, `/api/news/{id}` |
-| Empleo | `GET /api/jobs`, `/api/jobs/latest`, `/api/jobs/{id}` |
-| Foro | `GET/POST /api/discussions`, `GET /api/discussions/mine`, `GET/PUT/DELETE /api/discussions/{id}`, `POST /api/discussions/{id}/like` |
-| Comentarios | `GET /api/comments/discussion/{id}`, `POST /api/comments`, `DELETE /api/comments/{id}`, `POST /api/comments/{id}/like` |
-| Testimonios | `GET /api/testimonials`, `/api/testimonials/latest`, `POST /api/testimonials` |
-| Admin (solo ADMIN) | `/api/admin/stats`, `news`, `jobs`, `discussions`, `testimonials`, `users`, `uploads/image`, `import-sources` |
-| SEO / estáticos | `/sitemap.xml`, `/robots.txt`, `/uploads/news/{archivo}` |
-
-Todas las listas paginadas usan `page` (desde 0) y `size` (por defecto 12, máximo 50), y los errores siguen el formato JSON descrito en `docs/API.md`.
-
-## Cuentas: verificación de email y recuperación de contraseña
-
-- Al registrarse se envía un enlace de verificación (válido 48 horas). Hasta verificar, se puede iniciar sesión y leer, pero publicar debates, comentarios o testimonios responde 403 con el código `EMAIL_NOT_VERIFIED`.
-- «¿Has olvidado tu contraseña?» envía un enlace válido 1 hora y de un solo uso. La respuesta es siempre la misma, exista o no la cuenta, para no revelar qué emails están registrados. Al cambiar la contraseña, todos los JWT emitidos antes dejan de valer (`users.credentials_changed_at`).
-- Los tokens se generan con 256 bits aleatorios y en la base de datos solo se guarda su hash SHA-256 (`user_tokens`). Al emitir uno nuevo se invalidan los anteriores del mismo tipo, y los caducados se borran cada día.
-- Los emails se envían en segundo plano y solo después de confirmar la transacción.
-
-**En desarrollo** no hace falta ningún servicio de correo: con `MAIL_ENABLED=false` el email completo, con su enlace, aparece en la consola del backend entre líneas `===== EMAIL`. Copia el enlace en el navegador para probar el flujo.
-
-**En producción**, crea una cuenta en un proveedor SMTP, verifica tu dominio (registros SPF y DKIM que te indicará) y define `MAIL_ENABLED=true`, `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD` y `MAIL_FROM`.
-
-## Idiomas (castellano, catalán, inglés)
-
-El servidor responde en el idioma de la cabecera `Accept-Language` (el frontend la envía con el idioma elegido). Si falta o es otro
-idioma, se usa el castellano. Afecta a:
-
-- Mensajes de error y de validación: están en `src/main/resources/messages.properties` (castellano), `messages_ca.properties` y
-  `messages_en.properties`. Los servicios lanzan excepciones con una **clave** (`error.news.notFound`) y `GlobalExceptionHandler`
-  la traduce; los DTO usan `message = "{validation.title.required}"`.
-- Emails de cuenta (`mail.*`): salen en el idioma de la petición y los enlaces apuntan a `/ca/...` o `/en/...`.
-- `sitemap.xml`: las páginas traducidas (portada, listados y testimonios) aparecen en los tres idiomas con enlaces `hreflang`. Las noticias, ofertas, debates y páginas legales, cuyo texto solo existe en castellano, aparecen una sola vez en su URL castellana y sin `hreflang`, para que no cuenten como contenido duplicado. `robots.txt` cubre también las rutas de cada idioma. Las URLs de catalán e inglés llevan la sección traducida (`/ca/noticies`, `/en/jobs`): la tabla está en `i18n/Languages` y debe coincidir con `src/shared/i18n/routeSegments.js` del frontend (`LanguagesTest` lo recuerda). Los enlaces de los emails usan la misma tabla.
-
-Para añadir un texto, créalo **en los tres ficheros** con la misma clave: `MessageBundlesTest` falla si falta alguna.
-Los textos con argumentos (`{0}`) duplican el apóstrofo (`''`); en el resto se usa `’`.
-El contenido que escribe la gente (noticias, ofertas, foro) no se traduce.
-
-## Importación automática de noticias y empleo
-
-El paquete `importer/` consulta periódicamente fuentes externas y guarda lo nuevo como noticias u ofertas. Las fuentes se gestionan en el panel (`/admin/importacion`) o en `/api/admin/import-sources`.
-
-| Tipo | Qué importa | Intervalo mínimo |
-|---|---|---|
-| `RSS_NEWS` | Cualquier feed RSS 2.0 o Atom | 30 min |
-| `GETONBRD_JOBS` | API pública de [Get on Board](https://www.getonbrd.com) (empleo tech en español), por categoría | 2 h |
-| `REMOTIVE_JOBS` | API pública de [Remotive](https://remotive.com/api-documentation) (empleo en remoto) | 6 h (máximo 4 consultas al día según sus condiciones) |
-| `JOBICY_JOBS` | API pública de [Jobicy](https://github.com/Jobicy/remote-jobs-api) (empleo en remoto; se filtra con `geo=europe`) | 6 h (sus condiciones piden máximo una consulta por hora) |
-| `ARBEITNOW_JOBS` | API pública de [Arbeitnow](https://www.arbeitnow.com/blog/job-board-api) (Europa) | 1 h |
-
-Reglas que aplica en cada ejecución:
-
-- **Noticias:** solo se guarda un resumen en texto plano (máximo 600 caracteres), la imagen y el enlace al artículo original. Se descartan las de más de 14 días y, si la fuente tiene palabras clave, las que no contengan ninguna. Máximo 10 nuevas por fuente y ejecución.
-- **Empleo:** solo ofertas de prácticas o junior del sector tech (`JobClassifier`, con pistas de nivel en español, inglés, alemán y francés). Se descartan las de más de 30 días; las importadas caducan a los 30 días de publicarse y se borran 60 días después de caducar.
-- **Duplicados:** cada elemento tiene un `externalId` único. Si un admin borra algo importado, se guarda en `import_exclusions` y no vuelve a importarse.
-- **SEO y atribución:** lo importado sale marcado con su fuente y enlaza al original, no entra en el sitemap y el frontend lo publica con `noindex` y sin datos estructurados (Remotive prohíbe expresamente que sus ofertas acaben en Google Jobs).
-- **Seguridad:** solo URLs `http`/`https` públicas (se rechazan localhost y redes privadas, también en cada redirección), tiempo de espera de 25 s, respuestas de 8 MB como máximo, XML sin DOCTYPE y HTML convertido a texto plano con jsoup.
-- **Revisión manual:** con `autoPublish=false` lo importado queda oculto hasta que un admin lo publique.
-- **Palabras clave y exclusiones:** con `keywords` solo entra lo que contenga alguna; con `excludeKeywords` se descarta lo que contenga alguna, aunque cumpla lo demás. Genbeta trae ambas por defecto.
-- **Fuentes recomendadas:** están en `importer/DefaultImportSources`. Se crean al arrancar con una base de datos vacía; en el panel, «Añadir fuentes recomendadas» crea las que falten sin tocar las existentes. Si cambia la configuración recomendada de una fuente ya existente, se aplica a las bases de datos existentes con una migración (como la V7).
-
-El planificador está pensado para una sola instancia. Si despliegas varias réplicas, deja `IMPORT_ENABLED=true` solo en una.
-
-## Seguridad en breve
-
-- La identidad sale únicamente del JWT (`Authorization: Bearer ...`); el filtro recarga al usuario de la BD en cada petición, por lo que desactivar una cuenta invalida sus tokens.
-- El registro público siempre crea usuarios `USER`; solo se crea un ADMIN desde las variables de entorno.
-- El contenido de usuario se guarda como texto plano; el frontend debe pintarlo como texto.
-- Subida de imágenes solo para ADMIN, con lista blanca de extensión y content-type, comprobación de firma y nombres generados con UUID.
-- Límite de peticiones por IP en login, registro, discusiones, comentarios y testimonios.
+<p align="center">
+  Hecho con cuidado para quienes empiezan · <a href="https://primercommit.es">primercommit.es</a>
+</p>
