@@ -134,12 +134,8 @@ La primera vez tarda unos minutos (compila todo). Cuando termine escribe «Listo
 5. Mira el aviso legal y la privacidad: tu nombre y el email, sin «pendiente de configurar».
 6. Publica tú lo primero (para que nadie llegue a una web vacía): una discusión «Feedback de la beta» en el foro,
    alguna pregunta y tu testimonio.
-7. **Hilo del glosario (pendiente):** con la cuenta de Primer Commit, crea en el foro la discusión «📚 ¿Qué palabra
-   le falta al glosario? ¡Déjala aquí!». En el servidor tendrá otro número que en local: copia su enlace (algo como
-   `/foro/3-que-palabra-le-falta-al-glosario-dejala-aqui`) y pon su número y su texto en `GLOSSARY_THREAD`
-   (`nexus-frontend/src/shared/config/community.js`), o pásaselo a Claude para que lo cambie. Después, publica el
-   cambio con `./actualizar.sh`. Hasta entonces, «¡Añádela a la lista!» lleva al hilo de la base de datos local, que
-   en el servidor no existe.
+7. **Hilo del glosario:** hecho. «¡Añádela a la lista!» lleva a `/foro/1-que-palabra-le-falta-al-glosario-dejala-aqui`
+   (`GLOSSARY_THREAD` en `nexus-frontend/src/shared/config/community.js`).
 
 Y ya puedes mandar el enlace.
 
