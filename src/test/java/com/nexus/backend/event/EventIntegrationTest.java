@@ -323,6 +323,24 @@ class EventIntegrationTest {
     }
 
     @Test
+    void longDescriptionsAreKeptWholeUpTo2000Characters() throws Exception {
+        User ana = user("Ana", User.Role.USER, true);
+        // Como las de Meetup o Eventbrite: varios párrafos. Antes se cortaba en 280 caracteres.
+        String whole = ("Los agentes se han convertido en el nuevo punto de partida de la IA. En este taller aprenderás "
+                + "los conceptos fundamentales: el razonamiento, el uso de herramientas y la memoria.\n\n").repeat(6).trim();
+        assertThat(whole.length()).isGreaterThan(280).isLessThan(2000);
+        Map<String, Object> body = event("Agentes de IA de la A a la Z", TODAY.plusDays(4), "ONLINE", null, false);
+        body.put("description", whole);
+        create(ana, body).andExpect(status().isCreated()).andExpect(jsonPath("$.description").value(whole));
+        mvc.perform(get("/api/events")).andExpect(jsonPath("$.content[0].description").value(whole));
+
+        Map<String, Object> tooLong = event("Evento demasiado largo", TODAY.plusDays(5), "ONLINE", null, false);
+        tooLong.put("url", "https://www.meetup.com/largo/events/1/");
+        tooLong.put("description", "a".repeat(2001));
+        create(ana, tooLong).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void meApuntoShowsHowManyPeopleAreInterestedWithoutSayingWho() throws Exception {
         User ana = user("Ana", User.Role.USER, true);
         User bea = user("Bea", User.Role.USER, true);

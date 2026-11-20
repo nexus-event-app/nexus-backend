@@ -31,7 +31,7 @@ public class EventRequest {
     private String title;
 
     @NotBlank(message = "{validation.event.description.required}")
-    @Size(min = 10, max = 280, message = "{validation.event.description.size}")
+    @Size(min = 10, max = 2000, message = "{validation.event.description.size}")
     private String description;
 
     @NotNull(message = "{validation.event.date.required}")

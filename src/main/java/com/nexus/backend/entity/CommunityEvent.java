@@ -37,7 +37,7 @@ public class CommunityEvent {
     @Column(nullable = false, length = 120)
     private String title;
 
-    @Column(nullable = false, length = 280)
+    @Column(nullable = false, length = 2000)
     private String description;
 
     @Column(nullable = false, length = 500)
