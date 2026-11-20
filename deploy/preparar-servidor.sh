@@ -14,6 +14,19 @@ apt-get update -q
 apt-get install -y -q git curl ufw unattended-upgrades openssl
 dpkg-reconfigure -f noninteractive unattended-upgrades
 
+echo "==> Memoria de reserva (swap de 4 GB)"
+# Con 2 GB de RAM, compilar el backend y la web necesita más memoria: el swap evita que se quede sin ella.
+if ! swapon --show | grep -q /swapfile; then
+  fallocate -l 4G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile >/dev/null
+  swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+# Usa el swap solo cuando haga falta (por defecto el sistema lo usa antes de tiempo y todo va más lento).
+echo 'vm.swappiness=10' > /etc/sysctl.d/99-primercommit.conf
+sysctl -q -p /etc/sysctl.d/99-primercommit.conf
+
 echo "==> Docker"
 if ! command -v docker >/dev/null; then
   curl -fsSL https://get.docker.com | sh

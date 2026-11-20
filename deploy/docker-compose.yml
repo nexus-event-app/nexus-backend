@@ -54,7 +54,8 @@ services:
       IMPORT_ENABLED: ${IMPORT_ENABLED:-true}
       ADZUNA_APP_ID: ${ADZUNA_APP_ID:-}
       ADZUNA_APP_KEY: ${ADZUNA_APP_KEY:-}
-      JAVA_OPTS: -XX:MaxRAMPercentage=60
+      # Memoria máxima de Java fija: deja sitio a PostgreSQL y a lo demás en un servidor de 2 GB.
+      JAVA_OPTS: -Xms256m -Xmx640m -XX:+UseSerialGC
     volumes:
       - uploads:/app/uploads
 

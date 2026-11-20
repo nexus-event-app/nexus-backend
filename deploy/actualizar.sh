@@ -14,7 +14,11 @@ fi
 git -C .. pull --ff-only
 git -C ../../nexus-frontend pull --ff-only
 
-docker compose up -d --build --remove-orphans
+# Se compila una pieza cada vez (y antes de reiniciar nada): así cabe en un servidor de 2 GB y, si la compilación
+# falla, la web que ya funcionaba sigue en pie.
+docker compose build backend
+docker compose build frontend
+docker compose up -d --remove-orphans
 docker image prune -f >/dev/null
 
 echo "Esperando a que el backend arranque..."

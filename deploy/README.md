@@ -37,7 +37,7 @@ Recomendado: **Hetzner Cloud** (centros de datos en la UE, buena relación preci
    pbcopy < ~/.ssh/id_ed25519.pub
    ```
 
-4. «Add Server»: ubicación en Alemania o Finlandia, imagen **Ubuntu 24.04**, tipo con **4 GB de RAM** (x86), y en
+4. «Add Server»: ubicación en Alemania o Finlandia, imagen **Ubuntu 24.04**, tipo **CPX12** (2 GB de RAM, x86) o mayor; el script añade memoria de reserva (swap) para que quepa la compilación, y en
    «SSH keys» pega la llave. Sin volúmenes ni extras.
 5. Apunta la **IP** del servidor (algo como `203.0.113.10`).
 
