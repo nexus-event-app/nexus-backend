@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class JobOffer {
+public class JobOffer extends TimestampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -94,26 +94,21 @@ public class JobOffer {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
+    @Override
     @PrePersist
     protected void onCreate() {
+        super.onCreate();
         inSpain = SpainLocation.matches(location);
-        createdAt = LocalDateTime.now();
-        updatedAt = createdAt;
         if (publishedAt == null) {
-            publishedAt = createdAt;
+            publishedAt = getCreatedAt();
         }
     }
 
+    @Override
     @PreUpdate
     protected void onUpdate() {
+        super.onUpdate();
         inSpain = SpainLocation.matches(location);
-        updatedAt = LocalDateTime.now();
     }
 
     /** Se muestra en la web: activa y sin caducar en ese momento. Equivale a JobSpecifications.isPublished(). */

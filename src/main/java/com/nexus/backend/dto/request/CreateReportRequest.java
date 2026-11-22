@@ -14,6 +14,6 @@ public record CreateReportRequest(
         @Size(max = 500, message = "{validation.report.details.max500}") String details) {
 
     public CreateReportRequest {
-        details = details == null || details.isBlank() ? null : TextUtil.clean(details);
+        details = TextUtil.optional(details);
     }
 }

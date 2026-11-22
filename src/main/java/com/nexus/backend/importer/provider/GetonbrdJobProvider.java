@@ -41,7 +41,7 @@ public class GetonbrdJobProvider implements JobFeedProvider {
         List<ImportedJob> jobs = new ArrayList<>();
         int totalPages = 1;
         for (int page = 1; page <= Math.min(totalPages, MAX_PAGES); page++) {
-            JsonNode root = JsonFeeds.read(objectMapper, feedClient.get(pageUrl(source.getUrl(), page), "application/json"));
+            JsonNode root = JsonFeeds.fetch(feedClient, objectMapper, pageUrl(source.getUrl(), page));
             jobs.addAll(parse(root));
             totalPages = root.path("meta").path("total_pages").asInt(1);
         }

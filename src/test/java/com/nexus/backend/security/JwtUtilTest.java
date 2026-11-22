@@ -25,7 +25,7 @@ class JwtUtilTest {
 
         String token = jwtUtil.generateToken("ana@example.com", "USER", 1L);
 
-        assertEquals(Optional.of("ana@example.com"), jwtUtil.extractEmailIfValid(token));
+        assertEquals(Optional.of("ana@example.com"), jwtUtil.parse(token).map(JwtUtil.TokenClaims::email));
     }
 
     @Test
@@ -35,8 +35,8 @@ class JwtUtilTest {
 
         String foreignToken = other.generateToken("ana@example.com", "USER", 1L);
 
-        assertTrue(jwtUtil.extractEmailIfValid(foreignToken).isEmpty());
-        assertTrue(jwtUtil.extractEmailIfValid("no-es-un-token").isEmpty());
+        assertTrue(jwtUtil.parse(foreignToken).isEmpty());
+        assertTrue(jwtUtil.parse("no-es-un-token").isEmpty());
     }
 
     @Test
@@ -45,7 +45,7 @@ class JwtUtilTest {
 
         String token = jwtUtil.generateToken("ana@example.com", "USER", 1L);
 
-        assertTrue(jwtUtil.extractEmailIfValid(token).isEmpty());
+        assertTrue(jwtUtil.parse(token).isEmpty());
     }
 
     @Test
@@ -59,7 +59,7 @@ class JwtUtilTest {
 
         String token = jwtUtil.generateToken("ana@example.com", "USER", 1L);
 
-        assertTrue(jwtUtil.extractEmailIfValid(token).isPresent());
+        assertTrue(jwtUtil.parse(token).isPresent());
     }
 
     @Test

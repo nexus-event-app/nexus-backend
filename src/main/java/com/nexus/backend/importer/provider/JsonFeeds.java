@@ -2,6 +2,7 @@ package com.nexus.backend.importer.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexus.backend.importer.FeedClient;
 import com.nexus.backend.importer.ImportException;
 import com.nexus.backend.util.TextUtil;
 
@@ -21,9 +22,9 @@ final class JsonFeeds {
     private JsonFeeds() {
     }
 
-    static JsonNode read(ObjectMapper mapper, byte[] body) {
+    static JsonNode fetch(FeedClient client, ObjectMapper mapper, String url) {
         try {
-            return mapper.readTree(body);
+            return mapper.readTree(client.get(url, "application/json"));
         } catch (IOException e) {
             throw new ImportException("La fuente no devolvió un JSON válido", e);
         }

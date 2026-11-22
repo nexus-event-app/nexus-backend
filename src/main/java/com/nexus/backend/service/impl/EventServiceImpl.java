@@ -27,6 +27,7 @@ import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.EventService;
 import com.nexus.backend.util.Pagination;
 import com.nexus.backend.util.SpanishCities;
+import com.nexus.backend.util.TextUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -231,7 +232,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private static void assertCityWhenInPerson(EventRequest request) {
-        if (request.getMode() == EventMode.PRESENCIAL && blankToNull(request.getCity()) == null) {
+        if (request.getMode() == EventMode.PRESENCIAL && TextUtil.optionalLine(request.getCity()) == null) {
             throw new BadRequestException("error.event.cityRequired");
         }
     }
@@ -245,8 +246,8 @@ public class EventServiceImpl implements EventService {
         event.setStartsOn(request.getDate());
         event.setStartTime(request.getTime());
         event.setMode(request.getMode());
-        String city = online ? null : blankToNull(request.getCity());
-        String address = online ? null : blankToNull(request.getAddress());
+        String city = online ? null : TextUtil.optionalLine(request.getCity());
+        String address = online ? null : TextUtil.optionalLine(request.getAddress());
         // Si en la ciudad viene una dirección («C. de Cronos, 63 · Madrid»), se queda la ciudad y el resto, como dirección.
         if (city != null && SpanishCities.looksLikeAddress(city)) {
             String fullText = city;
@@ -286,9 +287,5 @@ public class EventServiceImpl implements EventService {
 
     private LocalDate today() {
         return LocalDate.now(clock);
-    }
-
-    private static String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
     }
 }

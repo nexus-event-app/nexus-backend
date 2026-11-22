@@ -2,7 +2,6 @@ package com.nexus.backend.importer;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.time.Duration;
 
 /**
  * Configuración de la importación automática ({@code app.import.*}).
@@ -20,9 +19,6 @@ import java.time.Duration;
  */
 @ConfigurationProperties(prefix = "app.import")
 public record ImportProperties(
-        boolean enabled,
-        Duration checkInterval,
-        Duration initialDelay,
         boolean seedDefaults,
         int newsMaxAgeDays,
         int newsMaxItemsPerRun,

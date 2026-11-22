@@ -4,26 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexus.backend.entity.UserToken;
 import com.nexus.backend.enums.UserTokenType;
 import com.nexus.backend.mail.EmailMessage;
-import com.nexus.backend.mail.EmailSender;
 import com.nexus.backend.repository.UserTokenRepository;
 import com.nexus.backend.security.OneTimeTokens;
+import com.nexus.backend.support.CapturingMail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Verificación de email y recuperación de contraseña de extremo a extremo, leyendo los enlaces de los emails. */
+@Import(CapturingMail.class)
 @SpringBootTest(properties = "app.auth.require-verified-email=true")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -42,30 +39,12 @@ class AccountFlowIntegrationTest {
 
     private static final Pattern TOKEN = Pattern.compile("token=([A-Za-z0-9_-]{43})");
 
-    @TestConfiguration
-    static class CapturingMail {
-        @Bean
-        @Primary
-        CapturingEmailSender capturingEmailSender() {
-            return new CapturingEmailSender();
-        }
-    }
-
-    static class CapturingEmailSender implements EmailSender {
-        final List<EmailMessage> sent = new CopyOnWriteArrayList<>();
-
-        @Override
-        public void send(EmailMessage message) {
-            sent.add(message);
-        }
-    }
-
     @Autowired
     private MockMvc mvc;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private CapturingEmailSender mail;
+    private CapturingMail.Sender mail;
     @Autowired
     private UserTokenRepository tokenRepository;
 

@@ -64,8 +64,8 @@ public class AdzunaJobProvider implements JobFeedProvider {
         }
         List<ImportedJob> jobs = new ArrayList<>();
         for (int page = 1; page <= MAX_PAGES; page++) {
-            List<ImportedJob> found = parse(JsonFeeds.read(objectMapper,
-                    feedClient.get(pageUrl(source.getUrl(), page, appId, appKey), "application/json")));
+            List<ImportedJob> found = parse(
+                    JsonFeeds.fetch(feedClient, objectMapper, pageUrl(source.getUrl(), page, appId, appKey)));
             jobs.addAll(found);
             if (found.size() < PAGE_SIZE) {
                 break;

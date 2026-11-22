@@ -6,17 +6,15 @@ import com.nexus.backend.entity.User;
 import com.nexus.backend.enums.DiscussionCategory;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionRepository;
-import com.nexus.backend.repository.UserRepository;
+import com.nexus.backend.support.TestUsers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -37,15 +35,11 @@ class ContentOwnershipIntegrationTest {
     @Autowired
     private MockMvc mvc;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private DiscussionRepository discussionRepository;
     @Autowired
     private CommentRepository commentRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private TestUsers users;
 
     @Test
     void writingToTheForumRequiresLogin() throws Exception {
@@ -62,69 +56,55 @@ class ContentOwnershipIntegrationTest {
 
     @Test
     void onlyTheAuthorOrAnAdminCanDeleteADiscussion() throws Exception {
-        User author = user(User.Role.USER);
-        User stranger = user(User.Role.USER);
-        User admin = user(User.Role.ADMIN);
+        User author = users.create("Usuario de prueba", User.Role.USER, false);
+        User stranger = users.create("Usuario de prueba", User.Role.USER, false);
+        User admin = users.create("Usuario de prueba", User.Role.ADMIN, false);
 
         Long first = discussion(author).getId();
-        mvc.perform(delete("/api/discussions/" + first).header("Authorization", bearer(stranger)))
+        mvc.perform(delete("/api/discussions/" + first).header("Authorization", users.bearer(stranger)))
                 .andExpect(status().isForbidden());
         assertThat(discussionRepository.existsById(first)).isTrue();
 
-        mvc.perform(delete("/api/discussions/" + first).header("Authorization", bearer(author)))
+        mvc.perform(delete("/api/discussions/" + first).header("Authorization", users.bearer(author)))
                 .andExpect(status().isNoContent());
         assertThat(discussionRepository.existsById(first)).isFalse();
 
         Long second = discussion(author).getId();
-        mvc.perform(delete("/api/discussions/" + second).header("Authorization", bearer(admin)))
+        mvc.perform(delete("/api/discussions/" + second).header("Authorization", users.bearer(admin)))
                 .andExpect(status().isNoContent());
         assertThat(discussionRepository.existsById(second)).isFalse();
     }
 
     @Test
     void onlyTheAuthorOrAnAdminCanDeleteAComment() throws Exception {
-        User author = user(User.Role.USER);
-        User stranger = user(User.Role.USER);
-        User admin = user(User.Role.ADMIN);
+        User author = users.create("Usuario de prueba", User.Role.USER, false);
+        User stranger = users.create("Usuario de prueba", User.Role.USER, false);
+        User admin = users.create("Usuario de prueba", User.Role.ADMIN, false);
         Discussion discussion = discussion(author);
 
         Long first = comment(discussion, author).getId();
-        mvc.perform(delete("/api/comments/" + first).header("Authorization", bearer(stranger)))
+        mvc.perform(delete("/api/comments/" + first).header("Authorization", users.bearer(stranger)))
                 .andExpect(status().isForbidden());
         assertThat(commentRepository.existsById(first)).isTrue();
 
-        mvc.perform(delete("/api/comments/" + first).header("Authorization", bearer(author)))
+        mvc.perform(delete("/api/comments/" + first).header("Authorization", users.bearer(author)))
                 .andExpect(status().isNoContent());
         assertThat(commentRepository.existsById(first)).isFalse();
 
         Long second = comment(discussion, author).getId();
-        mvc.perform(delete("/api/comments/" + second).header("Authorization", bearer(admin)))
+        mvc.perform(delete("/api/comments/" + second).header("Authorization", users.bearer(admin)))
                 .andExpect(status().isNoContent());
         assertThat(commentRepository.existsById(second)).isFalse();
     }
 
     @Test
     void aStrangerCannotEditSomeoneElsesDiscussion() throws Exception {
-        Long id = discussion(user(User.Role.USER)).getId();
+        Long id = discussion(users.create("Usuario de prueba", User.Role.USER, false)).getId();
 
-        mvc.perform(put("/api/discussions/" + id).header("Authorization", bearer(user(User.Role.USER)))
+        mvc.perform(put("/api/discussions/" + id).header("Authorization", users.bearer(users.create("Usuario de prueba", User.Role.USER, false)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Título nuevo\",\"content\":\"Contenido nuevo largo\",\"category\":\"GENERAL\"}"))
                 .andExpect(status().isForbidden());
-    }
-
-    private User user(User.Role role) {
-        User user = new User();
-        user.setName("Usuario de prueba");
-        user.setEmail("u-" + UUID.randomUUID() + "@test.com");
-        user.setPassword(passwordEncoder.encode("Clave12345"));
-        user.setRole(role);
-        user.setEnabled(true);
-        return userRepository.save(user);
-    }
-
-    private String bearer(User user) {
-        return "Bearer " + jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
     }
 
     private Discussion discussion(User author) {

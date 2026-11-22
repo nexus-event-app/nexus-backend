@@ -7,15 +7,14 @@ import com.nexus.backend.enums.DiscussionCategory;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.repository.UserRepository;
-import com.nexus.backend.security.JwtUtil;
 import com.nexus.backend.service.AvatarStorage;
+import com.nexus.backend.support.TestUsers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,8 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -59,9 +56,7 @@ class ProfileIntegrationTest {
     @Autowired
     private AvatarStorage avatarStorage;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private TestUsers users;
 
     @Test
     void editingRequiresLogin() throws Exception {
@@ -73,8 +68,8 @@ class ProfileIntegrationTest {
 
     @Test
     void updatesAndShowsThePublicProfileWithoutPrivateData() throws Exception {
-        User ana = user("Ana López");
-        mvc.perform(put("/api/profile").header("Authorization", bearer(ana))
+        User ana = users.create("Ana López", User.Role.USER, true);
+        mvc.perform(put("/api/profile").header("Authorization", users.bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"name":"  Ana   García ","headline":"Estudiante de DAW","bio":"Me encanta el frontend.",
@@ -97,7 +92,7 @@ class ProfileIntegrationTest {
 
     @Test
     void rejectsLinksThatAreNotProfiles() throws Exception {
-        String ana = bearer(user("Ana"));
+        String ana = users.bearer(users.create("Ana", User.Role.USER, true));
         for (String body : new String[]{
                 "{\"name\":\"Ana\",\"githubUrl\":\"https://evil.example/github.com/ana\"}",
                 "{\"name\":\"Ana\",\"githubUrl\":\"javascript:alert(1)\"}",
@@ -111,7 +106,7 @@ class ProfileIntegrationTest {
 
     @Test
     void disabledAccountsHaveNoPublicProfile() throws Exception {
-        User user = user("Desactivada");
+        User user = users.create("Desactivada", User.Role.USER, true);
         user.setEnabled(false);
         userRepository.save(user);
         mvc.perform(get("/api/users/" + user.getId())).andExpect(status().isNotFound());
@@ -120,7 +115,7 @@ class ProfileIntegrationTest {
 
     @Test
     void activityIsOnlyVisibleToItsOwner() throws Exception {
-        User luis = user("Luis");
+        User luis = users.create("Luis", User.Role.USER, true);
         discussion(luis, "Visible", true);
         discussion(luis, "Oculta", false);
         testimonial(luis, "Publicado y aprobado por el equipo de moderación de la comunidad.", true);
@@ -134,12 +129,12 @@ class ProfileIntegrationTest {
                 .andExpect(jsonPath("$.testimonialCount").doesNotExist());
         mvc.perform(get("/api/users/" + luis.getId() + "/discussions")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/users/" + luis.getId() + "/testimonials")).andExpect(status().isUnauthorized());
-        String other = bearer(user("Otra"));
+        String other = users.bearer(users.create("Otra", User.Role.USER, true));
         mvc.perform(get("/api/users/" + luis.getId() + "/discussions").header("Authorization", other))
                 .andExpect(status().isNotFound());
 
         // Su dueño la ve en su perfil (solo lo publicado).
-        String token = bearer(luis);
+        String token = users.bearer(luis);
         mvc.perform(get("/api/profile").header("Authorization", token))
                 .andExpect(jsonPath("$.discussionCount").value(1))
                 .andExpect(jsonPath("$.testimonialCount").value(1));
@@ -154,8 +149,8 @@ class ProfileIntegrationTest {
 
     @Test
     void avatarIsCroppedResizedAndStrippedOfMetadata() throws Exception {
-        User ana = user("Ana");
-        String token = bearer(ana);
+        User ana = users.create("Ana", User.Role.USER, true);
+        String token = users.bearer(ana);
 
         String body = mvc.perform(multipart("/api/profile/avatar")
                         .file(new MockMultipartFile("file", "foto.jpg", "image/jpeg", jpegWithExif(1200, 800)))
@@ -194,7 +189,7 @@ class ProfileIntegrationTest {
 
     @Test
     void rejectsFilesThatAreNotImages() throws Exception {
-        String token = bearer(user("Ana"));
+        String token = users.bearer(users.create("Ana", User.Role.USER, true));
         mvc.perform(multipart("/api/profile/avatar")
                         .file(new MockMultipartFile("file", "foto.png", "image/png", "<script>alert(1)</script>".getBytes()))
                         .header("Authorization", token))
@@ -207,21 +202,6 @@ class ProfileIntegrationTest {
 
     private Path stored(String url) {
         return avatarStorage.directory().resolve(url.substring(AvatarStorage.PUBLIC_PATH.length()));
-    }
-
-    private User user(String name) {
-        User user = new User();
-        user.setName(name);
-        user.setEmail("profile-" + UUID.randomUUID() + "@test.com");
-        user.setPassword(passwordEncoder.encode("Clave12345"));
-        user.setRole(User.Role.USER);
-        user.setEnabled(true);
-        user.setEmailVerifiedAt(LocalDateTime.now());
-        return userRepository.save(user);
-    }
-
-    private String bearer(User user) {
-        return "Bearer " + jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
     }
 
     private Discussion discussion(User author, String title, boolean active) {

@@ -5,33 +5,27 @@ import com.nexus.backend.entity.CommunityEvent;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.enums.EventMode;
 import com.nexus.backend.mail.EmailMessage;
-import com.nexus.backend.mail.EmailSender;
 import com.nexus.backend.repository.CommunityEventRepository;
 import com.nexus.backend.repository.EventInterestRepository;
 import com.nexus.backend.repository.ReportRepository;
-import com.nexus.backend.repository.UserRepository;
-import com.nexus.backend.security.JwtUtil;
+import com.nexus.backend.support.CapturingMail;
+import com.nexus.backend.support.TestUsers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -45,28 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Eventos que comparte la comunidad: quién puede publicar, qué se ve, límites, borrado, reportes y aviso por email. */
+@Import(CapturingMail.class)
 @SpringBootTest(properties = {"app.moderation.email=moderacion@primercommit.test", "app.auth.require-verified-email=true"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class EventIntegrationTest {
-
-    @TestConfiguration
-    static class CapturingMail {
-        @Bean
-        @Primary
-        CapturingEmailSender capturingEmailSender() {
-            return new CapturingEmailSender();
-        }
-    }
-
-    static class CapturingEmailSender implements EmailSender {
-        final List<EmailMessage> sent = new CopyOnWriteArrayList<>();
-
-        @Override
-        public void send(EmailMessage message) {
-            sent.add(message);
-        }
-    }
 
     private static final LocalDate TODAY = LocalDate.now(ZoneId.of("Europe/Madrid"));
 
@@ -79,11 +56,9 @@ class EventIntegrationTest {
     @Autowired
     private ReportRepository reportRepository;
     @Autowired
-    private UserRepository userRepository;
+    private TestUsers users;
     @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
-    private CapturingEmailSender mail;
+    private CapturingMail.Sender mail;
     @Autowired
     private EventInterestRepository interestRepository;
 
@@ -97,7 +72,7 @@ class EventIntegrationTest {
 
     @Test
     void sharingAnEventPublishesItAtOnceWithoutTheAuthorAndEmailsModeration() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
 
         create(ana, event("Meetup de React en Valencia", TODAY.plusDays(3), "PRESENCIAL", "Valencia", false))
                 .andExpect(status().isCreated())
@@ -124,7 +99,7 @@ class EventIntegrationTest {
 
     @Test
     void onlyUpcomingVisibleEventsAreListedSoonestFirstAndCanBeFiltered() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         saved(ana, "Ya pasó", TODAY.minusDays(1), EventMode.ONLINE, false, true);
         saved(ana, "Oculto por moderación", TODAY.plusDays(1), EventMode.ONLINE, false, false);
         saved(ana, "Dentro de una semana", TODAY.plusDays(7), EventMode.PRESENCIAL, true, true);
@@ -143,7 +118,7 @@ class EventIntegrationTest {
 
     @Test
     void filtersByCityWithoutCaringAboutCaseAndByDay() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         saved(ana, "En Madrid", TODAY.plusDays(2), EventMode.PRESENCIAL, false, true, "Madrid");
         saved(ana, "En Barcelona", TODAY.plusDays(2), EventMode.PRESENCIAL, false, true, "Barcelona");
         saved(ana, "En madrid, otro día", TODAY.plusDays(5), EventMode.PRESENCIAL, true, true, "madrid ");
@@ -161,7 +136,7 @@ class EventIntegrationTest {
 
     @Test
     void theCalendarMarksTheDaysWithEventsAndWhetherAnyIsForWomen() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         saved(ana, "Pasado", TODAY.minusDays(1), EventMode.ONLINE, false, true);
         saved(ana, "Uno", TODAY.plusDays(1), EventMode.ONLINE, false, true);
         saved(ana, "Dos, de mujeres", TODAY.plusDays(1), EventMode.ONLINE, true, true);
@@ -184,17 +159,17 @@ class EventIntegrationTest {
 
     @Test
     void anAdministratorCanFixAnEventFromThePanel() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
-        User admin = user("Admin", User.Role.ADMIN, true);
+        User ana = users.create("Ana", User.Role.USER, true);
+        User admin = users.create("Admin", User.Role.ADMIN, true);
         CommunityEvent typo = saved(ana, "Meetup de Reakt", TODAY.plusDays(1), EventMode.PRESENCIAL, false, true,
                 "Doofinder C. de Cronos, 63 · Madrid");
         Map<String, Object> fixed = event("Meetup de React", TODAY.plusDays(2), "PRESENCIAL", "Madrid", false);
         fixed.put("address", "C. de Cronos, 63 (Doofinder)");
 
-        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", bearer(ana))
+        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", users.bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(fixed)))
                 .andExpect(status().isForbidden());
-        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", bearer(admin))
+        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", users.bearer(admin))
                         .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(fixed)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Meetup de React"))
@@ -204,7 +179,7 @@ class EventIntegrationTest {
 
         // Si pasa a online, se quedan sin ciudad ni dirección.
         Map<String, Object> online = event("Meetup de React", TODAY.plusDays(2), "ONLINE", "Madrid", false);
-        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", bearer(admin))
+        mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", users.bearer(admin))
                         .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(online)))
                 .andExpect(jsonPath("$.city").value(nullValue()))
                 .andExpect(jsonPath("$.address").value(nullValue()));
@@ -215,13 +190,13 @@ class EventIntegrationTest {
         mvc.perform(post("/api/events").contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(event("Sin sesión", TODAY, "ONLINE", null, false))))
                 .andExpect(status().isUnauthorized());
-        User unverified = user("Sin verificar", User.Role.USER, false);
+        User unverified = users.create("Sin verificar", User.Role.USER, false);
         create(unverified, event("Charla de Python", TODAY, "ONLINE", null, false)).andExpect(status().isForbidden());
     }
 
     @Test
     void rejectsUnsafeLinksPastDatesAndInPersonEventsWithoutCity() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         Map<String, Object> plainHttp = event("Charla de Python", TODAY, "ONLINE", null, false);
         plainHttp.put("url", "http://inseguro.example.com/evento");
         create(ana, plainHttp).andExpect(status().isBadRequest());
@@ -239,10 +214,10 @@ class EventIntegrationTest {
 
     @Test
     void theSameEventCannotBeSharedTwiceAndThereIsADailyLimit() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         Map<String, Object> meetup = event("Meetup de React", TODAY.plusDays(2), "ONLINE", null, false);
         create(ana, meetup).andExpect(status().isCreated());
-        create(user("Bea", User.Role.USER, true), meetup)
+        create(users.create("Bea", User.Role.USER, true), meetup)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Ese evento ya está en la lista"));
 
@@ -258,51 +233,51 @@ class EventIntegrationTest {
 
     @Test
     void whoSharedItOrAnAdministratorCanDeleteItButNobodyElse() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
-        User bea = user("Bea", User.Role.USER, true);
-        User admin = user("Admin", User.Role.ADMIN, true);
+        User ana = users.create("Ana", User.Role.USER, true);
+        User bea = users.create("Bea", User.Role.USER, true);
+        User admin = users.create("Admin", User.Role.ADMIN, true);
         CommunityEvent first = saved(ana, "Primero", TODAY.plusDays(1), EventMode.ONLINE, false, true);
         CommunityEvent repeated = saved(ana, "Repetido", TODAY.plusDays(1), EventMode.ONLINE, false, true);
 
-        mvc.perform(delete("/api/events/" + first.getId()).header("Authorization", bearer(bea)))
+        mvc.perform(delete("/api/events/" + first.getId()).header("Authorization", users.bearer(bea)))
                 .andExpect(status().isForbidden());
-        mvc.perform(delete("/api/events/" + first.getId()).header("Authorization", bearer(ana)))
+        mvc.perform(delete("/api/events/" + first.getId()).header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNoContent());
-        mvc.perform(delete("/api/events/" + repeated.getId()).header("Authorization", bearer(admin)))
+        mvc.perform(delete("/api/events/" + repeated.getId()).header("Authorization", users.bearer(admin)))
                 .andExpect(status().isNoContent());
         assertThat(eventRepository.count()).isZero();
     }
 
     @Test
     void aReportedEventCanBeHiddenFromTheReportsQueue() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
-        User bea = user("Bea", User.Role.USER, true);
-        User admin = user("Admin", User.Role.ADMIN, true);
+        User ana = users.create("Ana", User.Role.USER, true);
+        User bea = users.create("Bea", User.Role.USER, true);
+        User admin = users.create("Admin", User.Role.ADMIN, true);
         CommunityEvent spam = saved(ana, "Compra seguidores baratos", TODAY.plusDays(1), EventMode.ONLINE, false, true);
 
-        mvc.perform(post("/api/reports").header("Authorization", bearer(bea)).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/reports").header("Authorization", users.bearer(bea)).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"targetType\":\"EVENT\",\"targetId\":" + spam.getId() + ",\"reason\":\"SPAM\"}"))
                 .andExpect(status().is2xxSuccessful());
-        mvc.perform(get("/api/admin/reports").header("Authorization", bearer(admin)))
+        mvc.perform(get("/api/admin/reports").header("Authorization", users.bearer(admin)))
                 .andExpect(jsonPath("$[0].targetType").value("EVENT"))
                 .andExpect(jsonPath("$[0].target.title").value("Compra seguidores baratos"))
                 .andExpect(jsonPath("$[0].target.authorName").value("Ana"));
-        mvc.perform(post("/api/admin/reports/resolve").header("Authorization", bearer(admin))
+        mvc.perform(post("/api/admin/reports/resolve").header("Authorization", users.bearer(admin))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"targetType\":\"EVENT\",\"targetId\":" + spam.getId() + ",\"action\":\"HIDE\"}"))
                 .andExpect(status().is2xxSuccessful());
 
         mvc.perform(get("/api/events")).andExpect(jsonPath("$.content", hasSize(0)));
         // En el panel sigue, marcado como oculto, con quién lo compartió.
-        mvc.perform(get("/api/admin/events").header("Authorization", bearer(admin)))
+        mvc.perform(get("/api/admin/events").header("Authorization", users.bearer(admin)))
                 .andExpect(jsonPath("$.content[0].active").value(false))
                 .andExpect(jsonPath("$.content[0].authorName").value("Ana"));
-        mvc.perform(get("/api/admin/events").header("Authorization", bearer(ana))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/admin/events").header("Authorization", users.bearer(ana))).andExpect(status().isForbidden());
     }
 
     @Test
     void whenTheCityCarriesTheAddressOnlyTheCityIsKeptAndTheRestGoesToTheAddress() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         Map<String, Object> pasted = event("Meetup de Java", TODAY.plusDays(2), "PRESENCIAL",
                 "Doofinder C. de Cronos, 63 · Madrid", false);
         pasted.put("address", null);
@@ -324,7 +299,7 @@ class EventIntegrationTest {
 
     @Test
     void longDescriptionsAreKeptWholeUpTo2000Characters() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         // Como las de Meetup o Eventbrite: varios párrafos. Antes se cortaba en 280 caracteres.
         String whole = ("Los agentes se han convertido en el nuevo punto de partida de la IA. En este taller aprenderás "
                 + "los conceptos fundamentales: el razonamiento, el uso de herramientas y la memoria.\n\n").repeat(6).trim();
@@ -342,21 +317,21 @@ class EventIntegrationTest {
 
     @Test
     void meApuntoShowsHowManyPeopleAreInterestedWithoutSayingWho() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
-        User bea = user("Bea", User.Role.USER, true);
-        User carla = user("Carla", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
+        User bea = users.create("Bea", User.Role.USER, true);
+        User carla = users.create("Carla", User.Role.USER, true);
         CommunityEvent meetup = saved(ana, "Meetup", TODAY.plusDays(2), EventMode.ONLINE, false, true);
         String interest = "/api/events/" + meetup.getId() + "/interest";
 
         mvc.perform(post(interest)).andExpect(status().isUnauthorized());
-        mvc.perform(post(interest).header("Authorization", bearer(bea)))
+        mvc.perform(post(interest).header("Authorization", users.bearer(bea)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").value(1))
                 .andExpect(jsonPath("$.interested").value(true));
-        mvc.perform(post(interest).header("Authorization", bearer(carla)))
+        mvc.perform(post(interest).header("Authorization", users.bearer(carla)))
                 .andExpect(jsonPath("$.count").value(2));
 
-        mvc.perform(get("/api/events").header("Authorization", bearer(bea)))
+        mvc.perform(get("/api/events").header("Authorization", users.bearer(bea)))
                 .andExpect(jsonPath("$.content[0].interestedCount").value(2))
                 .andExpect(jsonPath("$.content[0].interested").value(true));
         mvc.perform(get("/api/events"))
@@ -365,38 +340,38 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content[0].interestedUsers").doesNotExist());
 
         // Pulsarlo otra vez lo quita.
-        mvc.perform(post(interest).header("Authorization", bearer(bea)))
+        mvc.perform(post(interest).header("Authorization", users.bearer(bea)))
                 .andExpect(jsonPath("$.count").value(1))
                 .andExpect(jsonPath("$.interested").value(false));
-        mvc.perform(get("/api/events").header("Authorization", bearer(bea)))
+        mvc.perform(get("/api/events").header("Authorization", users.bearer(bea)))
                 .andExpect(jsonPath("$.content[0].interestedCount").value(1))
                 .andExpect(jsonPath("$.content[0].interested").value(false));
     }
 
     @Test
     void meApuntoOnlyWorksOnVisibleEventsAndWithAVerifiedAccount() throws Exception {
-        User ana = user("Ana", User.Role.USER, true);
+        User ana = users.create("Ana", User.Role.USER, true);
         CommunityEvent hidden = saved(ana, "Oculto", TODAY.plusDays(1), EventMode.ONLINE, false, false);
         CommunityEvent past = saved(ana, "Pasado", TODAY.minusDays(1), EventMode.ONLINE, false, true);
         CommunityEvent open = saved(ana, "Abierto", TODAY.plusDays(1), EventMode.ONLINE, false, true);
 
-        mvc.perform(post("/api/events/" + hidden.getId() + "/interest").header("Authorization", bearer(ana)))
+        mvc.perform(post("/api/events/" + hidden.getId() + "/interest").header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNotFound());
-        mvc.perform(post("/api/events/" + past.getId() + "/interest").header("Authorization", bearer(ana)))
+        mvc.perform(post("/api/events/" + past.getId() + "/interest").header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNotFound());
         mvc.perform(post("/api/events/" + open.getId() + "/interest")
-                        .header("Authorization", bearer(user("Sin verificar", User.Role.USER, false))))
+                        .header("Authorization", users.bearer(users.create("Sin verificar", User.Role.USER, false))))
                 .andExpect(status().isForbidden());
         // Al borrar el evento se van sus «Me apunto».
-        mvc.perform(post("/api/events/" + open.getId() + "/interest").header("Authorization", bearer(ana)))
+        mvc.perform(post("/api/events/" + open.getId() + "/interest").header("Authorization", users.bearer(ana)))
                 .andExpect(status().isOk());
-        mvc.perform(delete("/api/events/" + open.getId()).header("Authorization", bearer(ana)))
+        mvc.perform(delete("/api/events/" + open.getId()).header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNoContent());
         assertThat(interestRepository.count()).isZero();
     }
 
     private ResultActions create(User author, Map<String, Object> body) throws Exception {
-        return mvc.perform(post("/api/events").header("Authorization", bearer(author))
+        return mvc.perform(post("/api/events").header("Authorization", users.bearer(author))
                 .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)));
     }
 
@@ -440,19 +415,5 @@ class EventIntegrationTest {
         }
         assertThat(mail.sent).as("aviso de evento nuevo").isNotEmpty();
         return mail.sent.get(0);
-    }
-
-    private User user(String name, User.Role role, boolean verified) {
-        User user = new User();
-        user.setName(name);
-        user.setEmail("event-" + UUID.randomUUID() + "@test.com");
-        user.setRole(role);
-        user.setEnabled(true);
-        user.setEmailVerifiedAt(verified ? LocalDateTime.now() : null);
-        return userRepository.save(user);
-    }
-
-    private String bearer(User user) {
-        return "Bearer " + jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
     }
 }

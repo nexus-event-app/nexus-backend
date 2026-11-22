@@ -7,18 +7,15 @@ import com.nexus.backend.entity.User;
 import com.nexus.backend.enums.DiscussionCategory;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.UserRepository;
-import com.nexus.backend.security.JwtUtil;
+import com.nexus.backend.support.TestUsers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -43,9 +40,7 @@ class NotificationIntegrationTest {
     @Autowired
     private DiscussionRepository discussionRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private TestUsers users;
 
     @Test
     void requiresLogin() throws Exception {
@@ -58,16 +53,16 @@ class NotificationIntegrationTest {
 
     @Test
     void theAuthorIsNotifiedOfRepliesButNotOfTheirOwn() throws Exception {
-        User ana = user("Ana");
-        User luis = user("Luis");
+        User ana = users.create("Ana", User.Role.USER, true);
+        User luis = users.create("Luis", User.Role.USER, true);
         Discussion discussion = discussion(ana, "¿Cómo empiezo con Spring?");
 
         comment(luis, discussion, "Empieza por Spring Initializr.");
         comment(ana, discussion, "¡Gracias, lo pruebo!");
 
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.count").value(1));
-        mvc.perform(get("/api/notifications").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].type").value("COMMENT"))
                 .andExpect(jsonPath("$.content[0].actorName").value("Luis"))
@@ -75,39 +70,39 @@ class NotificationIntegrationTest {
                 .andExpect(jsonPath("$.content[0].discussionSlug").value("como-empiezo-con-spring"))
                 .andExpect(jsonPath("$.content[0].read").value(false))
                 .andExpect(jsonPath("$.content[0].actorEmail").doesNotExist());
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(luis)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(luis)))
                 .andExpect(jsonPath("$.count").value(0));
     }
 
     @Test
     void marksNotificationsAsReadOnlyForTheirRecipient() throws Exception {
-        User ana = user("Ana");
-        User luis = user("Luis");
+        User ana = users.create("Ana", User.Role.USER, true);
+        User luis = users.create("Luis", User.Role.USER, true);
         Discussion discussion = discussion(ana, "Primera discusión");
         comment(luis, discussion, "Primera respuesta");
         comment(luis, discussion, "Segunda respuesta");
         long first = firstNotificationId(ana);
 
         // Otra persona no puede tocar los avisos de Ana: responde como si no existieran.
-        mvc.perform(put("/api/notifications/" + first + "/read").header("Authorization", bearer(luis)))
+        mvc.perform(put("/api/notifications/" + first + "/read").header("Authorization", users.bearer(luis)))
                 .andExpect(status().isNotFound());
 
-        mvc.perform(put("/api/notifications/" + first + "/read").header("Authorization", bearer(ana)))
+        mvc.perform(put("/api/notifications/" + first + "/read").header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNoContent());
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.count").value(1));
 
-        mvc.perform(put("/api/notifications/read-all").header("Authorization", bearer(ana)))
+        mvc.perform(put("/api/notifications/read-all").header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNoContent());
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.count").value(0));
     }
 
     @Test
     void onlyTheAuthorChoosesTheBestAnswerAndItsWriterIsNotified() throws Exception {
-        User ana = user("Ana");
-        User luis = user("Luis");
-        User admin = user("Admin");
+        User ana = users.create("Ana", User.Role.USER, true);
+        User luis = users.create("Luis", User.Role.USER, true);
+        User admin = users.create("Admin", User.Role.USER, true);
         admin.setRole(User.Role.ADMIN);
         userRepository.save(admin);
         Discussion discussion = discussion(ana, "Duda con JPA");
@@ -116,79 +111,79 @@ class NotificationIntegrationTest {
         String body = "{\"commentId\":" + answer + "}";
         for (User other : new User[]{luis, admin}) {
             mvc.perform(put("/api/discussions/" + discussion.getId() + "/accepted-answer")
-                            .header("Authorization", bearer(other))
+                            .header("Authorization", users.bearer(other))
                             .contentType(MediaType.APPLICATION_JSON).content(body))
                     .andExpect(status().isForbidden());
         }
 
         mvc.perform(put("/api/discussions/" + discussion.getId() + "/accepted-answer")
-                        .header("Authorization", bearer(ana))
+                        .header("Authorization", users.bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.acceptedCommentId").value(answer));
         mvc.perform(get("/api/discussions/" + discussion.getId()))
                 .andExpect(jsonPath("$.acceptedCommentId").value(answer));
-        mvc.perform(get("/api/notifications").header("Authorization", bearer(luis)))
+        mvc.perform(get("/api/notifications").header("Authorization", users.bearer(luis)))
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].type").value("ACCEPTED_ANSWER"))
                 .andExpect(jsonPath("$.content[0].commentId").value(answer));
 
         // Marcarla otra vez no repite el aviso; desmarcarla lo retira.
         mvc.perform(put("/api/discussions/" + discussion.getId() + "/accepted-answer")
-                .header("Authorization", bearer(ana))
+                .header("Authorization", users.bearer(ana))
                 .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(luis)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(luis)))
                 .andExpect(jsonPath("$.count").value(1));
         mvc.perform(delete("/api/discussions/" + discussion.getId() + "/accepted-answer")
-                        .header("Authorization", bearer(ana)))
+                        .header("Authorization", users.bearer(ana)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.acceptedCommentId").doesNotExist());
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(luis)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(luis)))
                 .andExpect(jsonPath("$.count").value(0));
     }
 
     @Test
     void rejectsCommentsFromAnotherDiscussion() throws Exception {
-        User ana = user("Ana");
+        User ana = users.create("Ana", User.Role.USER, true);
         Discussion mine = discussion(ana, "La mía");
-        Discussion other = discussion(user("Luis"), "La de Luis");
+        Discussion other = discussion(users.create("Luis", User.Role.USER, true), "La de Luis");
         long foreign = comment(ana, other, "Comentario en otra discusión");
 
         mvc.perform(put("/api/discussions/" + mine.getId() + "/accepted-answer")
-                        .header("Authorization", bearer(ana))
+                        .header("Authorization", users.bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"commentId\":" + foreign + "}"))
                 .andExpect(status().isBadRequest());
         mvc.perform(put("/api/discussions/" + mine.getId() + "/accepted-answer")
-                        .header("Authorization", bearer(ana))
+                        .header("Authorization", users.bearer(ana))
                         .contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void deletingTheBestAnswerReopensTheDiscussionAndRemovesItsNotifications() throws Exception {
-        User ana = user("Ana");
-        User luis = user("Luis");
+        User ana = users.create("Ana", User.Role.USER, true);
+        User luis = users.create("Luis", User.Role.USER, true);
         Discussion discussion = discussion(ana, "Se resolverá y se borrará");
         long answer = comment(luis, discussion, "Esta es la buena.");
         mvc.perform(put("/api/discussions/" + discussion.getId() + "/accepted-answer")
-                .header("Authorization", bearer(ana))
+                .header("Authorization", users.bearer(ana))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"commentId\":" + answer + "}"));
 
-        mvc.perform(delete("/api/comments/" + answer).header("Authorization", bearer(luis)))
+        mvc.perform(delete("/api/comments/" + answer).header("Authorization", users.bearer(luis)))
                 .andExpect(status().isNoContent());
 
         mvc.perform(get("/api/discussions/" + discussion.getId()))
                 .andExpect(jsonPath("$.acceptedCommentId").doesNotExist());
-        mvc.perform(get("/api/notifications").header("Authorization", bearer(luis)))
+        mvc.perform(get("/api/notifications").header("Authorization", users.bearer(luis)))
                 .andExpect(jsonPath("$.content", hasSize(0)));
-        mvc.perform(get("/api/notifications").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.content", hasSize(0)));
     }
 
     @Test
     void hiddenAndDeletedDiscussionsTakeTheirNotificationsWithThem() throws Exception {
-        User ana = user("Ana");
-        User luis = user("Luis");
+        User ana = users.create("Ana", User.Role.USER, true);
+        User luis = users.create("Luis", User.Role.USER, true);
         Discussion hidden = discussion(ana, "Se ocultará");
         Discussion deleted = discussion(ana, "Se borrará");
         comment(luis, hidden, "Respuesta a la que se ocultará");
@@ -196,17 +191,17 @@ class NotificationIntegrationTest {
 
         hidden.setIsActive(false);
         discussionRepository.save(hidden);
-        mvc.perform(delete("/api/discussions/" + deleted.getId()).header("Authorization", bearer(ana)))
+        mvc.perform(delete("/api/discussions/" + deleted.getId()).header("Authorization", users.bearer(ana)))
                 .andExpect(status().isNoContent());
 
-        mvc.perform(get("/api/notifications/unread-count").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications/unread-count").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.count").value(0));
-        mvc.perform(get("/api/notifications").header("Authorization", bearer(ana)))
+        mvc.perform(get("/api/notifications").header("Authorization", users.bearer(ana)))
                 .andExpect(jsonPath("$.content", hasSize(0)));
     }
 
     private long comment(User author, Discussion discussion, String content) throws Exception {
-        String response = mvc.perform(post("/api/comments").header("Authorization", bearer(author))
+        String response = mvc.perform(post("/api/comments").header("Authorization", users.bearer(author))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 java.util.Map.of("discussionId", discussion.getId(), "content", content))))
@@ -216,25 +211,10 @@ class NotificationIntegrationTest {
     }
 
     private long firstNotificationId(User recipient) throws Exception {
-        String response = mvc.perform(get("/api/notifications").header("Authorization", bearer(recipient)))
+        String response = mvc.perform(get("/api/notifications").header("Authorization", users.bearer(recipient)))
                 .andReturn().getResponse().getContentAsString();
         JsonNode content = objectMapper.readTree(response).get("content");
         return content.get(content.size() - 1).get("id").asLong();
-    }
-
-    private User user(String name) {
-        User user = new User();
-        user.setName(name);
-        user.setEmail("notif-" + UUID.randomUUID() + "@test.com");
-        user.setPassword(passwordEncoder.encode("Clave12345"));
-        user.setRole(User.Role.USER);
-        user.setEnabled(true);
-        user.setEmailVerifiedAt(LocalDateTime.now());
-        return userRepository.save(user);
-    }
-
-    private String bearer(User user) {
-        return "Bearer " + jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
     }
 
     private Discussion discussion(User author, String title) {

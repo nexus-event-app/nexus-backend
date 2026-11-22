@@ -8,17 +8,15 @@ import com.nexus.backend.enums.WorkMode;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.SavedJobRepository;
 import com.nexus.backend.repository.UserRepository;
-import com.nexus.backend.security.JwtUtil;
+import com.nexus.backend.support.TestUsers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -44,9 +42,7 @@ class SavedJobsIntegrationTest {
     @Autowired
     private SavedJobRepository savedJobRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private TestUsers users;
 
     @Test
     void requiresLogin() throws Exception {
@@ -58,7 +54,7 @@ class SavedJobsIntegrationTest {
 
     @Test
     void savesListsAndRemovesIdempotently() throws Exception {
-        String ana = bearer(user());
+        String ana = users.bearer(users.create("Usuario de prueba", User.Role.USER, false));
         Long first = job("Primera", true).getId();
         Long second = job("Segunda", true).getId();
 
@@ -84,8 +80,8 @@ class SavedJobsIntegrationTest {
 
     @Test
     void eachUserOnlySeesTheirOwn() throws Exception {
-        String ana = bearer(user());
-        String luis = bearer(user());
+        String ana = users.bearer(users.create("Usuario de prueba", User.Role.USER, false));
+        String luis = users.bearer(users.create("Usuario de prueba", User.Role.USER, false));
         Long id = job("Privada", true).getId();
 
         mvc.perform(put("/api/saved-jobs/" + id).header("Authorization", ana)).andExpect(status().isNoContent());
@@ -98,7 +94,7 @@ class SavedJobsIntegrationTest {
 
     @Test
     void unpublishedJobsCannotBeSavedButStayListedAsUnavailable() throws Exception {
-        String ana = bearer(user());
+        String ana = users.bearer(users.create("Usuario de prueba", User.Role.USER, false));
         Long hidden = job("Inactiva", false).getId();
         mvc.perform(put("/api/saved-jobs/" + hidden).header("Authorization", ana)).andExpect(status().isNotFound());
         mvc.perform(put("/api/saved-jobs/999999").header("Authorization", ana)).andExpect(status().isNotFound());
@@ -115,33 +111,19 @@ class SavedJobsIntegrationTest {
 
     @Test
     void deletingAJobRemovesItFromSavedLists() throws Exception {
-        User admin = user();
+        User admin = users.create("Usuario de prueba", User.Role.USER, false);
         admin.setRole(User.Role.ADMIN);
         userRepository.save(admin);
-        String ana = bearer(user());
+        String ana = users.bearer(users.create("Usuario de prueba", User.Role.USER, false));
         Long id = job("Se borrará", true).getId();
         mvc.perform(put("/api/saved-jobs/" + id).header("Authorization", ana)).andExpect(status().isNoContent());
 
-        mvc.perform(delete("/api/admin/jobs/" + id).header("Authorization", bearer(admin)))
+        mvc.perform(delete("/api/admin/jobs/" + id).header("Authorization", users.bearer(admin)))
                 .andExpect(status().isNoContent());
 
         assertThat(jobOfferRepository.existsById(id)).isFalse();
         mvc.perform(get("/api/saved-jobs/ids").header("Authorization", ana)).andExpect(jsonPath("$", empty()));
         assertThat(savedJobRepository.findAll()).noneMatch(saved -> saved.getJob().getId().equals(id));
-    }
-
-    private User user() {
-        User user = new User();
-        user.setName("Usuario de prueba");
-        user.setEmail("saved-" + UUID.randomUUID() + "@test.com");
-        user.setPassword(passwordEncoder.encode("Clave12345"));
-        user.setRole(User.Role.USER);
-        user.setEnabled(true);
-        return userRepository.save(user);
-    }
-
-    private String bearer(User user) {
-        return "Bearer " + jwtUtil.generateToken(user.getEmail(), user.getRole().name(), user.getId());
     }
 
     private JobOffer job(String title, boolean active) {

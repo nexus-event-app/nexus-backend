@@ -33,7 +33,7 @@ public class JobicyJobProvider implements JobFeedProvider {
 
     @Override
     public List<ImportedJob> fetch(ImportSource source) {
-        return parse(JsonFeeds.read(objectMapper, feedClient.get(source.getUrl(), "application/json")));
+        return parse(JsonFeeds.fetch(feedClient, objectMapper, source.getUrl()));
     }
 
     List<ImportedJob> parse(JsonNode root) {

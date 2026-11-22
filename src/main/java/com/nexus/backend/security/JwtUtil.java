@@ -71,11 +71,6 @@ public class JwtUtil {
     public record TokenClaims(String email, Instant issuedAt) {
     }
 
-    /** Devuelve el email (subject) si el token es válido y no ha caducado; vacío en cualquier otro caso. */
-    public Optional<String> extractEmailIfValid(String token) {
-        return parse(token).map(TokenClaims::email);
-    }
-
     /** Email y fecha de emisión si el token es válido y no ha caducado; vacío en cualquier otro caso. */
     public Optional<TokenClaims> parse(String token) {
         try {
