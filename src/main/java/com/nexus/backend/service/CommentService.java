@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface CommentService {
 
-    /** {@code viewer} puede ser null (visitante anónimo). */
     List<CommentResponse> getCommentsByDiscussion(Long discussionId, UserDetail viewer);
 
     CommentResponse createComment(CreateCommentRequest request, UserDetail actor);

@@ -19,7 +19,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/** Evento que comparte alguien de la comunidad: un enlace para apuntarse, la fecha y una descripción corta. */
 @Entity
 @Table(name = "community_events")
 @Getter
@@ -53,24 +52,19 @@ public class CommunityEvent extends TimestampedEntity {
     @Column(length = 80)
     private String city;
 
-    /** Dirección exacta, opcional (solo en los presenciales). */
     @Column(length = 200)
     private String address;
 
-    /** Organizado por y para mujeres: sale en su propio bloque. */
     @Column(name = "for_women", nullable = false)
     private boolean forWomen;
 
-    /** Se oculta si la moderación lo decide tras un reporte. */
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
-    /** Quién lo compartió: para que pueda borrarlo y para moderar; no se muestra en la web. */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;
 
-    /** Se ve en la web: activo y todavía no ha pasado. */
     public boolean isVisibleOn(LocalDate today) {
         return active && !startsOn.isBefore(today);
     }

@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Eventos de la comunidad: verlos es público; compartirlos y borrar los propios, con sesión. */
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
@@ -48,7 +47,6 @@ public class EventController {
                 principal));
     }
 
-    /** Días con eventos entre dos fechas, para marcar el calendario. */
     @GetMapping("/calendar")
     public ResponseEntity<List<EventDayResponse>> getCalendar(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -56,7 +54,6 @@ public class EventController {
         return ResponseEntity.ok(eventService.getCalendar(from, to));
     }
 
-    /** Ciudades con eventos presenciales próximos, para el filtro. */
     @GetMapping("/cities")
     public ResponseEntity<List<String>> getCities() {
         return ResponseEntity.ok(eventService.getCities());
@@ -68,7 +65,6 @@ public class EventController {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(request, principal));
     }
 
-    /** «Me apunto»: lo marca o lo quita. */
     @PostMapping("/{id}/interest")
     public ResponseEntity<EventInterestResponse> toggleInterest(@PathVariable Long id,
                                                                 @AuthenticationPrincipal UserDetail principal) {

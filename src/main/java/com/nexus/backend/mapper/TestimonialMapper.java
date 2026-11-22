@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestimonialMapper {
 
-    /** Los testimonios nacen pendientes de moderación y sin publicar. */
     public Testimonial toEntity(CreateTestimonialRequest request, User user) {
         Testimonial testimonial = new Testimonial();
         testimonial.setName(request.getName());

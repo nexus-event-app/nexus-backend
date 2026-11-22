@@ -14,21 +14,15 @@ public final class Pagination {
     private Pagination() {
     }
 
-    /** Página 0-based ordenada por más reciente primero, con tamaño limitado a {@value #MAX_SIZE}. */
     public static Pageable newestFirst(int page, int size) {
         return page(page, size, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
     }
 
-    /**
-     * Ofertas públicas: las de España delante y, dentro de cada grupo, por fecha de publicación real en la fuente
-     * (no por cuándo se importaron).
-     */
     public static Pageable spainFirst(int page, int size) {
         Sort sort = Sort.by(Sort.Order.desc("inSpain"), Sort.Order.desc("publishedAt"), Sort.Order.desc("id"));
         return page(page, size, sort);
     }
 
-    /** Ofertas en el panel de administración: por fecha de publicación, la más reciente primero. */
     public static Pageable newestPublishedFirst(int page, int size) {
         return page(page, size, Sort.by(Sort.Order.desc("publishedAt"), Sort.Order.desc("id")));
     }
@@ -37,12 +31,10 @@ public final class Pagination {
         return spainFirst(0, latestSize(limit));
     }
 
-    /** Agenda: del evento más cercano al más lejano. */
     public static Pageable soonestFirst(int page, int size) {
         return page(page, size, Sort.by(Sort.Order.asc("startsOn"), Sort.Order.asc("startTime"), Sort.Order.asc("id")));
     }
 
-    /** Sin orden propio: lo pone la consulta (p. ej., los eventos por fecha). */
     public static Pageable unsorted(int page, int size) {
         return page(page, size, Sort.unsorted());
     }
@@ -51,7 +43,6 @@ public final class Pagination {
         return newestFirst(0, latestSize(limit));
     }
 
-    /** Página y tamaño saneados: nunca negativos ni por encima de {@value #MAX_SIZE}, diga lo que diga la URL. */
     private static Pageable page(int page, int size, Sort sort) {
         return PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), MAX_SIZE), sort);
     }

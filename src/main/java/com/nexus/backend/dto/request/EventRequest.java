@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/**
- * Lo mínimo para compartir un evento (o corregirlo desde el panel): enlace para apuntarse, título, fecha, dónde y una
- * descripción corta. Que la fecha no haya pasado se comprueba al compartirlo: el panel puede corregir cualquiera.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

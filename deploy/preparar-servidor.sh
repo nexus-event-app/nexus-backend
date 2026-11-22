@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Prepara un servidor Ubuntu recién creado para Primer Commit. Se ejecuta una sola vez, como root:
-#   curl -fsSL https://raw.githubusercontent.com/nexus-event-app/nexus-backend/dev/deploy/preparar-servidor.sh | bash
-# Instala Docker, abre solo los puertos necesarios, activa las actualizaciones de seguridad, descarga el código en
-# /opt/primercommit y crea deploy/.env con los secretos ya generados. Se puede repetir sin romper nada.
 set -euo pipefail
 
 BASE=/opt/primercommit
@@ -15,7 +11,6 @@ apt-get install -y -q git curl ufw unattended-upgrades openssl
 dpkg-reconfigure -f noninteractive unattended-upgrades
 
 echo "==> Memoria de reserva (swap de 4 GB)"
-# Con 2 GB de RAM, compilar el backend y la web necesita más memoria: el swap evita que se quede sin ella.
 if ! swapon --show | grep -q /swapfile; then
   fallocate -l 4G /swapfile
   chmod 600 /swapfile
@@ -23,7 +18,6 @@ if ! swapon --show | grep -q /swapfile; then
   swapon /swapfile
   grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
-# Usa el swap solo cuando haga falta (por defecto el sistema lo usa antes de tiempo y todo va más lento).
 echo 'vm.swappiness=10' > /etc/sysctl.d/99-primercommit.conf
 sysctl -q -p /etc/sysctl.d/99-primercommit.conf
 
@@ -55,7 +49,6 @@ if [ ! -f .env ]; then
   cp .env.example .env
   chmod 600 .env
 fi
-# Rellena los secretos que estén vacíos; nunca cambia uno que ya exista (rompería la base de datos o las sesiones).
 fill_secret() {
   if grep -qE "^$1=$" .env; then
     sed -i "s|^$1=$|$1=$(openssl rand -base64 "$2" | tr -d '\n/+=')|" .env

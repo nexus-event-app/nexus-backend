@@ -24,11 +24,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Aplica las migraciones sobre un PostgreSQL real y comprueba que Hibernate valida el esquema.
- * Solo se ejecuta si se define NEXUS_TEST_POSTGRES_URL (y opcionalmente _USER y _PASSWORD), como en CI.
- * La base de datos indicada se vacía al empezar: usa una exclusiva para tests.
- */
 @SpringBootTest
 @ActiveProfiles("test")
 @EnabledIfEnvironmentVariable(named = "NEXUS_TEST_POSTGRES_URL", matches = ".+")

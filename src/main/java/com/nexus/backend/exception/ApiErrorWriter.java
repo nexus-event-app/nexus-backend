@@ -13,10 +13,6 @@ import org.springframework.web.servlet.LocaleResolver;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Escribe el JSON de error del contrato desde componentes que quedan fuera de los controladores (filtros de seguridad).
- * El mensaje puede ser una clave de messages*.properties, que se traduce al idioma de la petición.
- */
 @Component
 @RequiredArgsConstructor
 public class ApiErrorWriter {

@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Los tres idiomas deben tener las mismas claves, ninguna vacía y los mismos argumentos {0}, {1}… */
 class MessageBundlesTest {
 
     private static final Pattern ARGUMENT = Pattern.compile("\\{(\\d+)}");

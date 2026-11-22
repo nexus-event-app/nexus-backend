@@ -10,10 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Recoloca las listas de las ofertas y noticias ya importadas: antes la viñeta quedaba sola en una línea y su texto
- * más abajo (ver {@link BulletText}). Las nuevas ya se importan bien.
- */
 public class V18__Arreglar_listas_importadas extends BaseJavaMigration {
 
     @Override

@@ -38,7 +38,6 @@ public class CreateNewsRequest {
 
     private NewsCategory category = NewsCategory.GENERAL;
 
-    /** Idioma del contenido: «es» (por defecto) o «en». */
     @Pattern(regexp = ContentLanguage.PATTERN, message = "{validation.language.pattern}")
     private String language;
 

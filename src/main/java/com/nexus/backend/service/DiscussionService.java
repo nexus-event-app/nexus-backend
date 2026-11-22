@@ -9,7 +9,6 @@ import com.nexus.backend.security.UserDetail;
 
 public interface DiscussionService {
 
-    /** {@code viewer} puede ser null (visitante anónimo). */
     PageResponse<DiscussionResponse> getDiscussions(DiscussionCategory category, String text, int page, int size,
                                                     UserDetail viewer);
 
@@ -25,14 +24,11 @@ public interface DiscussionService {
 
     void deleteDiscussion(Long id, UserDetail actor);
 
-    /** Marca un comentario como la mejor respuesta. Solo puede hacerlo quien abrió la discusión. */
     DiscussionResponse acceptAnswer(Long id, Long commentId, UserDetail actor);
 
-    /** Quita la marca de mejor respuesta. */
     DiscussionResponse clearAcceptedAnswer(Long id, UserDetail actor);
 
     DiscussionResponse toggleLike(Long id, UserDetail actor);
 
-    /** Discusiones publicadas de un autor, para su perfil público. */
     PageResponse<DiscussionResponse> getDiscussionsByAuthor(Long authorId, int page, int size, UserDetail viewer);
 }

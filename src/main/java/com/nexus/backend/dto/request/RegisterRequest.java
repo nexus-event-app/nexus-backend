@@ -34,7 +34,6 @@ public class RegisterRequest {
     @ToString.Exclude
     private String password;
 
-    /** Aceptación obligatoria del aviso legal, las condiciones de uso y la política de privacidad. */
     @NotNull(message = "{validation.terms.required}")
     @AssertTrue(message = "{validation.terms.required}")
     private Boolean acceptTerms;

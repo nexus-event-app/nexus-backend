@@ -38,7 +38,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Eventos que comparte la comunidad: quién puede publicar, qué se ve, límites, borrado, reportes y aviso por email. */
 @Import(CapturingMail.class)
 @SpringBootTest(properties = {"app.moderation.email=moderacion@primercommit.test", "app.auth.require-verified-email=true"})
 @AutoConfigureMockMvc
@@ -85,7 +84,6 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content[0].title").value("Meetup de React en Valencia"))
                 .andExpect(jsonPath("$.content[0].city").value("Valencia"))
                 .andExpect(jsonPath("$.content[0].address").value("Calle Mayor, 1"))
-                // Sin sesión no es «mío», y nunca se dice quién lo compartió.
                 .andExpect(jsonPath("$.content[0].mine").value(false))
                 .andExpect(jsonPath("$.content[0].author").doesNotExist())
                 .andExpect(jsonPath("$.content[0].authorName").doesNotExist());
@@ -130,7 +128,6 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content", hasSize(3)));
         mvc.perform(get("/api/events").param("day", TODAY.plusDays(2).toString()).param("city", "barcelona"))
                 .andExpect(jsonPath("$.content[*].title", contains("En Barcelona")));
-        // Una entrada por ciudad aunque esté escrita distinto, en orden alfabético.
         mvc.perform(get("/api/events/cities")).andExpect(jsonPath("$", contains("Barcelona", "Madrid")));
     }
 
@@ -177,7 +174,6 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.address").value("C. de Cronos, 63 (Doofinder)"))
                 .andExpect(jsonPath("$.authorName").value("Ana"));
 
-        // Si pasa a online, se quedan sin ciudad ni dirección.
         Map<String, Object> online = event("Meetup de React", TODAY.plusDays(2), "ONLINE", "Madrid", false);
         mvc.perform(put("/api/admin/events/" + typo.getId()).header("Authorization", users.bearer(admin))
                         .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(online)))
@@ -268,7 +264,6 @@ class EventIntegrationTest {
                 .andExpect(status().is2xxSuccessful());
 
         mvc.perform(get("/api/events")).andExpect(jsonPath("$.content", hasSize(0)));
-        // En el panel sigue, marcado como oculto, con quién lo compartió.
         mvc.perform(get("/api/admin/events").header("Authorization", users.bearer(admin)))
                 .andExpect(jsonPath("$.content[0].active").value(false))
                 .andExpect(jsonPath("$.content[0].authorName").value("Ana"));
@@ -286,7 +281,6 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.city").value("Madrid"))
                 .andExpect(jsonPath("$.address").value("Doofinder C. de Cronos, 63 · Madrid"));
 
-        // Con dirección propia, la dirección se respeta.
         Map<String, Object> withAddress = event("Taller de Git", TODAY.plusDays(3), "PRESENCIAL",
                 "Calle Pelai 12, Barcelona", false);
         withAddress.put("url", "https://www.meetup.com/git/events/1/");
@@ -300,7 +294,6 @@ class EventIntegrationTest {
     @Test
     void longDescriptionsAreKeptWholeUpTo2000Characters() throws Exception {
         User ana = users.create("Ana", User.Role.USER, true);
-        // Como las de Meetup o Eventbrite: varios párrafos. Antes se cortaba en 280 caracteres.
         String whole = ("Los agentes se han convertido en el nuevo punto de partida de la IA. En este taller aprenderás "
                 + "los conceptos fundamentales: el razonamiento, el uso de herramientas y la memoria.\n\n").repeat(6).trim();
         assertThat(whole.length()).isGreaterThan(280).isLessThan(2000);
@@ -339,7 +332,6 @@ class EventIntegrationTest {
                 .andExpect(jsonPath("$.content[0].interested").value(false))
                 .andExpect(jsonPath("$.content[0].interestedUsers").doesNotExist());
 
-        // Pulsarlo otra vez lo quita.
         mvc.perform(post(interest).header("Authorization", users.bearer(bea)))
                 .andExpect(jsonPath("$.count").value(1))
                 .andExpect(jsonPath("$.interested").value(false));
@@ -362,7 +354,6 @@ class EventIntegrationTest {
         mvc.perform(post("/api/events/" + open.getId() + "/interest")
                         .header("Authorization", users.bearer(users.create("Sin verificar", User.Role.USER, false))))
                 .andExpect(status().isForbidden());
-        // Al borrar el evento se van sus «Me apunto».
         mvc.perform(post("/api/events/" + open.getId() + "/interest").header("Authorization", users.bearer(ana)))
                 .andExpect(status().isOk());
         mvc.perform(delete("/api/events/" + open.getId()).header("Authorization", users.bearer(ana)))

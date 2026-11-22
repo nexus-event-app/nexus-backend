@@ -17,7 +17,6 @@ import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    /** Contenido reportado, uno por fila: el que más reportes tiene y el más reciente primero. */
     interface ReportedTarget {
         ReportTargetType getTargetType();
 
@@ -50,7 +49,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                      @Param("resolution") ReportAction resolution, @Param("admin") User admin,
                      @Param("now") LocalDateTime now);
 
-    /** Al borrar una discusión se borran sus comentarios: sus reportes pendientes se cierran como resueltos. */
     @Modifying
     @Query("update Report r set r.status = com.nexus.backend.enums.ReportStatus.RESOLVED, r.resolution = com.nexus.backend.enums.ReportAction.DELETE, "
             + "r.resolvedBy = :admin, r.resolvedAt = :now where r.status = com.nexus.backend.enums.ReportStatus.PENDING "

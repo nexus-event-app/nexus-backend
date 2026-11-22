@@ -13,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** «Añadir fuentes recomendadas» crea solo las que faltan y no toca las existentes. */
 @SpringBootTest
 @ActiveProfiles("test")
 class DefaultImportSourcesIntegrationTest {

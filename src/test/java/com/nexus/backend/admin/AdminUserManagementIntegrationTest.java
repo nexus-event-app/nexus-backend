@@ -12,7 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;
@@ -22,7 +21,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Desde el panel: dar y quitar el permiso de administración y editar el perfil de cualquier cuenta. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -42,7 +40,6 @@ class AdminUserManagementIntegrationTest {
 
         role(admin, amiga.getId(), "ADMIN").andExpect(status().isOk()).andExpect(jsonPath("$.role").value("ADMIN"));
         assertThat(userRepository.findById(amiga.getId()).orElseThrow().getRole()).isEqualTo(User.Role.ADMIN);
-        // Ya puede entrar en el panel con su sesión de siempre.
         mvc.perform(get("/api/admin/users").header("Authorization", users.bearer(amiga))).andExpect(status().isOk());
 
         role(admin, amiga.getId(), "USER").andExpect(status().isOk()).andExpect(jsonPath("$.role").value("USER"));

@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** La web solo enseña los filtros de noticias que tienen algo publicado, en el idioma que se pide. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -34,7 +33,6 @@ class NewsCategoriesIntegrationTest {
         news("Nuevo modelo de IA", NewsCategory.IA, "es", true);
         news("Otro modelo de IA", NewsCategory.IA, "es", true);
         news("PostgreSQL 18 released", NewsCategory.DATOS, "en", true);
-        // Sin publicar: no cuenta.
         news("Borrador de seguridad", NewsCategory.CIBERSEGURIDAD, "es", false);
     }
 

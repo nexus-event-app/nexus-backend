@@ -1,25 +1,12 @@
 package com.nexus.backend.enums;
 
-/**
- * Tipos de fuente de importación. Cada tipo sabe qué contenido produce y cada cuánto se le puede consultar
- * como mínimo (algunos proveedores lo exigen en sus condiciones de uso).
- */
 public enum ImportSourceType {
 
-    /** Cualquier feed RSS o Atom de noticias. */
     RSS_NEWS(true, 30, 1),
-    /** API pública de Remotive: máximo 4 consultas al día según sus condiciones. */
     REMOTIVE_JOBS(false, 360, 360),
-    /** API pública de Arbeitnow. */
     ARBEITNOW_JOBS(false, 60, 5),
-    /** API pública de Jobicy: empleo en remoto; sus condiciones piden no consultarla más de una vez por hora. */
     JOBICY_JOBS(false, 360, 60),
-    /** API pública de Get on Board: empleo tech en español con nivel explícito. */
     GETONBRD_JOBS(false, 120, 5),
-    /**
-     * API de Adzuna: ofertas de España en castellano. Pide claves (ADZUNA_APP_ID y ADZUNA_APP_KEY) y el plan gratuito
-     * tiene un cupo mensual: cada 6 horas, con 2 páginas por vez, son unas 240 consultas al mes.
-     */
     ADZUNA_JOBS(false, 360, 60);
 
     private final boolean news;
@@ -36,12 +23,10 @@ public enum ImportSourceType {
         return news;
     }
 
-    /** Intervalo mínimo entre ejecuciones programadas. */
     public int getMinIntervalMinutes() {
         return minIntervalMinutes;
     }
 
-    /** Tiempo mínimo desde la última ejecución para lanzar una manual. */
     public int getManualCooldownMinutes() {
         return manualCooldownMinutes;
     }

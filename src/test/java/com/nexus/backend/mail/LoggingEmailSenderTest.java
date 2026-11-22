@@ -8,7 +8,6 @@ import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Sin servicio de correo, el email solo se escribe entero en el log en desarrollo: fuera, sus enlaces son secretos. */
 @ExtendWith(OutputCaptureExtension.class)
 class LoggingEmailSenderTest {
 

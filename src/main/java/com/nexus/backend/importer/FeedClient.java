@@ -11,10 +11,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-/**
- * Cliente HTTP para fuentes externas: tiempos de espera acotados, tamaño máximo de respuesta y
- * redirecciones seguidas a mano para validar cada salto con {@link UrlGuard}.
- */
 @Component
 public class FeedClient {
 
@@ -87,7 +83,6 @@ public class FeedClient {
         try {
             body.close();
         } catch (IOException ignored) {
-            // nada que hacer
         }
     }
 }

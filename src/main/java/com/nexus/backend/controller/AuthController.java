@@ -39,7 +39,6 @@ public class AuthController {
         return ResponseEntity.ok(userService.login(request));
     }
 
-    /** Responde 202 siempre, exista o no la cuenta, para no revelar qué emails están registrados. */
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         accountService.requestPasswordReset(request.getEmail());

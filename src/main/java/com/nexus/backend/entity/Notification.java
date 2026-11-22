@@ -20,7 +20,6 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
-/** Aviso para una persona sobre algo que ha pasado en el foro. Los índices están en la migración V12. */
 @Entity
 @Table(name = "notifications")
 @Getter
@@ -36,7 +35,6 @@ public class Notification extends CreatedEntity {
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
-    /** Quién lo ha provocado (quien responde o quien marca la mejor respuesta). */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "actor_id", nullable = false)
     private User actor;

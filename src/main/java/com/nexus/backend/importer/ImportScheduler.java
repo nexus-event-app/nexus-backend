@@ -12,11 +12,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 
-/**
- * Revisa periódicamente qué fuentes activas toca ejecutar según su intervalo y limpia las ofertas
- * importadas que caducaron hace tiempo. Pensado para una sola instancia: con varias réplicas,
- * activarlo solo en una ({@code IMPORT_ENABLED=false} en el resto).
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

@@ -11,10 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * Crea las fuentes recomendadas la primera vez que arranca la aplicación (si no hay ninguna).
- * Después se gestionan desde el panel de administración.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor

@@ -56,14 +56,9 @@ public class Discussion extends TimestampedEntity {
     @Column(name = "likes_count", nullable = false)
     private Integer likesCount = 0;
 
-    /**
-     * Comentario que quien abrió la discusión ha marcado como la mejor respuesta. Se guarda solo el id: la base de
-     * datos lo pone a null si se borra el comentario (V12), sin que Hibernate tenga que cargarlo.
-     */
     @Column(name = "accepted_comment_id")
     private Long acceptedCommentId;
 
-    /** Visible en el foro (no la ha ocultado la moderación). */
     public boolean isVisible() {
         return Boolean.TRUE.equals(isActive);
     }

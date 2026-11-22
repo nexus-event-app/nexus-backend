@@ -52,7 +52,6 @@ public class ReportServiceImpl implements ReportService {
 
     private static final Set<ReportStatus> PENDING = Set.of(ReportStatus.PENDING);
     private static final Set<ReportStatus> CLOSED = Set.of(ReportStatus.RESOLVED, ReportStatus.DISMISSED);
-    /** La cola muestra como mucho estos contenidos a la vez: si hubiera más, se verían al ir resolviendo. */
     private static final int MAX_CASES = 100;
     private static final int EXCERPT_LENGTH = 280;
 
@@ -68,7 +67,6 @@ public class ReportServiceImpl implements ReportService {
     private final EventService eventService;
     private final CommunityEventRepository eventRepository;
 
-    /** Contenido reportable que se puede ver: quién lo escribió (null si fue un testimonio sin cuenta). */
     private record Owner(Long userId) {
     }
 
@@ -121,7 +119,6 @@ public class ReportServiceImpl implements ReportService {
                 close(type, id, ReportStatus.RESOLVED, ReportAction.HIDE, actor);
             }
             case DELETE -> {
-                // Al borrar el contenido, su servicio cierra también sus reportes pendientes.
                 if (exists) {
                     delete(type, id, actor);
                 }
@@ -141,7 +138,6 @@ public class ReportServiceImpl implements ReportService {
             case DISCUSSION -> discussionRepository.findById(id).ifPresent(discussion -> discussion.setIsActive(false));
             case TESTIMONIAL -> testimonialRepository.findById(id).ifPresent(testimonial -> testimonial.setIsActive(false));
             case EVENT -> eventService.hide(id);
-            // Los comentarios no se pueden ocultar, solo borrar.
             case COMMENT -> throw new BadRequestException("error.report.cannotHideComment");
         }
     }
@@ -164,7 +160,6 @@ public class ReportServiceImpl implements ReportService {
         };
     }
 
-    /** Autor del contenido si está publicado (lo oculto o pendiente de moderar no se puede reportar). */
     private Optional<Owner> findVisibleOwner(ReportTargetType type, Long id) {
         return switch (type) {
             case DISCUSSION -> discussionRepository.findById(id)
@@ -224,7 +219,6 @@ public class ReportServiceImpl implements ReportService {
                 testimonial.getUser() == null ? null : testimonial.getUser().getId(), testimonial.getName(), null, null);
     }
 
-    /** Para moderar, quien lo compartió sí se ve (en la web pública, no). */
     private static Target describe(CommunityEvent event) {
         return new Target(true, event.isActive(), event.getTitle(),
                 TextUtil.truncate(event.getDescription() + " — " + event.getUrl(), EXCERPT_LENGTH),

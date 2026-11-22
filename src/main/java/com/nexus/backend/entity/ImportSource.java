@@ -19,7 +19,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-/** Fuente externa desde la que se importan noticias u ofertas de empleo de forma periódica. */
 @Entity
 @Table(name = "import_sources")
 @Getter
@@ -31,7 +30,6 @@ public class ImportSource extends TimestampedEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Nombre visible; se muestra como atribución en el contenido importado. */
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
@@ -43,42 +41,29 @@ public class ImportSource extends TimestampedEntity {
     @Column(nullable = false, length = 500)
     private String url;
 
-    /** Categoría asignada a las noticias importadas (solo fuentes de noticias). */
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "news_category", length = 30)
     private NewsCategory newsCategory;
 
-    /** Si es false, lo importado queda oculto hasta que un admin lo publique. */
     @Column(name = "auto_publish", nullable = false)
     private Boolean autoPublish = true;
 
     @Column(nullable = false)
     private Boolean active = true;
 
-    /** Solo ofertas en remoto (fuentes de empleo). */
     @Column(name = "remote_only", nullable = false)
     private Boolean remoteOnly = false;
 
-    /**
-     * Palabras clave separadas por comas. Si hay alguna, solo se importa lo que contenga al menos una
-     * en el título o el resumen (útil para feeds generalistas).
-     */
-    /** Idioma en que publica la fuente: lo heredan sus noticias («es» o «en»). */
     @Column(name = "language", nullable = false, length = 5)
     private String language = "es";
 
     @Column(length = 500)
     private String keywords;
 
-    /** Palabras clave separadas por comas: lo que contenga alguna no se importa aunque cumpla las demás condiciones. */
     @Column(name = "exclude_keywords", length = 500)
     private String excludeKeywords;
 
-    /**
-     * Noticias: si es false, se ignoran las imágenes de la fuente (feed y página del artículo) y la web muestra
-     * sus propias fotos de portada. Útil para fuentes cuyas portadas son tarjetas generadas automáticamente.
-     */
     @Column(name = "use_source_images", nullable = false)
     private Boolean useSourceImages = true;
 

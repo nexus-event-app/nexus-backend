@@ -15,18 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Propiedad del contenido del foro: solo el autor o un administrador pueden editar o borrar,
- * y sin sesión no se puede escribir. Los usuarios y el contenido se insertan directamente en BD
- * para no consumir los límites de peticiones por IP.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

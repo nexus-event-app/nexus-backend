@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** La V22 pasa a los temas nuevos y reclasifica por su contenido lo importado; lo publicado a mano se respeta. */
 class V22TemasDeLasNoticiasTest {
 
     @Test
@@ -34,7 +33,6 @@ class V22TemasDeLasNoticiasTest {
                         + "(1, 'OpenAI presenta un nuevo modelo de lenguaje', 'Resumen.', 'GENERAL', 'Genbeta', 'a'), "
                         + "(2, 'Consejos para tus redes sociales', 'Sin tema técnico.', 'GENERAL', 'WeLiveSecurity en español', 'b'), "
                         + "(3, 'Arquitectura hexagonal paso a paso', 'Patrones de diseño.', 'DESARROLLO', 'Paradigma Digital', 'c'), "
-                        // Publicadas a mano: solo cambia el nombre del tema antiguo, no se reclasifican.
                         + "(4, 'Cómo preparar tu entrevista', 'Consejos.', 'ENTREVISTAS', null, null), "
                         + "(5, 'OpenAI presenta otro modelo de lenguaje', 'Texto.', 'NETWORKING', null, null)");
             }

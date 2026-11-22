@@ -6,14 +6,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-/**
- * Reconoce la ciudad dentro de un texto que mezcla dirección y ciudad («42 Málaga Fundación Telefónica, Av. de Sor
- * Teresa Prat, 15» → «Málaga»), para que el filtro de la agenda tenga solo ciudades. Capitales de provincia y las
- * ciudades más grandes de España, sin acentos ni mayúsculas al comparar.
- */
 public final class SpanishCities {
 
-    /** Las de varias palabras van antes, para que «Las Palmas de Gran Canaria» no se quede en «Palma». */
     private static final List<String> CITIES = List.of(
             "Las Palmas de Gran Canaria", "Santa Cruz de Tenerife", "San Sebastián", "Palma de Mallorca",
             "Vitoria-Gasteiz", "A Coruña", "La Coruña", "Ciudad Real", "Alcalá de Henares", "Jerez de la Frontera",
@@ -35,7 +29,6 @@ public final class SpanishCities {
     private SpanishCities() {
     }
 
-    /** La primera ciudad conocida que aparece en el texto, escrita como en la lista. */
     public static Optional<String> find(String text) {
         if (text == null || text.isBlank()) {
             return Optional.empty();
@@ -49,7 +42,6 @@ public final class SpanishCities {
         return Optional.empty();
     }
 
-    /** ¿Parece una dirección y no solo una ciudad? Lleva números, comas o es demasiado larga. */
     public static boolean looksLikeAddress(String text) {
         return text != null && (text.matches(".*\\d.*") || text.contains(",") || text.contains("·") || text.length() > 40);
     }

@@ -54,8 +54,6 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional(readOnly = true)
     public List<NewsResponse> getLatestNews(int limit) {
-        // La portada solo enseña noticias en castellano, aunque haya menos de las pedidas: las de otros idiomas están en
-        // la página de noticias, con su filtro de idioma.
         return newsRepository.findAll(
                         NewsSpecifications.isActive().and(NewsSpecifications.inLanguage(ContentLanguage.SPANISH)),
                         Pagination.latest(limit))
@@ -99,7 +97,6 @@ public class NewsServiceImpl implements NewsService {
         return newsMapper.toResponse(newsRepository.save(news));
     }
 
-    /** Sin imagen subida pero con enlace a la fuente: se usa la portada de esa página, si la tiene. */
     private void fillImageFromSource(News news) {
         if ((news.getImageUrl() == null || news.getImageUrl().isBlank()) && news.getSourceUrl() != null) {
             news.setImageUrl(articleImageFinder.find(news.getSourceUrl()).orElse(null));

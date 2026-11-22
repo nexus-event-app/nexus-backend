@@ -15,7 +15,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** El ida y vuelta a Google con credenciales de prueba (sin llamar a Google). */
 @SpringBootTest(properties = {
         "app.google.client-id=id-de-prueba.apps.googleusercontent.com",
         "app.google.client-secret=secreto-de-prueba",

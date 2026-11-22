@@ -44,7 +44,6 @@ public class SavedJobServiceImpl implements SavedJobService {
         return savedJobRepository.findJobIdsByUserId(actor.getId());
     }
 
-    /** Idempotente: guardar una oferta ya guardada no hace nada. Solo se pueden guardar ofertas publicadas. */
     @Override
     @Transactional
     public void save(Long jobId, UserDetail actor) {
@@ -60,7 +59,6 @@ public class SavedJobServiceImpl implements SavedJobService {
         savedJobRepository.save(new SavedJob(userRepository.getReferenceById(actor.getId()), job));
     }
 
-    /** Idempotente: quitar una oferta que no estaba guardada no da error. */
     @Override
     @Transactional
     public void remove(Long jobId, UserDetail actor) {

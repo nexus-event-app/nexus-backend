@@ -12,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-/** Solo se muestran los avisos de discusiones publicadas: si se oculta una discusión, sus avisos desaparecen. */
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
     @Query(value = "select n from Notification n join fetch n.actor join fetch n.discussion d "
@@ -35,7 +34,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("delete from Notification n where n.type = :type and n.comment.id = :commentId")
     void deleteByTypeAndCommentId(@Param("type") NotificationType type, @Param("commentId") Long commentId);
 
-    /** Las que recibió y las que generó (una respuesta suya, un «me gusta»...): sin la cuenta, no tienen sentido. */
     @Modifying
     @Query("delete from Notification n where n.recipient.id = :userId or n.actor.id = :userId")
     void deleteAllInvolving(@Param("userId") Long userId);

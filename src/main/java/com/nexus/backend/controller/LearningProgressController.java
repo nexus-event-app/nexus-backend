@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Progreso de la persona con sesión iniciada en las rutas de aprendizaje. */
 @RestController
 @RequestMapping("/api/learning/progress")
 @RequiredArgsConstructor

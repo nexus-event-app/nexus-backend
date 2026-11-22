@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** La V6 corrige las ofertas que la V5 marcó con una lista de ciudades más corta. */
 class V6RecalcularOfertasDeEspanaTest {
 
     @Test
@@ -23,7 +22,6 @@ class V6RecalcularOfertasDeEspanaTest {
             try (Statement sql = connection.createStatement()) {
                 sql.execute("create table job_offers (id bigint primary key, location varchar(120), "
                         + "in_spain boolean not null, published_at timestamp(6))");
-                // Valencia y Sevilla quedaron sin marcar en la V5; «Remoto» estaba mal marcada a propósito.
                 sql.execute("insert into job_offers values (1, 'Valencia', false, null), (2, 'Sevilla', false, null), "
                         + "(3, 'Santiago, Chile', false, null), (4, 'Remoto', true, null), (5, 'Madrid', true, null)");
             }

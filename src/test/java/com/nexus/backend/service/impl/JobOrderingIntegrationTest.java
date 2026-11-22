@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Orden público de las ofertas: España primero y, dentro de cada grupo, por fecha de publicación real. */
 @SpringBootTest
 @ActiveProfiles("test")
 class JobOrderingIntegrationTest {
@@ -31,7 +30,6 @@ class JobOrderingIntegrationTest {
     void seed() {
         jobOfferRepository.deleteAll();
         LocalDateTime now = LocalDateTime.now();
-        // Se guardan en un orden distinto al esperado: la fecha de importación (createdAt) no debe influir.
         save("Chile reciente", "Santiago, Chile", now.minusDays(1));
         save("Valencia antigua", "Valencia", now.minusDays(10));
         save("Chile antigua", "Chile", now.minusDays(8));

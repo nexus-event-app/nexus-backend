@@ -57,7 +57,6 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
-        // Las cuentas creadas con Google no tienen contraseña: con email y contraseña no se puede entrar en ellas.
         if (user == null || user.getPassword() == null
                 || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new UnauthorizedException("error.credentials.invalid");
@@ -87,7 +86,6 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateStatus(Long userId, boolean enabled, UserDetail actor) {
         User target = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
-        // Su dueña o dueño la eliminó: no se puede reactivar desde el panel (ya no tiene email ni datos).
         if (target.isDeleted()) {
             throw new ForbiddenOperationException("error.user.deleted");
         }
@@ -112,7 +110,6 @@ public class UserServiceImpl implements UserService {
         if (target.getId().equals(actor.getId())) {
             throw new ForbiddenOperationException("error.user.selfRole");
         }
-        // El panel da acceso a todo: solo a cuentas cuyo email está comprobado.
         if (role == User.Role.ADMIN && !target.isEmailVerified()) {
             throw new BadRequestException("error.user.adminNeedsVerifiedEmail");
         }

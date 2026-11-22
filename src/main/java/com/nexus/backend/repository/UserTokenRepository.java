@@ -15,7 +15,6 @@ public interface UserTokenRepository extends JpaRepository<UserToken, Long> {
     @Query("select t from UserToken t join fetch t.user where t.tokenHash = :hash and t.type = :type")
     Optional<UserToken> findByHashAndType(@Param("hash") String tokenHash, @Param("type") UserTokenType type);
 
-    /** Invalida los tokens pendientes de un usuario y tipo (al emitir uno nuevo o al usar uno). */
     @Modifying
     @Query("update UserToken t set t.usedAt = :now where t.user.id = :userId and t.type = :type and t.usedAt is null")
     int invalidatePending(@Param("userId") Long userId, @Param("type") UserTokenType type, @Param("now") LocalDateTime now);

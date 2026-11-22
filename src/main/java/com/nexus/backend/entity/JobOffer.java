@@ -67,7 +67,6 @@ public class JobOffer extends TimestampedEntity {
     @Column(name = "level", nullable = false, length = 20)
     private JobLevel level;
 
-    /** Etiquetas separadas por comas. */
     @Column(length = 400)
     private String tags;
 
@@ -77,14 +76,12 @@ public class JobOffer extends TimestampedEntity {
     @Column(name = "source", length = 100)
     private String source;
 
-    /** Identificador en el origen externo; único para evitar importaciones duplicadas. */
     @Column(name = "external_id", unique = true, length = 200)
     private String externalId;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    /** Calculado a partir de la ubicación: las ofertas de España se listan primero. */
     @Column(name = "in_spain", nullable = false)
     private boolean inSpain;
 
@@ -111,7 +108,6 @@ public class JobOffer extends TimestampedEntity {
         inSpain = SpainLocation.matches(location);
     }
 
-    /** Se muestra en la web: activa y sin caducar en ese momento. Equivale a JobSpecifications.isPublished(). */
     public boolean isPublishedAt(LocalDateTime now) {
         return Boolean.TRUE.equals(isActive) && (expiresAt == null || expiresAt.isAfter(now));
     }

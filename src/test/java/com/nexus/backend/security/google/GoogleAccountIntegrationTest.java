@@ -22,7 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Entrar con Google sin pasar por Google: lo que ocurre con los datos que devuelve y con los códigos de un solo uso. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -55,7 +54,6 @@ class GoogleAccountIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Lucía Prueba"))
                 .andExpect(jsonPath("$.email").value(email));
 
-        // Sin marcar la casilla no se crea nada.
         postJson("/api/auth/google/complete", Map.of("token", token, "acceptTerms", false))
                 .andExpect(status().isBadRequest());
         assertThat(userRepository.findByEmail(email)).isEmpty();
@@ -72,10 +70,8 @@ class GoogleAccountIntegrationTest {
         assertThat(created.getTermsAcceptedAt()).isNotNull();
         assertThat(created.isEmailVerified()).isTrue();
 
-        // El código de alta es de un solo uso.
         postJson("/api/auth/google/complete", Map.of("token", token, "acceptTerms", true))
                 .andExpect(status().isUnauthorized());
-        // Una cuenta sin contraseña no se abre con email y contraseña.
         postJson("/api/auth/login", Map.of("email", email, "password", "cualquier-cosa"))
                 .andExpect(status().isUnauthorized());
     }
@@ -99,10 +95,8 @@ class GoogleAccountIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.user.id").value(existing.getId()));
-        // El código se canjea una sola vez.
         postJson("/api/auth/google/exchange", Map.of("token", code)).andExpect(status().isUnauthorized());
 
-        // La próxima vez se la reconoce por la cuenta de Google aunque cambie el email de Google.
         GoogleLoginOutcome again = googleAccounts.handleLogin(new GoogleProfile(subject, uniqueEmail(), true, "X"));
         assertThat(again).isInstanceOf(GoogleLoginOutcome.SignedIn.class);
     }

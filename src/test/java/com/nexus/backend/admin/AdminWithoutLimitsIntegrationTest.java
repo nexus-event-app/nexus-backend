@@ -21,11 +21,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * La administración no tiene límites: ni de eventos al día, ni de testimonios, ni de publicaciones por hora en el
- * foro, ni necesita el email verificado. Lo suyo se publica sin pasar por moderación. El resto sí tiene límites.
- * Contexto propio ({@code app.test.context}) para que los contadores por IP no se mezclen con otras pruebas.
- */
 @Import(CapturingMail.class)
 @SpringBootTest(properties = {"app.moderation.email=moderacion@primercommit.test",
         "app.auth.require-verified-email=true", "app.test.context=admin-sin-limites"})
@@ -91,7 +86,6 @@ class AdminWithoutLimitsIntegrationTest {
         mvc.perform(post("/api/discussions").header("Authorization", ana).contentType(MediaType.APPLICATION_JSON)
                         .content(discussion(11)))
                 .andExpect(status().isTooManyRequests());
-        // Aunque otra persona haya agotado el límite desde la misma conexión, la administración sigue pudiendo.
         mvc.perform(post("/api/discussions").header("Authorization", admin).contentType(MediaType.APPLICATION_JSON)
                         .content(discussion(99)))
                 .andExpect(status().isCreated());

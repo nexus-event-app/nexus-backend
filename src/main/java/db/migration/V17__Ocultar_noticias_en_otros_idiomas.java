@@ -10,10 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Despublica las noticias importadas que no están ni en castellano ni en inglés (DEV Community trae a veces artículos
- * en danés, alemán...). Se ocultan en lugar de borrarse: siguen en el panel y el importador no las vuelve a traer.
- */
 public class V17__Ocultar_noticias_en_otros_idiomas extends BaseJavaMigration {
 
     @Override

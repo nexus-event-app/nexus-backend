@@ -42,7 +42,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markRead(Long id, UserDetail actor) {
-        // Solo se encuentran los avisos propios: los de otra persona responden igual que si no existieran.
         Notification notification = notificationRepository.findByIdAndRecipientId(id, actor.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("error.notification.notFound"));
         if (notification.getReadAt() == null) {
@@ -77,7 +76,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void create(NotificationType type, User recipient, User actor, Discussion discussion, Comment comment) {
-        // Nadie recibe avisos de lo que hace él mismo.
         if (recipient.getId().equals(actor.getId())) {
             return;
         }

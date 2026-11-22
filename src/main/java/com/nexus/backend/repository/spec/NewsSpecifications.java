@@ -13,7 +13,6 @@ public final class NewsSpecifications {
         return (root, query, cb) -> cb.isTrue(root.<Boolean>get("isActive"));
     }
 
-    /** Solo las de un idioma («es» o «en»); sin idioma no filtra. */
     public static Specification<News> inLanguage(String language) {
         return SpecificationUtils.equalTo("language", language);
     }

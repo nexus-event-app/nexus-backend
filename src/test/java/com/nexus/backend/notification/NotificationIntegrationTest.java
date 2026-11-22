@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,7 +24,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Avisos del foro y mejor respuesta: quién recibe qué, quién puede marcar y qué pasa al borrar. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -83,7 +81,6 @@ class NotificationIntegrationTest {
         comment(luis, discussion, "Segunda respuesta");
         long first = firstNotificationId(ana);
 
-        // Otra persona no puede tocar los avisos de Ana: responde como si no existieran.
         mvc.perform(put("/api/notifications/" + first + "/read").header("Authorization", users.bearer(luis)))
                 .andExpect(status().isNotFound());
 
@@ -128,7 +125,6 @@ class NotificationIntegrationTest {
                 .andExpect(jsonPath("$.content[0].type").value("ACCEPTED_ANSWER"))
                 .andExpect(jsonPath("$.content[0].commentId").value(answer));
 
-        // Marcarla otra vez no repite el aviso; desmarcarla lo retira.
         mvc.perform(put("/api/discussions/" + discussion.getId() + "/accepted-answer")
                 .header("Authorization", users.bearer(ana))
                 .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());

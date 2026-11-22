@@ -85,7 +85,6 @@ class ImportRunnerIntegrationTest {
         assertThat(first.imported()).isEqualTo(3);
 
         List<News> saved = newsRepository.findAll();
-        // El tema sale del contenido de cada noticia, no de la fuente.
         assertThat(saved).extracting(News::getTitle, News::getCategory).containsExactlyInAnyOrder(
                 tuple("Escalabilidad en el desarrollo de aplicaciones", NewsCategory.PROGRAMACION),
                 tuple("Cómo iniciar tu carrera en tecnología con freeCodeCamp - Charla completa", NewsCategory.CARRERA),
@@ -132,13 +131,11 @@ class ImportRunnerIntegrationTest {
                 tuple("Con portada en la página", "https://cdn.example.com/portada.jpg"),
                 tuple("Sin portada en ningún sitio", null));
 
-        // Si la página publica después su portada, el relleno periódico la recoge aunque la fuente esté pausada.
         source.setActive(false);
         sourceRepository.save(source);
         when(feedClient.get(eq("https://blog.example.com/sin-portada"), anyString())).thenReturn(
                 "<head><meta name=\"twitter:image\" content=\"/img/tarde.png\"></head>".getBytes(StandardCharsets.UTF_8));
         assertThat(newsImageBackfill.run()).isEqualTo(1);
-        // La misma noticia no se vuelve a intentar enseguida.
         assertThat(newsImageBackfill.run()).isZero();
         assertThat(newsRepository.findAll()).extracting(News::getImageUrl)
                 .containsExactlyInAnyOrder("https://cdn.example.com/portada.jpg", "https://blog.example.com/img/tarde.png");
@@ -176,7 +173,6 @@ class ImportRunnerIntegrationTest {
 
         assertThat(importRunner.run(source).imported()).isEqualTo(3);
         assertThat(newsRepository.findAll()).extracting(News::getImageUrl).containsOnlyNulls();
-        // El relleno periódico tampoco busca imágenes para esta fuente.
         assertThat(newsImageBackfill.run()).isZero();
     }
 
@@ -268,7 +264,6 @@ class ImportRunnerIntegrationTest {
                         tuple("Desarrollador/a Junior Java - Teletrabajo", JobLevel.JUNIOR, "Adzuna · España"),
                         tuple("Becario/a de Data Analytics", JobLevel.INTERN, "Adzuna · España"),
                         tuple("Soporte técnico junior", JobLevel.JUNIOR, "Adzuna · España"));
-        // Las claves solo viajan en la petición: la URL guardada de la fuente (la que se ve en el panel) no las lleva.
         verify(feedClient).get(contains("app_key=clave-de-prueba"), anyString());
         assertThat(adzuna.getUrl()).doesNotContain("clave");
     }
@@ -300,7 +295,6 @@ class ImportRunnerIntegrationTest {
 
     @Test
     void eachImportedNewsTakesTheLanguageOfItsTextAndTheSourceOnlyDecidesWhenItIsUnclear() throws Exception {
-        // Fuente marcada en castellano que también publica en inglés: lo que pasaba con el filtro «En castellano».
         ImportSource source = source("Blog mixto", ImportSourceType.RSS_NEWS, "https://feeds.example.com/mixed", false);
         when(feedClient.get(eq(source.getUrl()), anyString()))
                 .thenReturn(ProvidersTestFixtures.bytes("mixed-languages.xml"));
@@ -310,7 +304,6 @@ class ImportRunnerIntegrationTest {
                 "Cómo preparar tu primera entrevista técnica", "es",
                 "Kubernetes 1.31", "es"));
 
-        // Al marcar la fuente en inglés solo cambia la noticia cuyo texto no deja claro el idioma.
         importSourceService.update(source.getId(), requestWithLanguage(source, "en"));
         assertThat(languagesByTitle()).containsExactlyInAnyOrderEntriesOf(Map.of(
                 "What is Docker and why should you learn it?", "en",
@@ -344,7 +337,6 @@ class ImportRunnerIntegrationTest {
 
     @Test
     void publishingAnImportedNewsFromThePanelKeepsItsLanguage() {
-        // Así llegaba el fallo: «Publicar» enviaba la noticia sin idioma y el servidor la pasaba a castellano.
         News english = news("What is Docker and why should you learn it?", "en");
         english.setExternalId("dev-1");
         english.setIsActive(false);
@@ -385,7 +377,6 @@ class ImportRunnerIntegrationTest {
         news("Latest news in English", "en");
         News newestSpanish = news("Última noticia en castellano", "es");
 
-        // Solo castellano, aunque haya menos de las pedidas y las de inglés sean más recientes.
         assertThat(newsService.getLatestNews(3)).extracting("title")
                 .containsExactly(newestSpanish.getTitle(), oldSpanish.getTitle());
         assertThat(newsService.getLatestNews(1)).extracting("title").containsExactly(newestSpanish.getTitle());
@@ -393,7 +384,6 @@ class ImportRunnerIntegrationTest {
                 .containsExactlyInAnyOrder(oldSpanish.getTitle(), newestSpanish.getTitle());
         assertThat(newsService.getPublicNews(null, null, "en", 0, 10).getContent()).hasSize(2)
                 .extracting("language").containsOnly("en");
-        // Un idioma desconocido no filtra.
         assertThat(newsService.getPublicNews(null, null, "fr", 0, 10).getContent()).hasSize(4);
     }
 

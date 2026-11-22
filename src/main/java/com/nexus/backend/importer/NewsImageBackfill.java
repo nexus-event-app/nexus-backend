@@ -13,11 +13,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Busca la imagen de portada de las noticias que no la tienen, en la página del artículo ({@link ArticleImageFinder}).
- * Vale para todas: importadas (también de fuentes ya pausadas) y creadas a mano con enlace a la fuente. Se ejecuta
- * en cada revisión del planificador con un lote pequeño, y no reintenta la misma noticia hasta pasadas unas horas.
- */
 @Slf4j
 @Component
 public class NewsImageBackfill {
@@ -41,12 +36,10 @@ public class NewsImageBackfill {
         this.transactionTemplate = transactionTemplate;
     }
 
-    /** Recién importadas: se buscan en el momento. */
     public void fill(List<News> news) {
         news.stream().filter(item -> item.getImageUrl() == null && item.getSourceUrl() != null).forEach(this::tryFill);
     }
 
-    /** Un lote de noticias de los últimos días sin imagen. Devuelve cuántas se han completado. */
     public int run() {
         LocalDateTime since = LocalDateTime.now().minusDays(LOOKBACK_DAYS);
         List<News> pending = newsRepository.findWithoutImage(since, PageRequest.of(0, BATCH_SIZE * 5)).stream()

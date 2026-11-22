@@ -134,7 +134,6 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = findById(id);
         assertCanManage(discussion, actor);
 
-        // Lo reportado deja de estar pendiente: se ha borrado.
         User deletedBy = userRepository.getReferenceById(actor.getId());
         LocalDateTime now = LocalDateTime.now();
         reportRepository.closePendingCommentReportsOfDiscussion(id, deletedBy, now);
@@ -179,7 +178,6 @@ public class DiscussionServiceImpl implements DiscussionService {
         return toResponse(discussion, isLiked(id, actor));
     }
 
-    /** La mejor respuesta la elige quien preguntó: ni otras personas ni el equipo de administración. */
     private void assertIsAuthor(Discussion discussion, UserDetail actor) {
         if (!discussion.getAuthor().getId().equals(actor.getId())) {
             throw new ForbiddenOperationException("error.discussion.acceptForbidden");

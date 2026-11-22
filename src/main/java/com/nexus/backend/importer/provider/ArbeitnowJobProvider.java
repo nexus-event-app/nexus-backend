@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Locale;
 
-/** API pública de Arbeitnow (https://www.arbeitnow.com/blog/job-board-api). Pide enlazar al origen. */
 @Component
 @RequiredArgsConstructor
 public class ArbeitnowJobProvider implements JobFeedProvider {

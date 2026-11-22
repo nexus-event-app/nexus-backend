@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** La V18 junta cada viñeta con su texto en las ofertas y noticias ya guardadas. */
 class V18ArreglarListasImportadasTest {
 
     @Test

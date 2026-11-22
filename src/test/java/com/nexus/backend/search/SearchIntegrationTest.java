@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Búsqueda global: solo contenido público, agrupado por sección, sin datos privados. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

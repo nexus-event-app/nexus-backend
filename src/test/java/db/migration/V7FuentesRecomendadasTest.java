@@ -12,7 +12,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** La V7 lleva las fuentes recomendadas actuales a bases de datos que ya existían, sin pisar lo personalizado. */
 class V7FuentesRecomendadasTest {
 
     private static final String OLD_GENBETA = "programación, programador, programadora, desarrollador, desarrolladora, "

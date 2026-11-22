@@ -4,20 +4,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Idiomas en los que responde el servidor y cómo son las URLs del frontend en cada uno. El castellano es el idioma
- * por defecto: no lleva prefijo y sus rutas son las internas («/noticias»). En catalán e inglés la ruta lleva prefijo
- * y la sección traducida («/ca/noticies», «/en/news»).
- */
 public final class Languages {
 
     public static final Locale DEFAULT = Locale.forLanguageTag("es");
     public static final List<Locale> SUPPORTED = List.of(DEFAULT, Locale.forLanguageTag("ca"), Locale.forLanguageTag("en"));
 
-    /**
-     * Nombre de cada sección en catalán y en inglés. Debe coincidir con src/shared/i18n/routeSegments.js del
-     * frontend; LanguagesTest lo comprueba.
-     */
     static final Map<String, Map<String, String>> SEGMENTS = Map.ofEntries(
             Map.entry("noticias", Map.of("ca", "noticies", "en", "news")),
             Map.entry("empleo", Map.of("ca", "feina", "en", "jobs")),
@@ -39,10 +30,6 @@ public final class Languages {
             Map.entry("glosario", Map.of("ca", "glossari", "en", "glossary")),
             Map.entry("eventos", Map.of("ca", "esdeveniments", "en", "events")));
 
-    /**
-     * Subsecciones fijas que también se traducen (el resto de segundos segmentos son identificadores como
-     * «12-mi-duda»). Debe coincidir con ROUTE_SUBSEGMENTS de routeSegments.js; LanguagesTest lo comprueba.
-     */
     static final Map<String, Map<String, Map<String, String>>> SUBSEGMENTS = Map.of(
             "foro", Map.of("nueva", Map.of("ca", "nova", "en", "new")),
             "empleo", Map.of("guardadas", Map.of("ca", "desades", "en", "saved")),
@@ -55,16 +42,11 @@ public final class Languages {
     private Languages() {
     }
 
-    /** Prefijo de ruta del idioma en el frontend: vacío para el castellano, «/ca» o «/en» para el resto. */
     public static String pathPrefix(Locale locale) {
         String language = languageOf(locale);
         return DEFAULT.getLanguage().equals(language) ? "" : "/" + language;
     }
 
-    /**
-     * Ruta del frontend en el idioma indicado a partir de la ruta interna en castellano:
-     * {@code localizePath(en, "/noticias/12-x")} devuelve {@code "/en/news/12-x"}. La portada es «/», «/ca» o «/en».
-     */
     public static String localizePath(Locale locale, String internalPath) {
         String language = languageOf(locale);
         String prefix = pathPrefix(locale);

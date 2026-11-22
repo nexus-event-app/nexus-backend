@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Descarga lo último de la rama dev y vuelve a levantar la web. Sirve para el primer arranque y para cada cambio.
-# Antes hace una copia de seguridad, por si algo sale mal.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -14,8 +12,6 @@ fi
 git -C .. pull --ff-only
 git -C ../../nexus-frontend pull --ff-only
 
-# Se compila una pieza cada vez (y antes de reiniciar nada): así cabe en un servidor de 2 GB y, si la compilación
-# falla, la web que ya funcionaba sigue en pie.
 docker compose build backend
 docker compose build frontend
 docker compose up -d --remove-orphans

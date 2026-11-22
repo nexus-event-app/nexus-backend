@@ -40,7 +40,6 @@ class LanguageDetectorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            // El caso real: un artículo en danés de DEV Community, fuente marcada en inglés.
             "Byg en enkel trælog med JavaScript og CSV. Et gammelt træ i haven kan ændre sig over tid. En gren bliver "
                     + "beskadiget. Efter en storm opdager man måske noget, der ikke var der sidste år. Men hvordan",
             "Wie man eine REST-API mit Spring Boot baut und warum das für Anfänger wichtig ist",

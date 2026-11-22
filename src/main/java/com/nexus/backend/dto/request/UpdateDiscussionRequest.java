@@ -9,6 +9,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateDiscussionRequest extends CreateDiscussionRequest {
 
-    /** Solo se tiene en cuenta si quien edita es ADMIN (permite ocultar o restaurar una discusión). */
     private Boolean isActive;
 }

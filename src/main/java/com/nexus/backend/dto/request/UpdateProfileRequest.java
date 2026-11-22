@@ -14,14 +14,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-/** Datos del perfil público que la propia persona puede editar. Todo salvo el nombre es opcional. */
 @Getter
 @NoArgsConstructor
 public class UpdateProfileRequest {
 
-    /** Perfil de GitHub: https://github.com/usuario (sin repositorios ni otras rutas). */
     public static final String GITHUB_PATTERN = "^https://(www\\.)?github\\.com/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})/?$";
-    /** Perfil personal de LinkedIn: https://www.linkedin.com/in/usuario. */
     public static final String LINKEDIN_PATTERN = "^https://([a-z]{2,3}\\.)?linkedin\\.com/in/[A-Za-z0-9\\-_%.]{3,100}/?$";
 
     @NotBlank(message = "{validation.name.required}")
@@ -57,7 +54,6 @@ public class UpdateProfileRequest {
         this.bio = TextUtil.optional(bio);
     }
 
-    /** Limpia, quita comas (son el separador al guardar) y elimina repetidas sin distinguir mayúsculas. */
     public void setTechnologies(List<String> technologies) {
         if (technologies == null) {
             this.technologies = List.of();

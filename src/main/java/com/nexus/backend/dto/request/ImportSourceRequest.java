@@ -34,7 +34,6 @@ public class ImportSourceRequest {
 
     private NewsCategory newsCategory;
 
-    /** Idioma del contenido: «es» (por defecto) o «en». */
     @Pattern(regexp = ContentLanguage.PATTERN, message = "{validation.language.pattern}")
     private String language;
 
@@ -52,7 +51,6 @@ public class ImportSourceRequest {
     @Size(max = 500, message = "{validation.excludeKeywords.max500}")
     private String excludeKeywords;
 
-    /** Si no se indica, se usa el mínimo del tipo de fuente. */
     @Min(value = 30, message = "{validation.interval.min}")
     @Max(value = 10080, message = "{validation.interval.max}")
     private Integer intervalMinutes;

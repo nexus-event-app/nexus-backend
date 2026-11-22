@@ -87,7 +87,6 @@ public class CommentServiceImpl implements CommentService {
             throw new ForbiddenOperationException("error.comment.deleteForbidden");
         }
 
-        // Si era la mejor respuesta, la discusión vuelve a quedar sin resolver (la base de datos también lo haría).
         Discussion discussion = comment.getDiscussion();
         if (id.equals(discussion.getAcceptedCommentId())) {
             discussion.setAcceptedCommentId(null);

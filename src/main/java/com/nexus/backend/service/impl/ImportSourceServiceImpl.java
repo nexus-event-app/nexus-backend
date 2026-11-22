@@ -72,8 +72,6 @@ public class ImportSourceServiceImpl implements ImportSourceService {
         if (stopUsingImages) {
             newsRepository.clearImportedImages(saved.getName());
         }
-        // Si se corrige el idioma de la fuente, sus noticias ya importadas lo toman cuando su propio texto no deja claro
-        // en qué idioma están (el idioma de cada noticia se detecta por su texto al importarla).
         if (!saved.getLanguage().equals(previousLanguage)) {
             newsRepository.findBySourceAndExternalIdIsNotNull(previousName).forEach(news -> news.setLanguage(
                     LanguageDetector.detectOr(news.getTitle() + ". " + news.getContent(), saved.getLanguage())));

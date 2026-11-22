@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Progreso en las rutas de aprendizaje: privado, idempotente y con identificadores validados. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -43,7 +41,6 @@ class LearningProgressIntegrationTest {
 
         mvc.perform(put(BASE + "/frontend/fundamentos").header("Authorization", ana)).andExpect(status().isNoContent());
         mvc.perform(put(BASE + "/frontend/javascript").header("Authorization", ana)).andExpect(status().isNoContent());
-        // Repetir la marca no la duplica.
         mvc.perform(put(BASE + "/frontend/javascript").header("Authorization", ana)).andExpect(status().isNoContent());
 
         mvc.perform(get(BASE).header("Authorization", ana))

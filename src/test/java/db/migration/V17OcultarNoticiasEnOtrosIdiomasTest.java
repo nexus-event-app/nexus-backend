@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** La V17 despublica las noticias importadas que no están ni en castellano ni en inglés. */
 class V17OcultarNoticiasEnOtrosIdiomasTest {
 
     @Test
@@ -29,7 +28,6 @@ class V17OcultarNoticiasEnOtrosIdiomasTest {
                         + "(1, " + danish + ", true, 'a'), "
                         + "(2, 'What is Docker and why should you learn it?', 'A guide for beginners.', true, 'b'), "
                         + "(3, 'Qué es Docker y por qué aprenderlo', 'Una guía para empezar.', true, 'c'), "
-                        // Publicada a mano: no se toca.
                         + "(4, " + danish + ", true, null)");
             }
             Context context = mock(Context.class);

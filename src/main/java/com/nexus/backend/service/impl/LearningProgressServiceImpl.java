@@ -14,16 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/**
- * Progreso en las rutas de aprendizaje. El contenido de las rutas está en el frontend, así que aquí no se comprueba
- * que la etapa exista: solo que el identificador tenga un formato válido y que nadie guarde marcas sin límite.
- */
 @Service
 @RequiredArgsConstructor
 public class LearningProgressServiceImpl implements LearningProgressService {
 
     private static final Pattern ID = Pattern.compile("[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?");
-    /** Muy por encima de lo que suman todas las rutas: frena el uso indebido sin limitar a nadie. */
     static final int MAX_STEPS_PER_USER = 300;
 
     private final LearningProgressRepository progressRepository;

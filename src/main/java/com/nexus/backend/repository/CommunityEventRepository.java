@@ -18,15 +18,12 @@ import java.util.List;
 public interface CommunityEventRepository extends JpaRepository<CommunityEvent, Long>,
         JpaSpecificationExecutor<CommunityEvent> {
 
-    /** Panel: todos, también ocultos y pasados, los más recientes primero. */
     @EntityGraph(attributePaths = "author")
     @Query("select e from CommunityEvent e order by e.startsOn desc, e.id desc")
     Page<CommunityEvent> findAllForModeration(Pageable pageable);
 
-    /** Calendario: los visibles entre dos fechas. */
     List<CommunityEvent> findByActiveTrueAndStartsOnBetween(LocalDate from, LocalDate to);
 
-    /** Ciudades con eventos presenciales próximos, para el filtro. */
     @Query("select distinct e.city from CommunityEvent e where e.active = true and e.startsOn >= :today "
             + "and e.mode = :mode and e.city is not null")
     List<String> findUpcomingCities(@Param("today") LocalDate today, @Param("mode") EventMode mode);

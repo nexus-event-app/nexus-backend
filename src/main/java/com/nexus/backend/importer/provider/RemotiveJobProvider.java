@@ -12,10 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * API pública de Remotive (https://remotive.com/api-documentation). Sus condiciones obligan a enlazar
- * la oferta original y citar a Remotive como fuente, y a no consultarla más de 4 veces al día.
- */
 @Component
 @RequiredArgsConstructor
 public class RemotiveJobProvider implements JobFeedProvider {

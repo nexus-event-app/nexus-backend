@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** La V16 corrige el idioma de las noticias importadas que la V14 dejó en castellano por venir de otra fuente. */
 class V16DetectarIdiomaDeLasNoticiasTest {
 
     @Test
@@ -27,7 +26,6 @@ class V16DetectarIdiomaDeLasNoticiasTest {
                         + "(1, 'What is Docker and why should you learn it?', 'A guide for beginners.', 'es', 'a'), "
                         + "(2, 'Qué es Docker y por qué aprenderlo', 'Una guía para empezar.', 'en', 'b'), "
                         + "(3, 'Kubernetes 1.31', 'Kubernetes 1.31', 'en', 'c'), "
-                        // Publicada a mano: se respeta el idioma que eligió quien la publicó.
                         + "(4, 'What is Docker and why should you learn it?', 'A guide.', 'es', null)");
             }
             Context context = mock(Context.class);

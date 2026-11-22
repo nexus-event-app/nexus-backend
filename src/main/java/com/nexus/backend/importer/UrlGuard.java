@@ -7,10 +7,6 @@ import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Locale;
 
-/**
- * Valida las URLs de las fuentes externas: solo http/https y nunca direcciones internas
- * (loopback, red privada, link-local...), para que el servidor no pueda usarse contra su propia red.
- */
 public final class UrlGuard {
 
     private UrlGuard() {
@@ -40,8 +36,7 @@ public final class UrlGuard {
                     throw new ImportException("La URL de la fuente apunta a una dirección interna");
                 }
             }
-        } catch (UnknownHostException e) {
-            // Sin DNS local (p. ej. detrás de un proxy de salida): la resolución la hace el proxy.
+        } catch (UnknownHostException ignored) {
         }
         return uri;
     }
@@ -53,11 +48,11 @@ public final class UrlGuard {
         }
         byte[] bytes = address.getAddress();
         if (address instanceof Inet6Address) {
-            return (bytes[0] & 0xFE) == 0xFC; // fc00::/7, direcciones locales únicas
+            return (bytes[0] & 0xFE) == 0xFC;
         }
         int first = bytes[0] & 0xFF;
         int second = bytes[1] & 0xFF;
-        return (first == 100 && second >= 64 && second <= 127) // 100.64.0.0/10, CGNAT
+        return (first == 100 && second >= 64 && second <= 127)
                 || first == 0;
     }
 }

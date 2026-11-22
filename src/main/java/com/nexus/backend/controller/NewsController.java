@@ -32,7 +32,6 @@ public class NewsController {
         return ResponseEntity.ok(newsService.getPublicNews(category, q, language, page, size));
     }
 
-    /** Temas con noticias publicadas (para enseñar solo los filtros que tienen algo). */
     @GetMapping("/categories")
     public ResponseEntity<List<NewsCategory>> getPublishedCategories(@RequestParam(required = false) String language) {
         return ResponseEntity.ok(newsService.getPublishedCategories(language));

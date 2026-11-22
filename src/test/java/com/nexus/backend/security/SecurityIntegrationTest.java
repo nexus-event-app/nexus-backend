@@ -22,7 +22,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Reglas de seguridad básicas de la API, de extremo a extremo con la configuración real. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

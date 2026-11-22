@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Perfil público: qué se muestra, quién puede editarlo y cómo se procesan las fotos. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -121,7 +120,6 @@ class ProfileIntegrationTest {
         testimonial(luis, "Publicado y aprobado por el equipo de moderación de la comunidad.", true);
         testimonial(luis, "Pendiente de moderación todavía, no debería verse en el perfil público.", false);
 
-        // Quien visita el perfil solo ve lo que la persona ha puesto en él: ni su actividad ni cuánta tiene.
         mvc.perform(get("/api/users/" + luis.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Luis"))
@@ -133,7 +131,6 @@ class ProfileIntegrationTest {
         mvc.perform(get("/api/users/" + luis.getId() + "/discussions").header("Authorization", other))
                 .andExpect(status().isNotFound());
 
-        // Su dueño la ve en su perfil (solo lo publicado).
         String token = users.bearer(luis);
         mvc.perform(get("/api/profile").header("Authorization", token))
                 .andExpect(jsonPath("$.discussionCount").value(1))
@@ -168,13 +165,10 @@ class ProfileIntegrationTest {
         assertThat(image.getHeight()).isEqualTo(256);
         assertThat(new String(saved, StandardCharsets.ISO_8859_1)).doesNotContain("Exif").doesNotContain("GPS-SECRETO");
 
-        // Se sirve como archivo público.
         mvc.perform(get(firstUrl)).andExpect(status().isOk());
-        // Las discusiones muestran la foto del autor.
         Long discussionId = discussion(ana, "Con foto", true).getId();
         mvc.perform(get("/api/discussions/" + discussionId)).andExpect(jsonPath("$.authorAvatarUrl").value(firstUrl));
 
-        // Cambiar la foto borra la anterior; quitarla borra la actual.
         mvc.perform(multipart("/api/profile/avatar").file(png("file", 300, 300)).header("Authorization", token))
                 .andExpect(status().isOk());
         String secondUrl = userRepository.findById(ana.getId()).orElseThrow().getAvatarUrl();
@@ -230,7 +224,6 @@ class ProfileIntegrationTest {
         return new MockMultipartFile(field, "foto.png", "image/png", out.toByteArray());
     }
 
-    /** JPEG con un bloque EXIF (APP1) insertado tras la cabecera, como las fotos de móvil. */
     private static byte[] jpegWithExif(int width, int height) throws Exception {
         ByteArrayOutputStream plain = new ByteArrayOutputStream();
         ImageIO.write(image(width, height), "jpeg", plain);

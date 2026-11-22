@@ -47,20 +47,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * Eventos que comparte la comunidad. Se publican al momento (con límite diario y sin duplicados) y la moderación llega
- * por reportes y por el aviso por email. Los pasados dejan de verse solos y se borran a los {@value #KEEP_PAST_DAYS}
- * días.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
 
-    /** Para que nadie llene la lista: eventos que una persona puede compartir en 24 horas. */
     static final int DAILY_LIMIT = 5;
     static final int KEEP_PAST_DAYS = 90;
-    /** El calendario pide un mes (con los días que asoman de los meses de al lado): unas seis semanas. */
     static final int MAX_CALENDAR_DAYS = 62;
 
     private final CommunityEventRepository eventRepository;
@@ -81,7 +74,6 @@ public class EventServiceImpl implements EventService {
                 .and(EventSpecifications.inCity(filter.city()))
                 .and(EventSpecifications.onDay(filter.day()));
         var events = eventRepository.findAll(spec, Pagination.soonestFirst(page, size));
-        // Los «Me apunto» de toda la página en dos consultas, no una por tarjeta.
         List<Long> ids = events.getContent().stream().map(CommunityEvent::getId).toList();
         Map<Long, Long> counts = new java.util.HashMap<>();
         java.util.Set<Long> mine = new java.util.HashSet<>();
@@ -101,7 +93,6 @@ public class EventServiceImpl implements EventService {
         if (from == null || to == null || to.isBefore(from) || ChronoUnit.DAYS.between(from, to) > MAX_CALENDAR_DAYS) {
             throw new BadRequestException("error.event.rangeTooLong");
         }
-        // Los días pasados no salen: sus eventos ya no se ven en la agenda.
         LocalDate start = from.isBefore(today()) ? today() : from;
         if (to.isBefore(start)) {
             return List.of();
@@ -117,7 +108,6 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<String> getCities() {
-        // Una sola entrada por ciudad aunque se haya escrito distinto («madrid», «Madrid »): la primera forma vista.
         Map<String, String> cities = new LinkedHashMap<>();
         eventRepository.findUpcomingCities(today(), EventMode.PRESENCIAL).stream()
                 .filter(city -> !city.isBlank())
@@ -134,7 +124,6 @@ public class EventServiceImpl implements EventService {
             throw new BadRequestException("validation.event.date.future");
         }
         assertCityWhenInPerson(request);
-        // El límite diario frena el spam; la administración no lo tiene.
         if (!actor.isAdmin() && eventRepository.countByAuthorIdAndCreatedAtAfter(actor.getId(),
                 LocalDateTime.now(clock).minusHours(24)) >= DAILY_LIMIT) {
             throw new ConflictException("error.event.limit");
@@ -148,7 +137,6 @@ public class EventServiceImpl implements EventService {
         event.setAuthor(userRepository.getSessionUser(actor.getId()));
         CommunityEvent saved = eventRepository.save(event);
         if (!actor.isAdmin()) {
-            // Lo que publica la administración no hace falta revisarlo: sin aviso por email.
             moderationAlerts.newEvent(saved);
         }
         log.info("Evento id={} compartido por usuario id={}", saved.getId(), actor.getId());
@@ -192,7 +180,6 @@ public class EventServiceImpl implements EventService {
             throw new ForbiddenOperationException("error.event.deleteForbidden");
         }
         eventRepository.delete(event);
-        // Sus reportes pendientes quedan resueltos: el evento ya no existe.
         reportRepository.closePending(ReportTargetType.EVENT, id, ReportStatus.RESOLVED, ReportAction.DELETE, null,
                 LocalDateTime.now(clock));
     }
@@ -217,7 +204,6 @@ public class EventServiceImpl implements EventService {
         eventRepository.findById(id).ifPresent(event -> event.setActive(false));
     }
 
-    /** Cada noche: fuera los eventos que pasaron hace más de {@value #KEEP_PAST_DAYS} días. */
     @Scheduled(cron = "${app.events.cleanup-cron:0 45 4 * * *}")
     @Transactional
     public void deleteOldEvents() {
@@ -237,7 +223,6 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    /** Lo mismo al compartir y al corregir: textos sin espacios de más; un evento online no lleva ciudad ni dirección. */
     private static void apply(CommunityEvent event, EventRequest request) {
         boolean online = request.getMode() == EventMode.ONLINE;
         event.setTitle(request.getTitle().trim());
@@ -248,7 +233,6 @@ public class EventServiceImpl implements EventService {
         event.setMode(request.getMode());
         String city = online ? null : TextUtil.optionalLine(request.getCity());
         String address = online ? null : TextUtil.optionalLine(request.getAddress());
-        // Si en la ciudad viene una dirección («C. de Cronos, 63 · Madrid»), se queda la ciudad y el resto, como dirección.
         if (city != null && SpanishCities.looksLikeAddress(city)) {
             String fullText = city;
             city = SpanishCities.find(fullText).orElse(city);
@@ -275,7 +259,6 @@ public class EventServiceImpl implements EventService {
                 event.getAuthor().getName(), event.getCreatedAt());
     }
 
-    /** «https://www.meetup.com/grupo/...» → «meetup.com». */
     static String host(String url) {
         try {
             String host = URI.create(url).getHost();

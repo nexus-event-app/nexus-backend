@@ -8,11 +8,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-/**
- * Decide si una oferta importada encaja en Nexus: nivel prácticas o junior y del sector tech.
- * Trabaja con el título, las etiquetas y las pistas de nivel del origen (en español, inglés,
- * alemán y francés), sin acentos y en minúsculas.
- */
 public final class JobClassifier {
 
     private static final Pattern SENIOR = Pattern.compile(
@@ -28,7 +23,6 @@ public final class JobClassifier {
     private static final Pattern JUNIOR = Pattern.compile(
             "\\b(junior|jr|entry-level|entry level|graduate|berufseinstieg\\w*|berufseinsteiger\\w*|einsteiger\\w*|"
                     + "debutant\\w*|sin experiencia|no experience required|recien titulad\\w*)\\b");
-    /** En las pistas del origen, "entry" a secas sí indica nivel de entrada. */
     private static final Pattern ENTRY_HINT = Pattern.compile("\\bentry\\b");
     private static final Pattern TECH = Pattern.compile(
             "\\b(developer\\w*|desarrollador\\w*|programador\\w*|programmer|entwickler\\w*|softwareentwickl\\w*|"
@@ -39,14 +33,12 @@ public final class JobClassifier {
                     + "ruby|golang|rust|kotlin|swift|react|angular|vue|node|sql|android|ios|mobile|ux|ui|"
                     + "engineer|engineering|ingenier[oa] de software|soporte tecnico|helpdesk)\\b");
 
-    /** Puestos que contienen palabras tech pero no lo son. */
     private static final Pattern NON_TECH = Pattern.compile(
             "\\b(business developer\\w*|business development|sales|ventas|vertrieb\\w*|account manager|recruiter)\\b");
 
     private JobClassifier() {
     }
 
-    /** Nivel de la oferta, o vacío si no es de prácticas ni junior. */
     public static Optional<JobLevel> level(String title, Collection<String> levelHints) {
         String normalizedTitle = normalize(title);
         if (SENIOR.matcher(normalizedTitle).find()) {
@@ -63,7 +55,6 @@ public final class JobClassifier {
         return match(hints).or(() -> ENTRY_HINT.matcher(hints).find() ? Optional.of(JobLevel.JUNIOR) : Optional.empty());
     }
 
-    /** Si el título o las etiquetas indican que la oferta es del sector tech. */
     public static boolean isTech(String title, Collection<String> tags) {
         String normalizedTitle = normalize(title);
         if (NON_TECH.matcher(normalizedTitle).find()) {

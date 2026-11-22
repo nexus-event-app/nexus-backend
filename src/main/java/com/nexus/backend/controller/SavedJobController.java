@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Ofertas guardadas del usuario con sesión iniciada. Cada usuario solo ve y gestiona las suyas. */
 @RestController
 @RequestMapping("/api/saved-jobs")
 @RequiredArgsConstructor
@@ -34,7 +33,6 @@ public class SavedJobController {
         return ResponseEntity.ok(savedJobService.getSavedJobs(page, size, principal));
     }
 
-    /** Identificadores de todas las ofertas guardadas, para marcar el botón de guardar en los listados. */
     @GetMapping("/ids")
     public ResponseEntity<List<Long>> getSavedJobIds(@AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.ok(savedJobService.getSavedJobIds(principal));

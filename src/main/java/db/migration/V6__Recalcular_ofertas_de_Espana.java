@@ -10,11 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Vuelve a calcular {@code job_offers.in_spain} con {@link SpainLocation}, la misma lógica que usa la aplicación al
- * guardar. La V5 lo rellenó con una lista de ciudades más corta escrita en SQL; así queda una sola fuente de verdad.
- * También añade el índice para el orden público: España primero y después por fecha de publicación.
- */
 public class V6__Recalcular_ofertas_de_Espana extends BaseJavaMigration {
 
     @Override

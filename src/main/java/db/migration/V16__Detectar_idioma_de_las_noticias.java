@@ -10,11 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Vuelve a calcular el idioma de las noticias importadas con {@link LanguageDetector}, la misma lógica que usa ya el
- * importador. La V14 solo marcó en inglés lo que venía de DEV Community, así que las noticias en inglés de otras
- * fuentes seguían apareciendo con el filtro «En castellano». Las publicadas a mano conservan el idioma que se eligió.
- */
 public class V16__Detectar_idioma_de_las_noticias extends BaseJavaMigration {
 
     @Override

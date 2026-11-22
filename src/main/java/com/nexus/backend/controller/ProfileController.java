@@ -26,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/** Perfil de la persona con sesión iniciada: consultarlo, editarlo, cambiar o quitar la foto y ver su actividad. */
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -40,7 +39,6 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.getOwnProfile(principal));
     }
 
-    /** Sus discusiones: solo las ve ella, en su propio perfil. */
     @GetMapping("/discussions")
     public ResponseEntity<PageResponse<DiscussionResponse>> getDiscussions(
             @RequestParam(defaultValue = "0") int page,
@@ -49,7 +47,6 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.getOwnDiscussions(principal, page, size));
     }
 
-    /** Sus testimonios publicados: solo los ve ella, en su propio perfil. */
     @GetMapping("/testimonials")
     public ResponseEntity<List<TestimonialResponse>> getTestimonials(@AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.ok(profileService.getOwnTestimonials(principal));
@@ -74,7 +71,6 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.removeAvatar(principal));
     }
 
-    /** Eliminar la propia cuenta. Pide la contraseña actual si la cuenta la tiene. */
     @DeleteMapping
     public ResponseEntity<Void> deleteAccount(@Valid @RequestBody(required = false) DeleteAccountRequest request,
                                               @AuthenticationPrincipal UserDetail principal) {

@@ -23,11 +23,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Limita por IP las peticiones POST sensibles. Usa {@code request.getRemoteAddr()}: detrás de un proxy
- * de confianza hay que activar {@code server.forward-headers-strategy} para que Spring resuelva la IP real.
- * No se registra como bean para que solo se ejecute dentro de la cadena de seguridad.
- */
 @RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -53,7 +48,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             new Rule("testimonial", "/api/testimonials", 5, Duration.ofHours(1)),
             new Rule("report", "/api/reports", 20, Duration.ofHours(1)),
             new Rule("avatar", "/api/profile/avatar", 20, Duration.ofHours(1)),
-            // La búsqueda se lanza mientras se escribe: límite generoso, pero evita el raspado masivo.
             new Rule("GET", "search", "/api/search", 120, Duration.ofMinutes(1)));
 
     private final ApiErrorWriter apiErrorWriter;
@@ -73,7 +67,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        // La administración no tiene límites (va después del filtro JWT, así que ya se sabe quién es).
         if (isAdmin()) {
             filterChain.doFilter(request, response);
             return;
@@ -93,7 +86,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 "error.tooManyRequests");
     }
 
-    /** Ruta dentro de la aplicación (sin el contexto). No depende de cómo se mapee el servlet. */
     private static String pathOf(HttpServletRequest request) {
         return request.getRequestURI().substring(request.getContextPath().length());
     }

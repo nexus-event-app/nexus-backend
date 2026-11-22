@@ -13,12 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Al llegar un testimonio, se avisa por email al correo de moderación con el texto y el enlace al panel. */
 @Import(CapturingMail.class)
 @SpringBootTest(properties = {"app.moderation.email=moderacion@primercommit.test", "app.public-url=https://primercommit.test"})
 @AutoConfigureMockMvc
@@ -55,7 +53,6 @@ class ModerationAlertsIntegrationTest {
                 .contains("Marta (Desarrolladora junior · Valencia)")
                 .contains("Encontré mi primer trabajo gracias a la comunidad.")
                 .contains("https://primercommit.test/admin/testimonios");
-        // El texto de quien escribe no puede meter HTML en el email; los saltos de línea se respetan.
         assertThat(alert.html())
                 .contains("Y aprend&iacute; &lt;much&iacute;simo&gt;.")
                 .doesNotContain("<much")

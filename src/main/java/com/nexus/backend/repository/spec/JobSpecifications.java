@@ -13,7 +13,6 @@ public final class JobSpecifications {
     private JobSpecifications() {
     }
 
-    /** Ofertas visibles al público: activas y no caducadas. */
     public static Specification<JobOffer> isPublished() {
         return (root, query, cb) -> {
             LocalDateTime now = LocalDateTime.now();

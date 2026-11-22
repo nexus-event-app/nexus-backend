@@ -13,11 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Avisos por email de lo que conviene moderar (testimonios por aprobar, eventos recién publicados), para no tener que entrar al panel a mirar. Van a MODERATION_EMAIL
- * (el correo del proyecto) o, si no se configura, a las cuentas de administración. Se envían después de guardar, en
- * segundo plano (EmailDispatcher): si el correo falla, el testimonio se guarda igual.
- */
 @Slf4j
 @Component
 public class ModerationAlerts {

@@ -64,13 +64,11 @@ public class TestimonialServiceImpl implements TestimonialService {
         User user = userRepository.getSessionUser(actor.getId());
         Testimonial testimonial = testimonialMapper.toEntity(request, user);
         if (actor.isAdmin()) {
-            // El de la administración se publica al momento: no tiene que aprobárselo a sí misma.
             testimonial.setIsActive(true);
             testimonial.setIsPending(false);
         }
         Testimonial saved = testimonialRepository.save(testimonial);
         if (!actor.isAdmin()) {
-            // Aviso por email para revisarlo pronto: hasta que se apruebe, no se publica.
             moderationAlerts.newTestimonial(saved);
         }
         return testimonialMapper.toResponse(saved);
@@ -108,7 +106,6 @@ public class TestimonialServiceImpl implements TestimonialService {
     @Transactional
     public void deleteTestimonial(Long id) {
         testimonialRepository.delete(findById(id));
-        // Sus reportes pendientes quedan resueltos: el testimonio ya no existe.
         reportRepository.closePending(ReportTargetType.TESTIMONIAL, id, ReportStatus.RESOLVED, ReportAction.DELETE, null,
                 LocalDateTime.now());
     }

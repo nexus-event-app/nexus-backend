@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface SavedJobService {
 
-    /** Máximo de ofertas guardadas por usuario. */
     int MAX_SAVED = 500;
 
     PageResponse<SavedJobResponse> getSavedJobs(int page, int size, UserDetail actor);

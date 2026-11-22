@@ -14,7 +14,6 @@ public interface ProfileService {
 
     ProfileResponse getPublicProfile(Long userId);
 
-    /** Actividad de la persona con sesión iniciada: solo la ve ella. */
     PageResponse<DiscussionResponse> getOwnDiscussions(UserDetail actor, int page, int size);
 
     List<TestimonialResponse> getOwnTestimonials(UserDetail actor);
@@ -27,7 +26,6 @@ public interface ProfileService {
 
     ProfileResponse removeAvatar(UserDetail actor);
 
-    /** Panel de administración: el perfil de cualquier cuenta (también desactivada), para revisarlo o corregirlo. */
     ProfileResponse getProfileForAdmin(Long userId);
 
     ProfileResponse updateProfileAsAdmin(Long userId, UpdateProfileRequest request);

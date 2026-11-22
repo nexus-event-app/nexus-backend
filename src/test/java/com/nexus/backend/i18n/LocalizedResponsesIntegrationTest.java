@@ -20,7 +20,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Los errores salen en el idioma de la cabecera Accept-Language; sin ella, o con otro idioma, en castellano. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

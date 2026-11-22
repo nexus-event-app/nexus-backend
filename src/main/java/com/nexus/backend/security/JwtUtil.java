@@ -67,11 +67,9 @@ public class JwtUtil {
                 .compact();
     }
 
-    /** Datos verificados de un token válido. */
     public record TokenClaims(String email, Instant issuedAt) {
     }
 
-    /** Email y fecha de emisión si el token es válido y no ha caducado; vacío en cualquier otro caso. */
     public Optional<TokenClaims> parse(String token) {
         try {
             Claims claims = Jwts.parser()

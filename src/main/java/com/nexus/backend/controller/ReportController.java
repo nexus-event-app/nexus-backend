@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Reportes de la comunidad sobre contenido que incumple las normas. */
 @RestController
 @RequestMapping("/api/reports")
 @RequiredArgsConstructor

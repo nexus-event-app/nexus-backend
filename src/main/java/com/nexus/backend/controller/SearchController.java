@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Búsqueda global: noticias, ofertas, discusiones y personas. */
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor

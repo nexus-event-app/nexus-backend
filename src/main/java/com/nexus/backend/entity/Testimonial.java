@@ -53,7 +53,6 @@ public class Testimonial extends TimestampedEntity {
     @Column(name = "is_highlighted")
     private Boolean isHighlighted = false;
 
-    /** Aprobado por la moderación y visible en la web. */
     public boolean isPublished() {
         return Boolean.TRUE.equals(isActive) && !Boolean.TRUE.equals(isPending);
     }

@@ -14,7 +14,6 @@ class HtmlTextTest {
 
     @Test
     void keepsTheBulletAndItsTextTogetherWhenListItemsWrapParagraphs() {
-        // Así llegan muchas ofertas importadas: cada punto con un párrafo dentro.
         String html = "<p>What you will do</p><ul><li><p>Plan usability tests.</p></li><li><div>Run interviews.</div></li></ul>";
         assertThat(HtmlText.toPlainText(html))
                 .isEqualTo("What you will do\n\n• Plan usability tests.\n• Run interviews.");

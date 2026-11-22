@@ -13,18 +13,6 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Nuevos temas de las noticias (IA, Programación, Datos, Ciberseguridad, Sistemas y cloud, Empleo y carrera,
- * General) en lugar de los antiguos, que dependían solo de la fuente y dejaban casi todo en «Desarrollo» o «General»:
- * <ol>
- *   <li>Los antiguos pasan a su equivalente: Desarrollo y Recursos → Programación; Entrevistas y Networking → Empleo y
- *       carrera.</li>
- *   <li>WeLiveSecurity, que solo habla de seguridad, pasa a Ciberseguridad.</li>
- *   <li>El filtro de palabras de Genbeta e Hipertextual cambia «código» por «código fuente».</li>
- *   <li>Las noticias importadas se vuelven a clasificar por su contenido con {@link NewsClassifier}, la misma lógica
- *       que usa ya el importador. Las publicadas a mano conservan el tema que se eligió.</li>
- * </ol>
- */
 public class V22__Temas_de_las_noticias extends BaseJavaMigration {
 
     private static final Map<String, String> RENAMED = Map.of(
@@ -41,7 +29,6 @@ public class V22__Temas_de_las_noticias extends BaseJavaMigration {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("update import_sources set news_category = 'CIBERSEGURIDAD' "
                     + "where url = 'https://www.welivesecurity.com/es/rss/feed/'");
-            // «código» suelto dejaba pasar noticias del Código Civil en Genbeta e Hipertextual.
             statement.executeUpdate("update import_sources set keywords = replace(keywords, "
                     + "'software, código, código abierto', 'software, código fuente, código abierto') "
                     + "where keywords like '%software, código, código abierto%'");

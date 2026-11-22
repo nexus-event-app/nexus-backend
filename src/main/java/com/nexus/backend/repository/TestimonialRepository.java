@@ -10,10 +10,6 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Las listas cargan al autor en la misma consulta (@EntityGraph): el mapper usa su foto y si la cuenta sigue activa,
- * y sin esto haría una consulta más por cada testimonio.
- */
 public interface TestimonialRepository extends JpaRepository<Testimonial, Long> {
 
     @EntityGraph(attributePaths = "user")

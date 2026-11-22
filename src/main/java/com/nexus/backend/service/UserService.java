@@ -20,9 +20,7 @@ public interface UserService {
 
     UserResponse updateStatus(Long userId, boolean enabled, UserDetail actor);
 
-    /** Da o quita el permiso de administración. Nadie puede cambiar el suyo: así siempre queda al menos un admin. */
     UserResponse updateRole(Long userId, User.Role role, UserDetail actor);
 
-    /** Token de sesión y datos de la persona, como al iniciar sesión (lo usa también el acceso con Google). */
     AuthResponse buildAuthResponse(User user);
 }

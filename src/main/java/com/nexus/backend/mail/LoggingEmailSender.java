@@ -6,12 +6,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 
-/**
- * Sin servicio de correo (MAIL_ENABLED=false) no se envía nada. En desarrollo y en las pruebas el email, con sus
- * enlaces, se escribe en el log para poder probar los flujos. En cualquier otro entorno solo se avisa: los enlaces
- * (recuperar contraseña, verificar email) son secretos y el destinatario es un dato personal, y no deben acabar en
- * los registros si alguien olvida configurar el correo.
- */
 @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "app.mail", name = "enabled", havingValue = "false", matchIfMissing = true)

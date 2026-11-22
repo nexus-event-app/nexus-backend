@@ -30,11 +30,9 @@ public class User extends TimestampedEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    /** Hash de la contraseña; null en las cuentas que solo entran con Google. */
     @Column
     private String password;
 
-    /** Identificador de la cuenta de Google vinculada («sub»): no cambia aunque cambie el email de Google. */
     @Column(name = "google_subject", unique = true)
     private String googleSubject;
 
@@ -49,26 +47,21 @@ public class User extends TimestampedEntity {
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean enabled = true;
 
-    /** Cuándo confirmó su email; null mientras no lo haya verificado. */
     @Column(name = "email_verified_at")
     private LocalDateTime emailVerifiedAt;
 
-    /** Último cambio de contraseña: los JWT emitidos antes dejan de ser válidos. */
     @Column(name = "credentials_changed_at")
     private LocalDateTime credentialsChangedAt;
 
-    /** Cuándo aceptó el aviso legal y la política de privacidad al registrarse. */
     @Column(name = "terms_accepted_at")
     private LocalDateTime termsAcceptedAt;
 
-    /** Perfil público (todo opcional). */
     @Column(length = 80)
     private String headline;
 
     @Column(length = 300)
     private String bio;
 
-    /** Tecnologías separadas por comas, en el orden en que la persona las escribió. */
     @Column(length = 400)
     private String technologies;
 
@@ -78,11 +71,9 @@ public class User extends TimestampedEntity {
     @Column(name = "linkedin_url", length = 200)
     private String linkedinUrl;
 
-    /** Ruta pública de la foto ya procesada («/uploads/avatars/...»). */
     @Column(name = "avatar_url", length = 200)
     private String avatarUrl;
 
-    /** Cuándo pidió eliminar su cuenta. La fila se conserva anonimizada para que el foro no pierda sus hilos. */
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 

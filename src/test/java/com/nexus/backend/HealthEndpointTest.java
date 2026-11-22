@@ -11,10 +11,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * El healthcheck del contenedor usa /actuator/health: debe responder UP aunque el correo no esté configurado
- * (como en desarrollo y en los tests), o Docker reiniciaría el backend sin motivo.
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

@@ -23,10 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Cuentas desde el panel: buscarlas, activarlas o desactivarlas, dar o quitar el permiso de administración y
- * revisar o corregir su perfil. Solo para administradores (SecurityConfig protege /api/admin/**).
- */
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor

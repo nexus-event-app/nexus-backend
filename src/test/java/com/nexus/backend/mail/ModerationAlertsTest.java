@@ -18,7 +18,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/** A quién llega el aviso de un testimonio nuevo. */
 class ModerationAlertsTest {
 
     private final UserRepository users = mock(UserRepository.class);

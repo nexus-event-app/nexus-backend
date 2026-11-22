@@ -18,11 +18,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
-/**
- * Autentica la petición a partir del JWT si lo hay. Un token ausente, inválido o de una cuenta
- * desactivada deja la petición como anónima; la autorización la decide SecurityConfig.
- * No se registra como bean para que solo se ejecute dentro de la cadena de seguridad.
- */
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -55,13 +50,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetail, null, userDetail.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (UsernameNotFoundException ex) {
-                // El usuario del token ya no existe: se trata como anónimo.
+            } catch (UsernameNotFoundException ignored) {
             }
         });
     }
 
-    /** Tras cambiar la contraseña, los tokens emitidos antes dejan de valer (la fecha del JWT va en segundos). */
     private static boolean issuedBeforeCredentialsChange(UserDetail userDetail, JwtUtil.TokenClaims claims) {
         LocalDateTime changedAt = userDetail.getUser().getCredentialsChangedAt();
         if (changedAt == null) {

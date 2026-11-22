@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Panel: todos los eventos (también ocultos y pasados) para revisar y corregir; se borran con DELETE /api/events/{id}. */
 @RestController
 @RequestMapping("/api/admin/events")
 @RequiredArgsConstructor
@@ -31,7 +30,6 @@ public class AdminEventController {
         return ResponseEntity.ok(eventService.getAllForModeration(page, size));
     }
 
-    /** Corregir un evento (un error de fecha, de ciudad, el enlace...). */
     @PutMapping("/{id}")
     public ResponseEntity<AdminEventResponse> update(@PathVariable Long id, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.update(id, request));

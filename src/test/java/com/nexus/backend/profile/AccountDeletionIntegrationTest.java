@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,12 +24,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Eliminar la propia cuenta: qué se borra, qué se queda anonimizado en el foro y quién puede hacerlo. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class AccountDeletionIntegrationTest {
-
 
     @Autowired
     private MockMvc mvc;
@@ -58,8 +55,6 @@ class AccountDeletionIntegrationTest {
         User bea = user("Bea Ruiz", User.Role.USER, true);
         String anaToken = users.bearer(ana);
 
-        // Actividad de Ana: una discusión con respuesta de Bea (que le genera una notificación), una respuesta suya,
-        // un testimonio y un paso completado de una ruta.
         long discussionId = id(mvc.perform(post("/api/discussions").header("Authorization", anaToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"¿Por dónde empiezo con Java?\",\"content\":\"Busco recursos para empezar desde cero.\",\"category\":\"AYUDA_TECNICA\"}"))
@@ -78,7 +73,6 @@ class AccountDeletionIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content("{\"password\":\"" + TestUsers.PASSWORD + "\"}"))
                 .andExpect(status().isNoContent());
 
-        // Sus datos personales ya no están; la fila queda anonimizada.
         User deleted = userRepository.findById(ana.getId()).orElseThrow();
         assertThat(deleted.isDeleted()).isTrue();
         assertThat(deleted.isEnabled()).isFalse();
@@ -88,19 +82,16 @@ class AccountDeletionIntegrationTest {
         assertThat(deleted.getGoogleSubject()).isNull();
         assertThat(deleted.getBio()).isNull();
 
-        // Lo que solo era suyo, borrado.
         assertThat(testimonialRepository.findIdsByUserId(ana.getId())).isEmpty();
         assertThat(learningProgressRepository.countByUserId(ana.getId())).isZero();
         assertThat(notificationRepository.countUnread(ana.getId())).isZero();
 
-        // El hilo sigue en pie, firmado como «Cuenta eliminada», y su perfil ya no existe.
         mvc.perform(get("/api/discussions/" + discussionId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.authorName").value("Cuenta eliminada"))
                 .andExpect(jsonPath("$.authorDeleted").value(true));
         mvc.perform(get("/api/users/" + ana.getId())).andExpect(status().isNotFound());
 
-        // La sesión deja de valer al momento, y con su email se puede crear una cuenta nueva.
         mvc.perform(get("/api/profile").header("Authorization", anaToken)).andExpect(status().isUnauthorized());
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Ana\",\"email\":\"" + ana.getEmail() + "\",\"password\":\"OtraClave123\","

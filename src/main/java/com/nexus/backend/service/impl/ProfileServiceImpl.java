@@ -83,7 +83,6 @@ public class ProfileServiceImpl implements ProfileService {
         String stored = avatarStorage.store(file);
         user.setAvatarUrl(stored);
         ProfileResponse response = toResponse(userRepository.save(user), true);
-        // La foto anterior se borra solo si el cambio llega a guardarse; si falla, se borra la nueva.
         afterTransaction(() -> avatarStorage.delete(previous), () -> avatarStorage.delete(stored));
         return response;
     }
@@ -112,7 +111,6 @@ public class ProfileServiceImpl implements ProfileService {
         return clearAvatar(findAny(userId), false);
     }
 
-    /** Lo mismo para tu perfil y para el panel: guarda los datos públicos del perfil. */
     private ProfileResponse applyProfile(User user, UpdateProfileRequest request, boolean withActivity) {
         user.setName(request.getName());
         user.setHeadline(request.getHeadline());
@@ -123,7 +121,6 @@ public class ProfileServiceImpl implements ProfileService {
         return toResponse(userRepository.save(user), withActivity);
     }
 
-    /** Quita la foto; el archivo se borra solo si el cambio llega a guardarse. */
     private ProfileResponse clearAvatar(User user, boolean withActivity) {
         String previous = user.getAvatarUrl();
         user.setAvatarUrl(null);
@@ -132,21 +129,18 @@ public class ProfileServiceImpl implements ProfileService {
         return response;
     }
 
-    /** Panel: cualquier cuenta menos las eliminadas por su titular, que ya no tienen perfil que revisar. */
     private User findAny(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> !user.isDeleted())
                 .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
     }
 
-    /** Las cuentas desactivadas no tienen perfil público. */
     private User findVisible(Long userId) {
         return userRepository.findById(userId)
                 .filter(User::isEnabled)
                 .orElseThrow(() -> new ResourceNotFoundException("error.user.notFound"));
     }
 
-    /** Con {@code withActivity} añade los contadores de actividad: solo para su dueño. */
     private ProfileResponse toResponse(User user, boolean withActivity) {
         List<String> technologies = user.getTechnologies() == null
                 ? List.of()

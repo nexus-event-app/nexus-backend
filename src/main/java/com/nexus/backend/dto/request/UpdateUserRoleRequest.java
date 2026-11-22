@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Dar o quitar el permiso de administración desde el panel. */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

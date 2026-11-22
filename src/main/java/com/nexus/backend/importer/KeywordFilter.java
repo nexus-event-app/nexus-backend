@@ -6,10 +6,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-/**
- * Filtro por palabras clave de una fuente: coincide si el texto contiene al menos una, como palabra
- * completa, sin distinguir mayúsculas ni acentos. Sin palabras clave, todo coincide.
- */
 public final class KeywordFilter {
 
     private static final KeywordFilter ALL = new KeywordFilter(null);
@@ -37,7 +33,6 @@ public final class KeywordFilter {
         return new KeywordFilter(Pattern.compile("(?<![\\p{L}\\p{N}])(" + String.join("|", terms) + ")(?![\\p{L}\\p{N}])"));
     }
 
-    /** Filtro de exclusión: ningún texto queda excluido si no hay palabras clave. */
     public static KeywordFilter exclusion(String keywords) {
         KeywordFilter filter = of(keywords);
         return filter == ALL ? NONE : filter;

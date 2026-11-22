@@ -29,7 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Reportes de la comunidad y cola de moderación. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -123,7 +122,6 @@ class ReportIntegrationTest {
                 .andExpect(jsonPath("$[0].reports[0].status").value("RESOLVED"))
                 .andExpect(jsonPath("$[0].reports[0].resolution").value("HIDE"))
                 .andExpect(jsonPath("$[0].target.visible").value(false));
-        // Ya no hay nada pendiente que resolver.
         resolve("DISCUSSION", discussion.getId(), "DISMISS").andExpect(status().isNotFound());
     }
 
@@ -137,7 +135,6 @@ class ReportIntegrationTest {
         report(ana, "COMMENT", comment, "PERSONAL_DATA", null).andExpect(status().isNoContent());
         report(ana, "TESTIMONIAL", testimonial.getId(), "MISINFORMATION", null).andExpect(status().isNoContent());
 
-        // Un comentario no se puede ocultar, solo borrar.
         resolve("COMMENT", comment, "HIDE").andExpect(status().isBadRequest());
         resolve("COMMENT", comment, "DELETE").andExpect(status().isNoContent());
         mvc.perform(get("/api/comments/discussion/" + discussion.getId())).andExpect(jsonPath("$", hasSize(0)));

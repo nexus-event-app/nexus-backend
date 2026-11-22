@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-/** Código de un solo uso que la web recibe al volver de Google (para iniciar sesión o terminar el alta). */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

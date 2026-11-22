@@ -2,12 +2,6 @@ package com.nexus.backend.importer;
 
 import com.nexus.backend.enums.ImportStatus;
 
-/**
- * Resultado de ejecutar una fuente.
- *
- * @param fetched   elementos leídos del origen
- * @param imported  elementos nuevos guardados
- */
 public record ImportRunResult(ImportStatus status, int fetched, int imported, String message) {
 
     static ImportRunResult success(int fetched, int imported) {

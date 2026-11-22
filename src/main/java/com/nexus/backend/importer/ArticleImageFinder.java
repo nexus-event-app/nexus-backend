@@ -11,11 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Busca la imagen de portada de un artículo en su propia página (la que usan las redes sociales al compartirlo:
- * {@code og:image}, {@code twitter:image}...). Se usa cuando el feed no trae imagen. Pasa por {@link FeedClient},
- * con las mismas protecciones (solo direcciones públicas, tamaño y redirecciones limitados).
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -45,7 +40,6 @@ public class ArticleImageFinder {
         }
     }
 
-    /** Primera imagen declarada en la cabecera de la página, como dirección https absoluta. */
     static Optional<String> extract(String html, String pageUrl) {
         Document document = Jsoup.parse(html, pageUrl);
         for (String selector : SELECTORS) {

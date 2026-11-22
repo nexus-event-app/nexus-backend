@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-/** Lee feeds RSS 2.0 y Atom. Solo guarda un resumen: el artículo completo se lee en el origen. */
 @Component
 @RequiredArgsConstructor
 public class RssNewsProvider implements NewsFeedProvider {
@@ -83,7 +82,6 @@ public class RssNewsProvider implements NewsFeedProvider {
                 toLocalDateTime(entry.getPublishedDate() != null ? entry.getPublishedDate() : entry.getUpdatedDate())));
     }
 
-    /** Prefiere el resumen; si no lo hay, el contenido completo (que luego se recorta). */
     private static String bodyHtml(SyndEntry entry) {
         SyndContent description = entry.getDescription();
         if (description != null && description.getValue() != null && !description.getValue().isBlank()) {

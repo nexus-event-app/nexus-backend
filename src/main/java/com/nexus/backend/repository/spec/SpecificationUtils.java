@@ -23,7 +23,6 @@ public final class SpecificationUtils {
         return (root, query, cb) -> cb.equal(root.get(attribute), value);
     }
 
-    /** Búsqueda de texto (sin distinguir mayúsculas) en cualquiera de los atributos indicados. */
     public static <T> Specification<T> textContains(String text, String... attributes) {
         if (text == null || text.isBlank()) {
             return all();

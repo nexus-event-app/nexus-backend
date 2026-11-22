@@ -24,10 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Búsqueda en toda la web. Reutiliza los filtros públicos de cada sección, así que encuentra lo mismo que buscar
- * dentro de ella (y nada que no sea público).
- */
 @Service
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
@@ -53,7 +49,6 @@ public class SearchServiceImpl implements SearchService {
                 people(text, size));
     }
 
-    /** Perfiles de cuentas activas cuyo nombre, titular o tecnologías contienen el texto. */
     private Group<Person> people(String text, int size) {
         Specification<User> spec = SpecificationUtils.<User>equalTo("enabled", true)
                 .and(SpecificationUtils.textContains(text, "name", "headline", "technologies"));

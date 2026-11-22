@@ -19,17 +19,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-/** Genera sitemap.xml y robots.txt, con caché en memoria para que los bots no carguen la base de datos. */
 @Service
 public class SitemapService {
 
     private static final int MAX_URLS_PER_TYPE = 5000;
     private static final String CACHE_KEY = "content";
-    /** Páginas con la interfaz y el contenido traducidos: se publican en todos los idiomas con hreflang. */
     private static final List<String> TRANSLATED_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios",
             "/sobre-el-proyecto", "/rutas", "/rutas/frontend", "/rutas/backend", "/rutas/qa", "/rutas/datos", "/rutas/ia",
             "/glosario", "/eventos");
-    /** Páginas cuyo texto solo existe en castellano: una única URL, sin alternativas de idioma. */
     private static final List<String> SPANISH_ONLY_PATHS = List.of("/aviso-legal", "/privacidad", "/cookies");
 
     private final NewsRepository newsRepository;
@@ -85,10 +82,6 @@ public class SitemapService {
         return xml.toString();
     }
 
-    /**
-     * Noticias, ofertas y debates: su contenido está escrito en un solo idioma (castellano), así que solo se
-     * publica esa URL. Las versiones /ca y /en existen para navegar, pero apuntan con canonical a esta.
-     */
     private void appendEntries(StringBuilder xml, String section, List<SitemapEntry> entries) {
         for (SitemapEntry entry : entries) {
             appendSingleUrl(xml, section + SlugUtil.idSlug(entry.getId(), entry.getTitle()), entry.getLastModified());
@@ -102,7 +95,6 @@ public class SitemapService {
         xml.append("  </url>\n");
     }
 
-    /** Una entrada por idioma, cada una con los enlaces alternativos a todas las versiones (hreflang). */
     private void appendTranslatedUrl(StringBuilder xml, String path) {
         for (Locale locale : Languages.SUPPORTED) {
             xml.append("  <url>\n");
@@ -123,7 +115,6 @@ public class SitemapService {
         }
     }
 
-    /** URL pública de una ruta interna en un idioma: «/empleo» → «…/en/jobs». La portada castellana es «…/». */
     private String localizedUrl(Locale locale, String path) {
         return publicUrl + Languages.localizePath(locale, path);
     }

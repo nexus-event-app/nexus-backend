@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-/** Confirmación para eliminar la propia cuenta: la contraseña actual, si la cuenta tiene (las de Google pueden no). */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

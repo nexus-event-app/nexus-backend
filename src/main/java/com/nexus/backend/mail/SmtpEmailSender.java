@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 
-/** Envía los emails por SMTP (Brevo, Resend, Amazon SES...). Se activa con MAIL_ENABLED=true. */
 @Component
 @ConditionalOnProperty(prefix = "app.mail", name = "enabled", havingValue = "true")
 public class SmtpEmailSender implements EmailSender {

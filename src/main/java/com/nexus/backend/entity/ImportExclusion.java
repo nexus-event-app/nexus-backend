@@ -8,10 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Identificador externo de un elemento importado que un admin ha borrado. Evita que la siguiente
- * importación lo vuelva a crear.
- */
 @Entity
 @Table(name = "import_exclusions")
 @Getter

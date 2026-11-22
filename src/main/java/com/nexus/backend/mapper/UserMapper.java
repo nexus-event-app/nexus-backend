@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Component
 public class UserMapper {
 
-    /** El registro público siempre crea usuarios con rol USER. */
     public User toEntity(RegisterRequest request, String encodedPassword) {
         User user = new User();
         user.setName(request.getName());

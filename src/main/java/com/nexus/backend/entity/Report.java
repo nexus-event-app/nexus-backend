@@ -23,10 +23,6 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
-/**
- * Reporte de un contenido por parte de una persona de la comunidad (V15). El contenido se guarda como tipo e id, sin
- * clave ajena, porque puede ser de tres tablas distintas; al borrarlo se borran también sus reportes.
- */
 @Entity
 @Table(name = "reports")
 @Getter
@@ -63,7 +59,6 @@ public class Report extends CreatedEntity {
     @Column(name = "status", nullable = false, length = 20)
     private ReportStatus status = ReportStatus.PENDING;
 
-    /** Qué se hizo con el contenido al cerrar el reporte. */
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "resolution", length = 20)

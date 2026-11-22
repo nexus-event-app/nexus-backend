@@ -20,7 +20,6 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
-/** Token de un solo uso (verificación de email o recuperación de contraseña). Solo se guarda su hash. */
 @Entity
 @Table(name = "user_tokens")
 @Getter

@@ -12,7 +12,6 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-/** «Me apunto» de una persona a un evento. Solo cuenta para el número que se ve; quién es no se muestra. */
 @Entity
 @Table(name = "event_interests")
 @IdClass(EventInterest.Key.class)

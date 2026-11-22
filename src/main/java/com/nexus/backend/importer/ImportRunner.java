@@ -29,10 +29,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-/**
- * Ejecuta una fuente: descarga, normaliza, filtra (antigüedad, nivel, sector, duplicados) y guarda.
- * La descarga se hace fuera de la transacción; el guardado y el estado de la fuente, dentro.
- */
 @Slf4j
 @Component
 public class ImportRunner {
@@ -51,7 +47,6 @@ public class ImportRunner {
     private final ImportProperties properties;
     private final NewsImageBackfill newsImageBackfill;
 
-    /** Fuentes en ejecución, para no lanzar la misma dos veces a la vez (planificador + admin). */
     private final Set<Long> running = ConcurrentHashMap.newKeySet();
 
     public ImportRunner(List<NewsFeedProvider> newsProviders,
@@ -113,23 +108,19 @@ public class ImportRunner {
                 .filter(item -> !excluded.matches(item.title() + " " + item.summary()))
                 .filter(item -> item.publishedAt() == null || item.publishedAt().isAfter(oldest))
                 .filter(item -> item.link().length() <= 500)
-                // La web solo marca y filtra castellano e inglés: lo escrito en otro idioma se descarta.
                 .filter(item -> !LanguageDetector.isOtherLanguage(item.title() + ". " + item.summary()))
                 .sorted(Comparator.comparing(ImportedNews::publishedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
         List<ImportedNews> fresh = withoutKnown(candidates, ImportedNews::externalId,
                 newsRepository::findExistingExternalIds, properties.newsMaxItemsPerRun());
 
-        // Se guardan de la más antigua a la más reciente para que el orden por fecha de alta se respete.
         List<News> entities = fresh.reversed().stream().map(item -> toNews(item, source)).toList();
         transactionTemplate.executeWithoutResult(status -> newsRepository.saveAll(entities));
-        // Si el feed no trae imagen, se busca la portada en la página del artículo.
         if (!Boolean.FALSE.equals(source.getUseSourceImages())) {
             newsImageBackfill.fill(entities);
         }
         return ImportRunResult.success(fetched.size(), entities.size());
     }
-
 
     private ImportRunResult runJobs(ImportSource source) {
         JobFeedProvider provider = jobProviders.stream()
@@ -163,7 +154,6 @@ public class ImportRunner {
         return ImportRunResult.success(fetched.size(), entities.size());
     }
 
-    /** Quita los ya importados, los borrados por un admin y los repetidos dentro del propio feed. */
     private <T> List<T> withoutKnown(List<T> items, Function<T, String> idOf,
                                      Function<Set<String>, Set<String>> existingLookup, int limit) {
         if (items.isEmpty()) {
@@ -183,12 +173,10 @@ public class ImportRunner {
         news.setTitle(TextUtil.truncate(item.title(), 200));
         news.setContent(item.summary().isEmpty() ? item.title() : item.summary());
         news.setSourceUrl(item.link());
-        // Cada noticia lleva el idioma de su texto: una fuente puede mezclar artículos en castellano y en inglés.
         news.setLanguage(LanguageDetector.detectOr(news.getTitle() + ". " + news.getContent(), source.getLanguage()));
         boolean useImage = !Boolean.FALSE.equals(source.getUseSourceImages()) && ImageUrlPolicy.isAcceptable(item.imageUrl());
         news.setImageUrl(useImage ? item.imageUrl() : null);
         news.setAuthor(TextUtil.truncate(Optional.ofNullable(item.author()).orElse(source.getName()), 100));
-        // El tema sale del contenido; si no está claro, el de la fuente.
         news.setCategory(NewsClassifier.classify(news.getTitle(), news.getContent(), source.getNewsCategory()));
         news.setIsActive(Boolean.TRUE.equals(source.getAutoPublish()));
         news.setSource(source.getName());

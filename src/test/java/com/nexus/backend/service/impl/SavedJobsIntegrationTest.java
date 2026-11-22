@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Ofertas guardadas: privadas por usuario, idempotentes y coherentes cuando una oferta deja de publicarse. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -60,7 +59,6 @@ class SavedJobsIntegrationTest {
 
         mvc.perform(put("/api/saved-jobs/" + first).header("Authorization", ana)).andExpect(status().isNoContent());
         mvc.perform(put("/api/saved-jobs/" + second).header("Authorization", ana)).andExpect(status().isNoContent());
-        // Guardar dos veces no duplica.
         mvc.perform(put("/api/saved-jobs/" + first).header("Authorization", ana)).andExpect(status().isNoContent());
 
         mvc.perform(get("/api/saved-jobs/ids").header("Authorization", ana))
@@ -86,7 +84,6 @@ class SavedJobsIntegrationTest {
 
         mvc.perform(put("/api/saved-jobs/" + id).header("Authorization", ana)).andExpect(status().isNoContent());
         mvc.perform(get("/api/saved-jobs/ids").header("Authorization", luis)).andExpect(jsonPath("$", empty()));
-        // Luis no puede quitar el guardado de Ana: solo actúa sobre los suyos.
         mvc.perform(delete("/api/saved-jobs/" + id).header("Authorization", luis)).andExpect(status().isNoContent());
         mvc.perform(get("/api/saved-jobs/ids").header("Authorization", ana))
                 .andExpect(jsonPath("$", contains(id.intValue())));

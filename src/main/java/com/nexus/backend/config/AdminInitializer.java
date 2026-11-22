@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
-/** Crea el primer ADMIN a partir de ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME si aún no existe. */
 @Slf4j
 @Component
 @RequiredArgsConstructor

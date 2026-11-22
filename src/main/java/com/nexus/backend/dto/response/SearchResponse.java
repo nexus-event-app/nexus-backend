@@ -2,10 +2,6 @@ package com.nexus.backend.dto.response;
 
 import java.util.List;
 
-/**
- * Resultado de la búsqueda global: los primeros resultados de cada sección y cuántos hay en total, para enlazar a
- * la sección con la búsqueda aplicada. Solo incluye contenido público (publicado, vigente o activo).
- */
 public record SearchResponse(
         String query,
         Group<NewsResponse> news,
@@ -20,7 +16,6 @@ public record SearchResponse(
         }
     }
 
-    /** Perfil en los resultados: solo datos públicos del perfil, nunca el email. */
     public record Person(Long id, String slug, String name, String headline, String avatarUrl) {
     }
 }

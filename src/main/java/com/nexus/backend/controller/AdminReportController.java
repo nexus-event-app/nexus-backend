@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** Cola de moderación: contenidos reportados y decisiones del equipo. */
 @RestController
 @RequestMapping("/api/admin/reports")
 @RequiredArgsConstructor
@@ -25,7 +24,6 @@ public class AdminReportController {
 
     private final ReportService reportService;
 
-    /** {@code status=pending} (por defecto) o {@code status=closed}. */
     @GetMapping
     public ResponseEntity<List<ReportCaseResponse>> getCases(@RequestParam(defaultValue = "pending") String status) {
         return ResponseEntity.ok(reportService.getCases(!"closed".equalsIgnoreCase(status)));

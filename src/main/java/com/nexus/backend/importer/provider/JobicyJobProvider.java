@@ -14,11 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * API pública de Jobicy (https://github.com/Jobicy/remote-jobs-api). Sus condiciones piden no consultarla más
- * de una vez por hora, mantener a Jobicy como fuente con su enlace original y no presentar las ofertas como propias.
- * Todas las ofertas son en remoto; el campo {@code jobGeo} indica desde dónde se puede aplicar.
- */
 @Component
 @RequiredArgsConstructor
 public class JobicyJobProvider implements JobFeedProvider {
@@ -66,7 +61,6 @@ public class JobicyJobProvider implements JobFeedProvider {
                 false);
     }
 
-    /** Jobicy devuelve algunos campos como texto y otros como lista: se aceptan ambos. */
     private static List<String> values(JsonNode node) {
         if (node.isArray()) {
             return JsonFeeds.textList(node);
@@ -83,7 +77,6 @@ public class JobicyJobProvider implements JobFeedProvider {
         return List.of();
     }
 
-    /** La fecha llega como «2026-11-04 16:53:35» o ISO. */
     private static LocalDateTime publishedAt(String value) {
         return value == null ? null : JsonFeeds.dateTime(value.trim().replace(' ', 'T'));
     }

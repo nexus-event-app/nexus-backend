@@ -13,7 +13,6 @@ public interface ImportExclusionRepository extends JpaRepository<ImportExclusion
     @Query("select e.externalId from ImportExclusion e where e.externalId in :ids")
     Set<String> findExisting(@Param("ids") Collection<String> externalIds);
 
-    /** Al borrar algo importado se recuerda su id externo para que la próxima importación no lo vuelva a traer. */
     default void excludeIfImported(String externalId) {
         if (externalId != null) {
             save(new ImportExclusion(externalId));

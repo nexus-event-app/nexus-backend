@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/** Avisos de la persona con sesión iniciada. */
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -33,7 +32,6 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getNotifications(page, size, principal));
     }
 
-    /** Lo consulta la campanita de la cabecera cada poco: solo devuelve el número. */
     @GetMapping("/unread-count")
     public ResponseEntity<Map<String, Long>> countUnread(@AuthenticationPrincipal UserDetail principal) {
         return ResponseEntity.ok(Map.of("count", notificationService.countUnread(principal)));

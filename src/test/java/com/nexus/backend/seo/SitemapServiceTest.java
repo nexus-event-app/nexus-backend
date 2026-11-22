@@ -17,10 +17,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * El sitemap solo declara versiones por idioma (hreflang) de las páginas realmente traducidas. Noticias,
- * ofertas, debates y páginas legales solo existen en castellano: una URL, sin alternativas.
- */
 class SitemapServiceTest {
 
     private static final String SITE = "https://primercommit.test";
@@ -47,10 +43,8 @@ class SitemapServiceTest {
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/feina\"");
         assertThat(block(SITE + "/ca/forum")).isNotNull();
         assertThat(block(SITE + "/en/news")).contains("hreflang=\"ca\" href=\"" + SITE + "/ca/noticies\"");
-        // Eventos, en los tres idiomas.
         assertThat(block(SITE + "/eventos")).contains("hreflang=\"ca\" href=\"" + SITE + "/ca/esdeveniments\"",
                 "hreflang=\"en\" href=\"" + SITE + "/en/events\"");
-        // El glosario, en los tres idiomas.
         assertThat(block(SITE + "/glosario")).contains("hreflang=\"en\" href=\"" + SITE + "/en/glossary\"",
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/glossari\"");
         assertThat(xml).doesNotContain("/en/empleo", "/ca/foro<", "/en/noticias");
@@ -67,7 +61,6 @@ class SitemapServiceTest {
         assertThat(block(SITE + "/noticias/7-hola-mundo")).contains("<lastmod>2026-11-01</lastmod>");
     }
 
-    /** El bloque <url> cuya <loc> es exactamente la indicada. */
     private String block(String loc) {
         Matcher matcher = URL_BLOCK.matcher(xml);
         while (matcher.find()) {

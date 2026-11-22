@@ -22,12 +22,10 @@ public class DiscussionResponse {
     private Long authorId;
     private String authorName;
     private String authorAvatarUrl;
-    /** La autora o el autor eliminó su cuenta: se muestra como «Cuenta eliminada», sin enlace a su perfil. */
     private boolean authorDeleted;
     private Boolean isActive;
     private Integer commentCount;
     private Integer likesCount;
-    /** Comentario marcado como la mejor respuesta; null si la discusión aún no está resuelta. */
     private Long acceptedCommentId;
     private Boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;

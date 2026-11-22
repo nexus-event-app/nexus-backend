@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-/** Identificadores externos estables y de longitud acotada ({@code prefijo:valor}). */
 final class ExternalIds {
 
     private static final int MAX_LENGTH = 200;

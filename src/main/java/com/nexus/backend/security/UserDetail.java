@@ -28,7 +28,6 @@ public class UserDetail implements UserDetails {
         return user.getRole() == User.Role.ADMIN;
     }
 
-    /** Un usuario puede gestionar un recurso si es su autor o si es ADMIN. */
     public boolean canManage(Long ownerId) {
         return isAdmin() || (ownerId != null && ownerId.equals(user.getId()));
     }

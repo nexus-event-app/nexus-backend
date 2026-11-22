@@ -30,18 +30,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-/**
- * Fotos de perfil. La imagen subida nunca se guarda tal cual: se recorta al centro en cuadrado, se reduce a
- * {@value #SIZE}×{@value #SIZE} px y se vuelve a generar como JPEG. Así pesa poco y se eliminan los metadatos que
- * traen las fotos de móvil (ubicación GPS, modelo del teléfono...).
- */
 @Slf4j
 @Service
 public class AvatarStorage {
 
     public static final String PUBLIC_PATH = "/uploads/avatars/";
     static final int SIZE = 256;
-    /** Lado máximo de la imagen original, para no descomprimir imágenes enormes en memoria. */
     private static final int MAX_SOURCE_SIDE = 6000;
     private static final Set<String> FORMATS = Set.of("jpeg", "png", "gif");
     private static final Pattern STORED_URL = Pattern.compile("^" + Pattern.quote(PUBLIC_PATH) + "([a-f0-9\\-]{36}\\.jpg)$");
@@ -65,7 +59,6 @@ public class AvatarStorage {
         }
     }
 
-    /** Procesa y guarda la foto. Devuelve su ruta pública. */
     public String store(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("error.image.required");
@@ -81,7 +74,6 @@ public class AvatarStorage {
         return PUBLIC_PATH + fileName;
     }
 
-    /** Borra una foto guardada antes. Ignora rutas que no sean de este almacén. */
     public void delete(String publicUrl) {
         if (publicUrl == null) {
             return;
@@ -126,7 +118,6 @@ public class AvatarStorage {
         }
     }
 
-    /** Recorte cuadrado centrado y reducido, sobre fondo blanco (JPEG no admite transparencia). */
     private static BufferedImage square(BufferedImage source) {
         int side = Math.min(source.getWidth(), source.getHeight());
         int x = (source.getWidth() - side) / 2;

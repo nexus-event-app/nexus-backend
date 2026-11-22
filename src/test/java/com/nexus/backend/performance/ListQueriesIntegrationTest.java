@@ -26,10 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Las listas no deben hacer una consulta más por cada elemento (el problema «N+1»): con muchos testimonios, cargar
- * a sus autores uno a uno haría la página cada vez más lenta.
- */
 @SpringBootTest(properties = "spring.jpa.properties.hibernate.generate_statistics=true")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

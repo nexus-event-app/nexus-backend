@@ -9,7 +9,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.nio.file.Paths;
 import java.time.Duration;
 
-/** Sirve las imágenes subidas: noticias y fotos de perfil. Los nombres son aleatorios, así que se cachean un mes. */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 

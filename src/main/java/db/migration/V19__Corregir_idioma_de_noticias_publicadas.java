@@ -10,11 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Corrige el idioma de las noticias importadas que se publicaron desde el panel: «Publicar» enviaba la noticia sin
- * idioma y el servidor la pasaba a castellano, así que noticias en inglés salían con el filtro «Español» y en la
- * portada. Se vuelve a detectar por el texto y, si el texto no lo deja claro, se usa el idioma de su fuente.
- */
 public class V19__Corregir_idioma_de_noticias_publicadas extends BaseJavaMigration {
 
     @Override

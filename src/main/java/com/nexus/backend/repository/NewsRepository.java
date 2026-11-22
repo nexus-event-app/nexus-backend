@@ -24,13 +24,11 @@ public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificat
     @Query("select n.externalId from News n where n.externalId in :ids")
     Set<String> findExistingExternalIds(@Param("ids") Collection<String> externalIds);
 
-    /** Noticias sin imagen pero con enlace a su fuente, de las más recientes a las más antiguas. */
     @Query("select n from News n where n.imageUrl is null and n.sourceUrl is not null and n.createdAt >= :since "
             + "and not exists (select s.id from ImportSource s where s.name = n.source and s.useSourceImages = false) "
             + "order by n.createdAt desc")
     List<News> findWithoutImage(@Param("since") LocalDateTime since, Pageable pageable);
 
-    /** Quita las imágenes de lo importado de una fuente (cuando se decide no usar sus imágenes). */
     List<News> findBySourceAndExternalIdIsNotNull(String source);
 
     @Modifying
@@ -41,7 +39,6 @@ public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificat
     @Query("update News n set n.imageUrl = :imageUrl where n.id = :id and n.imageUrl is null")
     int updateImageUrl(@Param("id") Long id, @Param("imageUrl") String imageUrl);
 
-    /** Temas con alguna noticia publicada (en un idioma, o en todos con null), para no enseñar filtros vacíos. */
     @Query("select distinct n.category from News n where n.isActive = true and (:language is null or n.language = :language)")
     List<NewsCategory> findPublishedCategories(@Param("language") String language);
 }

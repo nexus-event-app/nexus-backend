@@ -11,14 +11,9 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Emails de cuenta (y avisos de moderación), en texto plano y HTML sencillo compatible con los clientes de correo. Se redactan en el idioma de la
- * petición que los provoca (cabecera Accept-Language) y los enlaces apuntan a la versión de la web en ese idioma.
- */
 @Component
 public class EmailTemplates {
 
-    /** Los avisos de moderación van en castellano, como el panel de administración. */
     private static final Locale MODERATION_LOCALE = Locale.forLanguageTag("es");
 
     private final Messages messages;
@@ -49,10 +44,6 @@ public class EmailTemplates {
                 messages.get(locale, "mail.reset.note"));
     }
 
-    /**
-     * Aviso a quien administra: hay un testimonio nuevo esperando. Va en castellano, como el panel, y trae el texto
-     * completo para leerlo desde el móvil; se publica o se rechaza en el panel, con la sesión iniciada.
-     */
     public EmailMessage newTestimonial(String to, String author, String role, String location, String content) {
         Locale locale = MODERATION_LOCALE;
         String who = oneLine(author);
@@ -62,10 +53,6 @@ public class EmailTemplates {
                 messages.get(locale, "mail.testimonial.note", messages.get(locale, "mail.brand")));
     }
 
-    /**
-     * Aviso de un evento nuevo de la comunidad. Ya está publicado: el email sirve para revisarlo (repetidos, spam) y
-     * borrarlo desde el panel si hace falta.
-     */
     public EmailMessage newEvent(String to, String title, String when, String where, boolean forWomen, String description,
                                  String url) {
         Locale locale = MODERATION_LOCALE;
@@ -77,10 +64,6 @@ public class EmailTemplates {
                 messages.get(locale, "mail.event.note", messages.get(locale, "mail.brand")));
     }
 
-    /**
-     * Aviso para quien administra: un texto destacado (lo que alguien ha escrito, escapado y con sus saltos de línea),
-     * quién o qué es, y un botón al panel. Va en castellano, como el panel.
-     */
     private EmailMessage moderationAlert(String to, String subject, String intro, String who, String details,
                                          String content, String adminPath, String action, String note) {
         String brand = messages.get(MODERATION_LOCALE, "mail.brand");
@@ -118,7 +101,6 @@ public class EmailTemplates {
                 .collect(Collectors.joining(" · "));
     }
 
-    /** Sin saltos de línea: lo que escribe una persona no puede romper el asunto ni la cabecera del email. */
     private static String oneLine(String value) {
         return value == null ? "" : value.replaceAll("[\\r\\n]+", " ").trim();
     }

@@ -47,7 +47,6 @@ public class AdminImportSourceController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Añade las fuentes recomendadas que falten; responde con las creadas (vacío si ya estaban todas). */
     @PostMapping("/defaults")
     public ResponseEntity<List<ImportSourceResponse>> addMissingDefaults() {
         return ResponseEntity.ok(importSourceService.addMissingDefaults());

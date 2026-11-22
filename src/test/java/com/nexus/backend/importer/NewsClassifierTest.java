@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** El tema de una noticia sale de su título y su resumen; la fuente solo desempata o rellena. */
 class NewsClassifierTest {
 
     @Test
@@ -24,10 +23,8 @@ class NewsClassifierTest {
     @Test
     void ignoresAccentsCaseAndPartsOfWords() {
         assertThat(classify("La INTELIGENCIA ARTIFICIAL llega a la oficina", "")).isEqualTo(NewsCategory.IA);
-        // «ia» dentro de otra palabra (noticia, historia) no cuenta como IA; «java» no se confunde con JavaScript.
         assertThat(classify("La historia de una noticia curiosa", "", NewsCategory.GENERAL)).isEqualTo(NewsCategory.GENERAL);
         assertThat(NewsClassifier.classify("Java 25 ya está aquí", "", NewsCategory.GENERAL)).isEqualTo(NewsCategory.PROGRAMACION);
-        // «Código» suelto no es programación (el Código Civil); «código fuente», sí.
         assertThat(classify("El Código Civil permite a los propietarios cortar las ramas", "")).isEqualTo(NewsCategory.GENERAL);
         assertThat(classify("Publican el código fuente del primer navegador", "")).isEqualTo(NewsCategory.PROGRAMACION);
     }
@@ -44,14 +41,12 @@ class NewsClassifierTest {
         assertThat(NewsClassifier.classify("Un día en la oficina", "Nada técnico por aquí.", NewsCategory.SISTEMAS))
                 .isEqualTo(NewsCategory.SISTEMAS);
         assertThat(NewsClassifier.classify("Un día en la oficina", "", null)).isEqualTo(NewsCategory.GENERAL);
-        // Una sola mención en el resumen no basta para cambiar de tema.
         assertThat(NewsClassifier.classify("Novedades de la semana", "También hablamos de Python.", NewsCategory.GENERAL))
                 .isEqualTo(NewsCategory.GENERAL);
     }
 
     @Test
     void aSpecialisedSourceWinsWhenTheContentIsBalanced() {
-        // Seguridad e IA a partes iguales: en una web de seguridad, se queda en Ciberseguridad.
         String title = "Cómo usan la IA los ciberdelincuentes";
         assertThat(NewsClassifier.classify(title, "", NewsCategory.CIBERSEGURIDAD)).isEqualTo(NewsCategory.CIBERSEGURIDAD);
         assertThat(NewsClassifier.classify(title, "", NewsCategory.IA)).isEqualTo(NewsCategory.IA);

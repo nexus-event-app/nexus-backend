@@ -9,10 +9,6 @@ import org.jsoup.select.NodeVisitor;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Convierte HTML de fuentes externas en texto plano legible (párrafos, listas y saltos de línea),
- * que es el único formato que guarda y muestra la aplicación.
- */
 public final class HtmlText {
 
     private static final Set<String> BLOCK_TAGS = Set.of(
@@ -32,8 +28,6 @@ public final class HtmlText {
 
         StringBuilder out = new StringBuilder(html.length() / 2);
         body.traverse(new NodeVisitor() {
-            // Justo después de una viñeta, los bloques que abre el punto (un <p> o <div> dentro del <li>) no añaden
-            // saltos de línea: si no, la viñeta quedaría sola en una línea y su texto en la siguiente.
             private boolean afterBullet;
 
             @Override
@@ -51,7 +45,6 @@ public final class HtmlText {
                         out.append("\n• ");
                         afterBullet = true;
                     } else if (BLOCK_TAGS.contains(tag) && !afterBullet) {
-                        // Dentro de un punto, un segundo bloque va en la línea siguiente, sin línea en blanco.
                         out.append(insideListItem(element) ? "\n" : "\n\n");
                     }
                 }
@@ -59,8 +52,6 @@ public final class HtmlText {
 
             @Override
             public void tail(Node node, int depth) {
-                // Al cerrar un bloque dentro de un punto no se deja línea en blanco: el siguiente punto ya empieza en
-                // su propia línea.
                 if (node instanceof Element element && BLOCK_TAGS.contains(element.normalName())
                         && !insideListItem(element)) {
                     out.append("\n\n");
@@ -75,7 +66,6 @@ public final class HtmlText {
         return element.parents().stream().anyMatch(parent -> parent.normalName().equals("li"));
     }
 
-    /** Primera imagen https del HTML, si la hay. */
     public static Optional<String> firstImage(String html) {
         if (html == null || html.isBlank()) {
             return Optional.empty();

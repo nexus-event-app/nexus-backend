@@ -19,17 +19,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-/**
- * API de Adzuna (https://developer.adzuna.com): junta ofertas de muchos portales, también de España y en castellano.
- * Pide registro: el identificador y la clave van en ADZUNA_APP_ID y ADZUNA_APP_KEY, nunca en la URL guardada de la
- * fuente (que se ve en el panel). La URL es la de una búsqueda sin página, p. ej.
- * {@code https://api.adzuna.com/v1/api/jobs/es/search?category=it-jobs&what_or=junior%20becario}; aquí se le añaden la
- * página y las claves. Se enlaza siempre la oferta en Adzuna, como piden sus condiciones.
- */
 @Component
 public class AdzunaJobProvider implements JobFeedProvider {
 
-    /** Páginas por ejecución: cada una es una consulta y el plan gratuito tiene un cupo mensual. */
     static final int MAX_PAGES = 2;
     private static final int PAGE_SIZE = 50;
 
@@ -74,7 +66,6 @@ public class AdzunaJobProvider implements JobFeedProvider {
         return jobs;
     }
 
-    /** «…/search?x=1» → «…/search/2?x=1&app_id=…&app_key=…&results_per_page=50&sort_by=date». */
     static String pageUrl(String searchUrl, int page, String appId, String appKey) {
         int query = searchUrl.indexOf('?');
         String path = (query < 0 ? searchUrl : searchUrl.substring(0, query)).replaceAll("/+$", "");
@@ -117,11 +108,9 @@ public class AdzunaJobProvider implements JobFeedProvider {
                 JsonFeeds.text(job, "redirect_url"),
                 JsonFeeds.dateTime(JsonFeeds.text(job, "created")),
                 List.of(),
-                // Se pide la categoría «it-jobs»: todo lo que llega es del sector, aunque el título no lo diga.
                 "it-jobs".equals(JsonFeeds.text(job.path("category"), "tag")));
     }
 
-    /** Adzuna no da la modalidad: se deduce del texto; sin pistas, presencial. */
     private static WorkMode workMode(String text) {
         if (REMOTE.matcher(text).find()) {
             return WorkMode.REMOTE;

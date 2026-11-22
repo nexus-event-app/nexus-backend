@@ -23,7 +23,6 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, Long>, JpaSp
     @Query("select j.externalId from JobOffer j where j.externalId in :ids")
     Set<String> findExistingExternalIds(@Param("ids") Collection<String> externalIds);
 
-    /** Borra ofertas importadas que caducaron antes de la fecha indicada (limpieza periódica). */
     @Modifying
     @Query("delete from JobOffer j where j.externalId is not null and j.expiresAt < :before")
     int deleteImportedExpiredBefore(@Param("before") LocalDateTime before);

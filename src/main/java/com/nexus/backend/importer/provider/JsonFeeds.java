@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/** Utilidades para leer APIs JSON de empleo de forma tolerante a campos ausentes. */
 final class JsonFeeds {
 
     private JsonFeeds() {
@@ -62,7 +61,6 @@ final class JsonFeeds {
                 .toList();
     }
 
-    /** Acepta fechas ISO con o sin zona horaria. */
     static LocalDateTime dateTime(String value) {
         if (value == null) {
             return null;
@@ -78,7 +76,6 @@ final class JsonFeeds {
         }
     }
 
-    /** Fecha a partir de segundos desde 1970 (como la dan algunas APIs); null si falta (0 o negativo). */
     static LocalDateTime epochSeconds(long seconds) {
         return seconds <= 0 ? null : LocalDateTime.ofInstant(Instant.ofEpochSecond(seconds), ZoneId.systemDefault());
     }

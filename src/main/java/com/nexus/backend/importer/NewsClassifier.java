@@ -9,13 +9,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Elige el tema de una noticia leyendo su título y su resumen (en castellano o en inglés, sin acentos y en
- * minúsculas): cada palabra clave del título cuenta 3 puntos y cada una del resumen, 1. La categoría de la fuente suma
- * 3 (una web especializada en seguridad suele hablar de seguridad), salvo «General». Gana el tema con más puntos si
- * llega a 3; si no, se queda la de la fuente. En caso de empate decide el orden de {@link #RULES}: lo más concreto
- * primero.
- */
 public final class NewsClassifier {
 
     private static final int TITLE_WEIGHT = 3;
@@ -86,7 +79,6 @@ public final class NewsClassifier {
             if (score > 0 && rule.getKey() == fallback) {
                 score += SOURCE_BONUS;
             }
-            // Con «mayor que» estricto, en un empate se queda el tema que va antes en RULES.
             if (score > bestScore) {
                 best = rule.getKey();
                 bestScore = score;
@@ -104,7 +96,6 @@ public final class NewsClassifier {
         return found;
     }
 
-    /** Una sola expresión por tema, con cada término como palabra completa. */
     private static Pattern words(String... terms) {
         return Pattern.compile("(?<![\\p{L}\\p{N}])(" + String.join("|", terms) + ")(?![\\p{L}\\p{N}])");
     }

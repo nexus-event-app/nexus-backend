@@ -26,7 +26,6 @@ class ImageUrlPolicyTest {
         assertThat(ImageUrlPolicy.isAcceptable("http://example.com/a.jpg")).isFalse();
         assertThat(ImageUrlPolicy.isAcceptable("https://")).isFalse();
         assertThat(ImageUrlPolicy.isAcceptable("https://example.com/" + "a".repeat(500))).isFalse();
-        // Un dominio que solo se parece no se bloquea.
         assertThat(ImageUrlPolicy.isAcceptable("https://mydev.tools/a.png")).isTrue();
     }
 }

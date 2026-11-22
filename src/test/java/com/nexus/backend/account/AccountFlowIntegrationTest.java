@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Verificación de email y recuperación de contraseña de extremo a extremo, leyendo los enlaces de los emails. */
 @Import(CapturingMail.class)
 @SpringBootTest(properties = "app.auth.require-verified-email=true")
 @AutoConfigureMockMvc
@@ -127,7 +126,7 @@ class AccountFlowIntegrationTest {
         resetPassword(token, "corta").andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors.password").exists());
 
-        Thread.sleep(1100); // los JWT guardan la fecha de emisión en segundos
+        Thread.sleep(1100);
         resetPassword(token, "NuevaClave123").andExpect(status().isNoContent());
         resetPassword(token, "OtraClave123").andExpect(status().isBadRequest());
 
@@ -169,7 +168,6 @@ class AccountFlowIntegrationTest {
                 .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"));
     }
 
-    /** Los emails se envían en segundo plano: espera hasta 5 segundos a que llegue. */
     private EmailMessage awaitEmailTo(String email) throws InterruptedException {
         for (int i = 0; i < 50; i++) {
             for (EmailMessage message : mail.sent) {

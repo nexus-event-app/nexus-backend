@@ -32,7 +32,6 @@ class LanguagesTest {
         assertThat(Languages.pathPrefix(Locale.GERMAN)).isEmpty();
     }
 
-    /** Copia exacta de src/shared/i18n/routeSegments.js del frontend: si una cambia, la otra también. */
     @Test
     void matchesTheFrontendRouteTable() {
         assertThat(Languages.SEGMENTS).containsExactlyInAnyOrderEntriesOf(Map.ofEntries(

@@ -16,11 +16,6 @@ import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-/**
- * API pública de Get on Board (https://www.getonbrd.com): ofertas tech en español con nivel y modalidad
- * explícitos. La URL es la de una categoría, p. ej. {@code /api/v0/categories/programming/jobs}.
- * Se enlaza siempre la oferta original.
- */
 @Component
 @RequiredArgsConstructor
 public class GetonbrdJobProvider implements JobFeedProvider {
@@ -92,7 +87,6 @@ public class GetonbrdJobProvider implements JobFeedProvider {
         return JsonFeeds.text(attributes.path("company").path("data").path("attributes"), "name");
     }
 
-    /** Funciones y requisitos, cada bloque con su encabezado. */
     private static String descriptionHtml(JsonNode attributes) {
         StringBuilder html = new StringBuilder();
         for (String section : List.of("functions", "description", "desirable", "benefits")) {
@@ -140,7 +134,6 @@ public class GetonbrdJobProvider implements JobFeedProvider {
         };
     }
 
-    /** Traduce el nivel de Get on Board a las pistas que entiende el clasificador. */
     private static List<String> levelHints(int seniority, int modality) {
         String level = switch (seniority) {
             case 1 -> "no experience required";

@@ -16,11 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Lo que la web hace al volver de Google (ver GoogleOAuthConfig): canjear el código por la sesión o, si es alguien
- * nuevo, mostrar «Ya casi está» y crear la cuenta cuando acepta las condiciones. Los códigos van en el cuerpo de
- * peticiones POST, no en la URL.
- */
 @RestController
 @RequestMapping("/api/auth")
 public class GoogleAuthController {

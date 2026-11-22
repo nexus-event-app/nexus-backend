@@ -7,10 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
-/**
- * Traduce claves de messages*.properties al idioma de la petición. Si el texto recibido no es una clave
- * conocida (por ejemplo, un mensaje ya redactado), se devuelve tal cual.
- */
 @Component
 @RequiredArgsConstructor
 public class Messages {

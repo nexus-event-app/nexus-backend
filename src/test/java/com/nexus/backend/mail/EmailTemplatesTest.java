@@ -10,7 +10,6 @@ import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Los emails salen en el idioma de la petición y sus enlaces apuntan a la versión de la web en ese idioma. */
 class EmailTemplatesTest {
 
     private final EmailTemplates templates = new EmailTemplates(new Messages(messageSource()), "https://primercommit.test/");

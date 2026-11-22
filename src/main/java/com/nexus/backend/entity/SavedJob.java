@@ -14,7 +14,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Oferta de empleo guardada por un usuario para revisarla más tarde. */
 @Entity
 @Table(name = "saved_jobs",
         uniqueConstraints = @UniqueConstraint(name = "uk_saved_jobs_user_job", columnNames = {"user_id", "job_id"}),

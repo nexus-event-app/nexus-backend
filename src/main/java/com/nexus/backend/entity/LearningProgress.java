@@ -16,7 +16,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-/** Etapa de una ruta de aprendizaje que una persona ha marcado como hecha (V13). */
 @Entity
 @Table(name = "learning_progress")
 @Getter

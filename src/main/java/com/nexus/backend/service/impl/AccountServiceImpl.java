@@ -82,7 +82,6 @@ public class AccountServiceImpl implements AccountService {
         LocalDateTime now = LocalDateTime.now();
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCredentialsChangedAt(now);
-        // Quien recibe el enlace en su bandeja demuestra que el email es suyo.
         if (user.getEmailVerifiedAt() == null) {
             user.setEmailVerifiedAt(now);
         }
@@ -112,7 +111,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void assertCanParticipate(UserDetail actor) {
-        // La administración siempre puede publicar: su cuenta nunca debe quedarse bloqueada.
         if (actor.isAdmin()) {
             return;
         }
@@ -121,7 +119,6 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    /** Limpia cada día los tokens caducados hace más de una semana. */
     @Scheduled(cron = "${app.auth.token-cleanup-cron:0 30 4 * * *}")
     @Transactional
     public void purgeExpiredTokens() {
@@ -131,7 +128,6 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    /** Invalida los tokens pendientes del mismo tipo y emite uno nuevo; devuelve el token en claro. */
     private String issueToken(User user, UserTokenType type) {
         LocalDateTime now = LocalDateTime.now();
         tokenRepository.invalidatePending(user.getId(), type, now);

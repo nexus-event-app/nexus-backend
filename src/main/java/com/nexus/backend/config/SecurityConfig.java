@@ -68,7 +68,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /** Consola H2: solo existe en el perfil dev. */
     @Bean
     @Order(1)
     @Profile("dev")

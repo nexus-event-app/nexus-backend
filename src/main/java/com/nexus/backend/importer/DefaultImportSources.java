@@ -6,48 +6,31 @@ import com.nexus.backend.enums.NewsCategory;
 
 import java.util.List;
 
-/**
- * Fuentes de importación recomendadas. Se crean al arrancar con una base de datos vacía y, desde el panel, se pueden
- * añadir las que falten («Añadir fuentes recomendadas»). Cada llamada devuelve objetos nuevos, sin guardar.
- */
 public final class DefaultImportSources {
 
-    /**
-     * Genbeta mezcla tecnología con economía, política y curiosidades. Solo se importa lo que habla de desarrollo,
-     * datos, IA aplicada, ciberseguridad o empleo tech. No se usan términos sueltos como «IA», «ChatGPT», «Google» o
-     * «Microsoft» porque dejan pasar noticias de empresas que no son de tecnología.
-     */
     public static final String GENBETA_KEYWORDS = "programación, programador, desarrollador, desarrolladora, "
             + "software, código fuente, código abierto, open source, GitHub, Python, JavaScript, TypeScript, Java, Rust, "
             + "Linux, Docker, DevOps, API, framework, algoritmo, base de datos, bases de datos, SQL, PostgreSQL, "
             + "MongoDB, ciberseguridad, vulnerabilidad, modelo de lenguaje, LLM, machine learning, "
             + "aprendizaje automático, agentes de IA, IA generativa, nube, cloud, developer, ingeniero de software";
 
-    /** Temas que no encajan en una comunidad junior aunque mencionen tecnología. */
     public static final String GENBETA_EXCLUDED = "contenido para adultos, porno, pornografía, sexual, apuestas, "
             + "casino, préstamo, préstamos, hipoteca, criptomoneda, criptomonedas, bitcoin, NFT, aerolínea, "
             + "Palantir, Bezos, Elon Musk, Trump, elecciones, partido político, sindicatos, atraco, robo";
 
-    /** Fuentes en castellano añadidas para que haya noticias en español a diario (también en V14). */
     static final String PARADIGMA_URL = "https://www.paradigmadigital.com/feed/";
     static final String WELIVESECURITY_URL = "https://www.welivesecurity.com/es/rss/feed/";
     static final String HIPERTEXTUAL_URL = "https://hipertextual.com/feed";
 
-    /** Ofertas y compras: abundan en los medios generalistas y no aportan a una comunidad junior. */
     public static final String SHOPPING_EXCLUDED = "chollo, chollos, oferta, ofertas, descuento, rebaja, rebajas, "
             + "Black Friday, Prime Day, precio mínimo, cupón";
 
     private DefaultImportSources() {
     }
 
-    /**
-     * Ofertas de informática en España que piden prácticas o nivel junior (Adzuna busca cualquiera de las palabras).
-     * Las claves no van aquí: el proveedor las añade desde ADZUNA_APP_ID y ADZUNA_APP_KEY.
-     */
     static final String ADZUNA_SPAIN_URL = "https://api.adzuna.com/v1/api/jobs/es/search?category=it-jobs"
             + "&what_or=junior%20becario%20becaria%20practicas%20trainee%20intern%20internship&max_days_old=30";
 
-    /** Fuentes añadidas en noviembre de 2026 para tener más temas (en el panel: «Añadir fuentes recomendadas»). */
     static final String XATAKA_IA_URL = "https://www.xataka.com/tag/inteligencia-artificial/rss2.xml";
     static final String MUYLINUX_URL = "https://www.muylinux.com/feed/";
     static final String MUYCOMPUTERPRO_URL = "https://www.muycomputerpro.com/feed";
@@ -55,11 +38,6 @@ public final class DefaultImportSources {
             "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada";
     static final String GOOGLE_BLOG_ES_URL = "https://blog.google/intl/es-es/rss/";
 
-    /**
-     * Recomendadas. Las que publican mucho (Xataka IA, MuyComputerPro) y todas las de inglés se crean sin publicación
-     * automática: lo importado espera a que alguien lo revise en el panel. El tema de cada noticia se decide por su
-     * contenido; la categoría de la fuente es solo el valor por defecto.
-     */
     public static List<ImportSource> create() {
         return List.of(
                 news("freeCodeCamp en español", "https://www.freecodecamp.org/espanol/news/rss/", NewsCategory.PROGRAMACION, true),
@@ -101,7 +79,6 @@ public final class DefaultImportSources {
                 jobs("Adzuna · España", ImportSourceType.ADZUNA_JOBS, ADZUNA_SPAIN_URL, false));
     }
 
-    /** Las fuentes en inglés se crean sin publicación automática para que un admin revise lo importado. */
     private static ImportSource news(String name, String url, NewsCategory category, boolean autoPublish) {
         ImportSource source = base(name, ImportSourceType.RSS_NEWS, url);
         source.setNewsCategory(category);
@@ -110,19 +87,16 @@ public final class DefaultImportSources {
         return source;
     }
 
-    /** Fuente que publica en inglés: sus noticias se marcan como tales en la web. */
     private static ImportSource english(ImportSource source) {
         source.setLanguage("en");
         return source;
     }
 
-    /** Fuente creada pero apagada: un admin puede activarla desde el panel si le sirve. */
     private static ImportSource inactive(ImportSource source) {
         source.setActive(false);
         return source;
     }
 
-    /** Sus portadas son tarjetas de texto generadas automáticamente: mejor las fotos propias de la web. */
     private static ImportSource withoutSourceImages(ImportSource source) {
         source.setUseSourceImages(false);
         return source;

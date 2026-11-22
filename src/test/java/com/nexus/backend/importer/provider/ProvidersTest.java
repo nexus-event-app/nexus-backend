@@ -14,7 +14,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/** Prueba los proveedores con recortes de respuestas reales (src/test/resources/feeds). */
 class ProvidersTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

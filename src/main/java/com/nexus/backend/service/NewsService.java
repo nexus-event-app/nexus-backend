@@ -10,16 +10,12 @@ import java.util.List;
 
 public interface NewsService {
 
-
-    /** Igual, pero solo en un idioma («es» o «en»); null o un idioma desconocido no filtra. */
     PageResponse<NewsResponse> getPublicNews(NewsCategory category, String text, String language, int page, int size);
 
-    /** Las más recientes, primero las que están en castellano. */
     List<NewsResponse> getLatestNews(int limit);
 
     NewsResponse getPublicNewsById(Long id);
 
-    /** Temas que tienen noticias publicadas, en el orden de los filtros; null o un idioma desconocido: todos. */
     List<NewsCategory> getPublishedCategories(String language);
 
     PageResponse<NewsResponse> getAllNews(NewsCategory category, String text, int page, int size);

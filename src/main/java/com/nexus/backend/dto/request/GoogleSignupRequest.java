@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-/** «Ya casi está»: terminar el alta con Google aceptando las condiciones y la política de privacidad. */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

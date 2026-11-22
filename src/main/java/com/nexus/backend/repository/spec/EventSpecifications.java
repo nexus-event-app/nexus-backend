@@ -7,13 +7,11 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.util.Locale;
 
-/** Filtros de la agenda. Cada uno, si su valor es null, no filtra. */
 public final class EventSpecifications {
 
     private EventSpecifications() {
     }
 
-    /** Se ven en la web: activos y de hoy en adelante. */
     public static Specification<CommunityEvent> upcoming(LocalDate today) {
         return (root, query, cb) -> cb.and(cb.isTrue(root.get("active")),
                 cb.greaterThanOrEqualTo(root.<LocalDate>get("startsOn"), today));
@@ -31,7 +29,6 @@ public final class EventSpecifications {
         return SpecificationUtils.equalTo("startsOn", day);
     }
 
-    /** Ciudad sin distinguir mayúsculas ni espacios de más («madrid » encuentra «Madrid»). */
     public static Specification<CommunityEvent> inCity(String city) {
         if (city == null || city.isBlank()) {
             return SpecificationUtils.all();

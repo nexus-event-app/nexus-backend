@@ -10,11 +10,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
-/**
- * Los primeros eventos llevaban la dirección en la ciudad («Doofinder C. de Cronos, 63 · Madrid»): si se reconoce la
- * ciudad, se deja solo la ciudad y el texto completo pasa a la dirección (si no tenía). Con la misma regla que al
- * guardar uno nuevo ({@link SpanishCities}).
- */
 public class V26__Ciudad_limpia_en_los_eventos extends BaseJavaMigration {
 
     @Override

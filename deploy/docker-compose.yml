@@ -1,8 +1,3 @@
-# Primer Commit en un servidor: base de datos, backend, frontend y Caddy (HTTPS automático).
-# Se arranca desde esta carpeta con «docker compose up -d --build» (o con ./actualizar.sh).
-# Espera los dos repositorios uno al lado del otro: /opt/primercommit/nexus-backend y /opt/primercommit/nexus-frontend.
-# Todos los valores salen de .env (copia de .env.example que nunca se sube al repositorio).
-
 name: primercommit
 
 services:
@@ -35,7 +30,6 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Falta JWT_SECRET en .env}
       APP_PUBLIC_URL: https://${DOMAIN:?Falta DOMAIN en .env}
       CORS_ALLOWED_ORIGINS: https://${DOMAIN}
-      # Delante van Caddy y nginx (de confianza, en la red interna): así el backend ve la IP real de cada visita.
       FORWARD_HEADERS_STRATEGY: native
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
@@ -47,14 +41,12 @@ services:
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      # Sin MAIL_FROM, el remitente es «Primer Commit» con la propia cuenta de envío (Gmail lo exige así).
       MAIL_FROM: ${MAIL_FROM:-Primer Commit <${MAIL_USERNAME:-no-reply@localhost}>}
       REQUIRE_VERIFIED_EMAIL: ${REQUIRE_VERIFIED_EMAIL:-true}
       MODERATION_EMAIL: ${MODERATION_EMAIL:-}
       IMPORT_ENABLED: ${IMPORT_ENABLED:-true}
       ADZUNA_APP_ID: ${ADZUNA_APP_ID:-}
       ADZUNA_APP_KEY: ${ADZUNA_APP_KEY:-}
-      # Memoria máxima de Java fija: deja sitio a PostgreSQL y a lo demás en un servidor de 2 GB.
       JAVA_OPTS: -Xms256m -Xmx640m -XX:+UseSerialGC
     volumes:
       - uploads:/app/uploads
@@ -76,7 +68,6 @@ services:
     environment:
       BACKEND_URL: http://backend:8080
 
-  # La única pieza abierta a internet: pide y renueva sola el certificado HTTPS de DOMAIN.
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped

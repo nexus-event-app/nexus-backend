@@ -6,7 +6,6 @@ import com.nexus.backend.util.TextUtil;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-/** Reporte de un contenido: qué es, por qué y, si se quiere, más detalles para el equipo. */
 public record CreateReportRequest(
         @NotNull(message = "{validation.report.target.required}") ReportTargetType targetType,
         @NotNull(message = "{validation.report.target.required}") Long targetId,

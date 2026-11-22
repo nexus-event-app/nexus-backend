@@ -54,19 +54,15 @@ public class News extends TimestampedEntity {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
-    /** Origen de la noticia cuando se importa automáticamente (null para noticias manuales). */
-    /** Idioma del texto: «es» o «en» (ContentLanguage). */
     @Column(name = "language", nullable = false, length = 5)
     private String language = "es";
 
     @Column(name = "source", length = 100)
     private String source;
 
-    /** Identificador en el origen externo; único para evitar importaciones duplicadas. */
     @Column(name = "external_id", unique = true, length = 200)
     private String externalId;
 
-    /** Publicada en la web (las importadas sin publicación automática esperan revisión). */
     public boolean isVisible() {
         return Boolean.TRUE.equals(isActive);
     }

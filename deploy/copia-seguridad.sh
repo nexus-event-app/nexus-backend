@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Copia de la base de datos y de las imágenes subidas en /opt/primercommit/copias. Guarda las de los últimos 14 días.
-# Restaurar una copia (borra lo que haya ahora en la base de datos):
-#   gunzip -c /opt/primercommit/copias/db-FECHA.sql.gz | docker compose exec -T db psql -U nexus -d nexus
 set -euo pipefail
 cd "$(dirname "$0")"
 
