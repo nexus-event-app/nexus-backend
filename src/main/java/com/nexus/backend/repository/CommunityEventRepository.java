@@ -18,6 +18,8 @@ import java.util.List;
 public interface CommunityEventRepository extends JpaRepository<CommunityEvent, Long>,
         JpaSpecificationExecutor<CommunityEvent> {
 
+    long countByActiveTrueAndStartsOnGreaterThanEqual(LocalDate date);
+
     @EntityGraph(attributePaths = "author")
     @Query("select e from CommunityEvent e order by e.startsOn desc, e.id desc")
     Page<CommunityEvent> findAllForModeration(Pageable pageable);

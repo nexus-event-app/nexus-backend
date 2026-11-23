@@ -18,4 +18,5 @@ public class StatsResponse {
     private long comments;
     private long pendingTestimonials;
     private long pendingReports;
+    private long upcomingEvents;
 }

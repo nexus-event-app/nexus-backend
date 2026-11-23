@@ -56,7 +56,8 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentResponse> getCommentsByDiscussion(Long discussionId, UserDetail viewer) {
         findActiveDiscussion(discussionId);
         List<Comment> comments = commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId).stream()
-                .filter(comment -> !comment.isHeld() || (viewer != null && viewer.getId().equals(comment.getAuthor().getId())))
+                .filter(comment -> !comment.isHeld() || (viewer != null
+                        && (viewer.isAdmin() || viewer.getId().equals(comment.getAuthor().getId()))))
                 .toList();
 
         Set<Long> likedIds = new HashSet<>();

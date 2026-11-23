@@ -2,6 +2,7 @@ package com.nexus.backend.service.impl;
 
 import com.nexus.backend.dto.response.StatsResponse;
 import com.nexus.backend.repository.CommentRepository;
+import com.nexus.backend.repository.CommunityEventRepository;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.NewsRepository;
@@ -10,6 +11,8 @@ import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.service.StatsService;
 import com.nexus.backend.enums.ReportStatus;
 import com.nexus.backend.repository.ReportRepository;
+import java.time.Clock;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,8 @@ public class StatsServiceImpl implements StatsService {
     private final CommentRepository commentRepository;
     private final TestimonialRepository testimonialRepository;
     private final ReportRepository reportRepository;
+    private final CommunityEventRepository eventRepository;
+    private final Clock clock;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,7 +41,8 @@ public class StatsServiceImpl implements StatsService {
                 .discussions(discussionRepository.count())
                 .comments(commentRepository.count())
                 .pendingTestimonials(testimonialRepository.countPending())
-                .pendingReports(reportRepository.countByStatus(ReportStatus.PENDING))
+                .pendingReports(reportRepository.findPendingTargets(ReportStatus.PENDING).size())
+                .upcomingEvents(eventRepository.countByActiveTrueAndStartsOnGreaterThanEqual(LocalDate.now(clock)))
                 .build();
     }
 }

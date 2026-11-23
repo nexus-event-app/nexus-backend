@@ -204,4 +204,20 @@ class ModerationIntegrationTest {
     private long id(ResultActions result) throws Exception {
         return body(result).get("id").asLong();
     }
+
+    @Test
+    void laAdministracionVeLoRetenidoParaPoderRevisarlo() throws Exception {
+        long held = id(discussion(ana, "Qué mierda de commit", "No entiendo el error").andExpect(status().isCreated()));
+        long visible = id(discussion(ana, "Duda sobre ramas", "¿Cuándo uso rebase?").andExpect(status().isCreated()));
+        comment(luis, visible, "Joder, a mí también me pasa").andExpect(status().isCreated());
+
+        mvc.perform(get("/api/discussions/" + held).header("Authorization", users.bearer(admin)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.held").value(true));
+        mvc.perform(get("/api/comments/discussion/" + visible).header("Authorization", users.bearer(admin)))
+                .andExpect(jsonPath("$", hasSize(1)));
+        mvc.perform(get("/api/comments/discussion/" + visible)).andExpect(jsonPath("$", hasSize(0)));
+        mvc.perform(get("/api/admin/stats").header("Authorization", users.bearer(admin)))
+                .andExpect(jsonPath("$.pendingReports").value(2));
+    }
 }

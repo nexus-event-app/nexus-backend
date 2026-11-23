@@ -79,7 +79,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     public DiscussionResponse getDiscussionById(Long id, UserDetail viewer) {
         Discussion discussion = findById(id);
         boolean ownHeld = discussion.isHeld() && viewer != null && viewer.getId().equals(discussion.getAuthor().getId());
-        if (!discussion.isVisible() && !ownHeld) {
+        if (!discussion.isVisible() && !ownHeld && (viewer == null || !viewer.isAdmin())) {
             throw new ResourceNotFoundException(NOT_FOUND_MESSAGE);
         }
         boolean liked = viewer != null && discussionLikeRepository

@@ -29,6 +29,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     boolean existsByReporterIdAndTargetTypeAndTargetId(Long reporterId, ReportTargetType targetType, Long targetId);
 
+    @Query("select r.targetType, r.targetId from Report r where r.status = :status group by r.targetType, r.targetId")
+    List<Object[]> findPendingTargets(@Param("status") ReportStatus status);
+
     long countByTargetTypeAndTargetIdAndStatusAndReporterIsNotNull(ReportTargetType targetType, Long targetId,
                                                                   ReportStatus status);
 
@@ -41,8 +44,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             + "and r.status in :statuses order by r.createdAt desc")
     List<Report> findByTarget(@Param("type") ReportTargetType type, @Param("id") Long id,
                               @Param("statuses") Collection<ReportStatus> statuses);
-
-    long countByStatus(ReportStatus status);
 
     @Modifying
     @Query("update Report r set r.status = :status, r.resolution = :resolution, r.resolvedBy = :admin, "
