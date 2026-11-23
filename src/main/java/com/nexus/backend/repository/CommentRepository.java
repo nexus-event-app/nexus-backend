@@ -16,10 +16,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @EntityGraph(attributePaths = "author")
     List<Comment> findByDiscussionIdOrderByCreatedAtAsc(Long discussionId);
 
-    long countByDiscussionId(Long discussionId);
+    long countByDiscussionIdAndHeldFalse(Long discussionId);
 
     @Query("select c.discussion.id as discussionId, count(c) as total from Comment c "
-            + "where c.discussion.id in :discussionIds group by c.discussion.id")
+            + "where c.discussion.id in :discussionIds and c.held = false group by c.discussion.id")
     List<DiscussionCommentCount> countByDiscussionIds(@Param("discussionIds") Collection<Long> discussionIds);
 
     @Modifying

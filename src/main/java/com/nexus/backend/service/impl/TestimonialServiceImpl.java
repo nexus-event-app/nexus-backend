@@ -9,6 +9,7 @@ import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mail.ModerationAlerts;
 import com.nexus.backend.mapper.TestimonialMapper;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.security.UserDetail;
@@ -39,6 +40,7 @@ public class TestimonialServiceImpl implements TestimonialService {
     private final UserRepository userRepository;
     private final TestimonialMapper testimonialMapper;
     private final ModerationAlerts moderationAlerts;
+    private final ContentModeration contentModeration;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,6 +63,8 @@ public class TestimonialServiceImpl implements TestimonialService {
             throw new ConflictException("error.testimonial.limit");
         }
 
+        contentModeration.wordsToHold(actor, request.getName(), request.getRole(), request.getLocation(),
+                request.getContent());
         User user = userRepository.getSessionUser(actor.getId());
         Testimonial testimonial = testimonialMapper.toEntity(request, user);
         if (actor.isAdmin()) {

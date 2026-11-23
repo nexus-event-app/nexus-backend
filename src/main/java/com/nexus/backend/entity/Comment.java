@@ -35,6 +35,9 @@ public class Comment extends TimestampedEntity {
     @Column(name = "likes_count", nullable = false)
     private Integer likesCount = 0;
 
+    @Column(name = "held", nullable = false)
+    private boolean held;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discussion_id")
     private Discussion discussion;

@@ -24,6 +24,7 @@ public class DiscussionResponse {
     private String authorAvatarUrl;
     private boolean authorDeleted;
     private Boolean isActive;
+    private boolean held;
     private Integer commentCount;
     private Integer likesCount;
     private Long acceptedCommentId;

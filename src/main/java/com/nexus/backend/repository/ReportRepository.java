@@ -29,12 +29,15 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     boolean existsByReporterIdAndTargetTypeAndTargetId(Long reporterId, ReportTargetType targetType, Long targetId);
 
+    long countByTargetTypeAndTargetIdAndStatusAndReporterIsNotNull(ReportTargetType targetType, Long targetId,
+                                                                  ReportStatus status);
+
     @Query("select r.targetType as targetType, r.targetId as targetId, count(r) as total, "
             + "max(r.createdAt) as lastReportedAt from Report r where r.status in :statuses "
             + "group by r.targetType, r.targetId order by count(r) desc, max(r.createdAt) desc")
     List<ReportedTarget> findReportedTargets(@Param("statuses") Collection<ReportStatus> statuses, Pageable pageable);
 
-    @Query("select r from Report r join fetch r.reporter where r.targetType = :type and r.targetId = :id "
+    @Query("select r from Report r left join fetch r.reporter where r.targetType = :type and r.targetId = :id "
             + "and r.status in :statuses order by r.createdAt desc")
     List<Report> findByTarget(@Param("type") ReportTargetType type, @Param("id") Long id,
                               @Param("statuses") Collection<ReportStatus> statuses);

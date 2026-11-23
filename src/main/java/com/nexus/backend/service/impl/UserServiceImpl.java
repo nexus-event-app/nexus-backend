@@ -12,6 +12,7 @@ import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.exception.UnauthorizedException;
 import com.nexus.backend.mapper.UserMapper;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.UserRepository;
 import com.nexus.backend.repository.spec.UserSpecifications;
 import com.nexus.backend.security.JwtUtil;
@@ -37,11 +38,13 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AccountService accountService;
+    private final ContentModeration contentModeration;
 
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         PasswordPolicy.requireBcryptLength(request.getPassword());
+        contentModeration.requireClean(request.getName());
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("error.account.exists");
         }

@@ -13,6 +13,7 @@ import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mapper.DiscussionMapper;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionLikeRepository;
@@ -62,6 +63,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     private final DiscussionMapper discussionMapper;
     private final NotificationService notificationService;
     private final ReportRepository reportRepository;
+    private final ContentModeration contentModeration;
 
     @Override
     @Transactional(readOnly = true)
@@ -75,7 +77,11 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Override
     @Transactional(readOnly = true)
     public DiscussionResponse getDiscussionById(Long id, UserDetail viewer) {
-        Discussion discussion = findActive(id);
+        Discussion discussion = findById(id);
+        boolean ownHeld = discussion.isHeld() && viewer != null && viewer.getId().equals(discussion.getAuthor().getId());
+        if (!discussion.isVisible() && !ownHeld) {
+            throw new ResourceNotFoundException(NOT_FOUND_MESSAGE);
+        }
         boolean liked = viewer != null && discussionLikeRepository
                 .findByDiscussionIdAndUserId(id, viewer.getId()).isPresent();
         return toResponse(discussion, liked);
@@ -108,8 +114,18 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Transactional
     public DiscussionResponse createDiscussion(CreateDiscussionRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
+        List<String> heldWords = contentModeration.wordsToHold(actor, request.getTitle(), request.getContent());
         User author = userRepository.getSessionUser(actor.getId());
-        Discussion saved = discussionRepository.save(discussionMapper.toEntity(request, author));
+        Discussion discussion = discussionMapper.toEntity(request, author);
+        if (!heldWords.isEmpty()) {
+            discussion.setIsActive(false);
+            discussion.setHeld(true);
+        }
+        Discussion saved = discussionRepository.save(discussion);
+        if (saved.isHeld()) {
+            contentModeration.holdForReview(ReportTargetType.DISCUSSION, saved.getId(), saved.getTitle(),
+                    saved.getContent(), heldWords);
+        }
         return discussionMapper.toResponse(saved, 0, 0, false);
     }
 
@@ -119,11 +135,22 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = findById(id);
         assertCanManage(discussion, actor);
 
+        List<String> heldWords = contentModeration.wordsToHold(actor, request.getTitle(), request.getContent());
         discussionMapper.updateEntity(discussion, request);
         if (actor.isAdmin() && request.getIsActive() != null) {
             discussion.setIsActive(request.getIsActive());
+            discussion.setHeld(false);
+        }
+        boolean newlyHeld = !heldWords.isEmpty() && !discussion.isHeld();
+        if (newlyHeld) {
+            discussion.setIsActive(false);
+            discussion.setHeld(true);
         }
         Discussion saved = discussionRepository.save(discussion);
+        if (newlyHeld) {
+            contentModeration.holdForReview(ReportTargetType.DISCUSSION, id, saved.getTitle(), saved.getContent(),
+                    heldWords);
+        }
         boolean liked = discussionLikeRepository.findByDiscussionIdAndUserId(id, actor.getId()).isPresent();
         return toResponse(saved, liked);
     }
@@ -152,7 +179,7 @@ public class DiscussionServiceImpl implements DiscussionService {
         Discussion discussion = findActive(id);
         assertIsAuthor(discussion, actor);
         Comment comment = commentRepository.findById(commentId)
-                .filter(found -> found.getDiscussion().getId().equals(id))
+                .filter(found -> found.getDiscussion().getId().equals(id) && !found.isHeld())
                 .orElseThrow(() -> new BadRequestException("error.comment.notInDiscussion"));
 
         if (!commentId.equals(discussion.getAcceptedCommentId())) {
@@ -208,7 +235,7 @@ public class DiscussionServiceImpl implements DiscussionService {
 
         int likesCount = (int) discussionLikeRepository.countByDiscussionId(id);
         discussionRepository.updateLikesCount(id, likesCount);
-        int commentCount = (int) commentRepository.countByDiscussionId(id);
+        int commentCount = (int) commentRepository.countByDiscussionIdAndHeldFalse(id);
         return discussionMapper.toResponse(discussion, commentCount, likesCount, liked);
     }
 
@@ -249,7 +276,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     }
 
     private DiscussionResponse toResponse(Discussion discussion, boolean liked) {
-        int commentCount = (int) commentRepository.countByDiscussionId(discussion.getId());
+        int commentCount = (int) commentRepository.countByDiscussionIdAndHeldFalse(discussion.getId());
         return discussionMapper.toResponse(discussion, commentCount, discussion.getLikesCount(), liked);
     }
 

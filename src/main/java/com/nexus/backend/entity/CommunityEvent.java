@@ -61,6 +61,9 @@ public class CommunityEvent extends TimestampedEntity {
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 
+    @Column(name = "held", nullable = false)
+    private boolean held;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User author;

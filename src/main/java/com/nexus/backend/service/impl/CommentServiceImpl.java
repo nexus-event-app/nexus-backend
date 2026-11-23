@@ -9,6 +9,7 @@ import com.nexus.backend.entity.User;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mapper.CommentMapper;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.CommentLikeRepository;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.DiscussionRepository;
@@ -48,12 +49,15 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final NotificationService notificationService;
     private final ReportRepository reportRepository;
+    private final ContentModeration contentModeration;
 
     @Override
     @Transactional(readOnly = true)
     public List<CommentResponse> getCommentsByDiscussion(Long discussionId, UserDetail viewer) {
         findActiveDiscussion(discussionId);
-        List<Comment> comments = commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId);
+        List<Comment> comments = commentRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId).stream()
+                .filter(comment -> !comment.isHeld() || (viewer != null && viewer.getId().equals(comment.getAuthor().getId())))
+                .toList();
 
         Set<Long> likedIds = new HashSet<>();
         if (viewer != null && !comments.isEmpty()) {
@@ -71,10 +75,18 @@ public class CommentServiceImpl implements CommentService {
     public CommentResponse createComment(CreateCommentRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
         Discussion discussion = findActiveDiscussion(request.getDiscussionId());
+        List<String> heldWords = contentModeration.wordsToHold(actor, request.getContent());
         User author = userRepository.getSessionUser(actor.getId());
 
-        Comment saved = commentRepository.save(commentMapper.toEntity(request, discussion, author));
-        notificationService.notifyNewComment(saved);
+        Comment comment = commentMapper.toEntity(request, discussion, author);
+        comment.setHeld(!heldWords.isEmpty());
+        Comment saved = commentRepository.save(comment);
+        if (saved.isHeld()) {
+            contentModeration.holdForReview(ReportTargetType.COMMENT, saved.getId(), discussion.getTitle(),
+                    saved.getContent(), heldWords);
+        } else {
+            notificationService.notifyNewComment(saved);
+        }
         return commentMapper.toResponse(saved, 0, false);
     }
 

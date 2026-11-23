@@ -18,11 +18,11 @@ public record ReportCaseResponse(
         LocalDateTime lastReportedAt,
         List<Entry> reports) {
 
-    public record Target(boolean exists, boolean visible, String title, String excerpt, Long authorId,
+    public record Target(boolean exists, boolean visible, boolean held, String title, String excerpt, Long authorId,
                          String authorName, Long discussionId, String discussionSlug) {
 
         public static Target missing() {
-            return new Target(false, false, null, null, null, null, null, null);
+            return new Target(false, false, false, null, null, null, null, null, null);
         }
     }
 

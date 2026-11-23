@@ -8,6 +8,7 @@ import com.nexus.backend.dto.response.TestimonialResponse;
 import com.nexus.backend.entity.User;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mapper.TestimonialMapper;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.TestimonialRepository;
 import com.nexus.backend.repository.UserRepository;
@@ -41,6 +42,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final AccountService accountService;
     private final AvatarStorage avatarStorage;
     private final TestimonialMapper testimonialMapper;
+    private final ContentModeration contentModeration;
 
     @Override
     @Transactional(readOnly = true)
@@ -112,6 +114,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private ProfileResponse applyProfile(User user, UpdateProfileRequest request, boolean withActivity) {
+        contentModeration.requireClean(request.getName(), request.getHeadline(), request.getBio(),
+                String.join(" ", request.getTechnologies()));
         user.setName(request.getName());
         user.setHeadline(request.getHeadline());
         user.setBio(request.getBio());

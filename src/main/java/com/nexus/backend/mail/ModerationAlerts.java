@@ -48,6 +48,13 @@ public class ModerationAlerts {
         log.info("Aviso de evento nuevo id={} para {} destinatario(s)", event.getId(), recipients.size());
     }
 
+    public void heldForReview(String title, String content, String reason) {
+        List<String> recipients = recipients();
+        recipients.forEach(to -> events.publishEvent(new EmailRequestedEvent(
+                emailTemplates.heldForReview(to, title, content, reason))));
+        log.info("Aviso de contenido retenido para {} destinatario(s)", recipients.size());
+    }
+
     private List<String> recipients() {
         return moderationEmail.isEmpty() ? userRepository.findAdminEmails() : List.of(moderationEmail);
     }

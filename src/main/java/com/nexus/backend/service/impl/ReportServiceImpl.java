@@ -16,6 +16,7 @@ import com.nexus.backend.enums.ReportTargetType;
 import com.nexus.backend.exception.BadRequestException;
 import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ResourceNotFoundException;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.CommentRepository;
 import com.nexus.backend.repository.CommunityEventRepository;
 import com.nexus.backend.repository.DiscussionRepository;
@@ -27,6 +28,7 @@ import com.nexus.backend.service.AccountService;
 import com.nexus.backend.service.CommentService;
 import com.nexus.backend.service.DiscussionService;
 import com.nexus.backend.service.EventService;
+import com.nexus.backend.service.NotificationService;
 import com.nexus.backend.service.ReportService;
 import com.nexus.backend.service.TestimonialService;
 import com.nexus.backend.util.SlugUtil;
@@ -54,6 +56,7 @@ public class ReportServiceImpl implements ReportService {
     private static final Set<ReportStatus> CLOSED = Set.of(ReportStatus.RESOLVED, ReportStatus.DISMISSED);
     private static final int MAX_CASES = 100;
     private static final int EXCERPT_LENGTH = 280;
+    private static final int REPORTS_TO_HIDE = 3;
 
     private final AccountService accountService;
     private final ReportRepository reportRepository;
@@ -66,6 +69,8 @@ public class ReportServiceImpl implements ReportService {
     private final TestimonialService testimonialService;
     private final EventService eventService;
     private final CommunityEventRepository eventRepository;
+    private final NotificationService notificationService;
+    private final ContentModeration contentModeration;
 
     private record Owner(Long userId) {
     }
@@ -74,6 +79,9 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public void create(CreateReportRequest request, UserDetail actor) {
         accountService.assertCanParticipate(actor);
+        if (request.reason() == ReportReason.LANGUAGE) {
+            throw new BadRequestException("validation.report.reason.required");
+        }
         Owner owner = findVisibleOwner(request.targetType(), request.targetId())
                 .orElseThrow(() -> new ResourceNotFoundException("error.report.targetNotFound"));
         if (Objects.equals(owner.userId(), actor.getId())) {
@@ -92,6 +100,10 @@ public class ReportServiceImpl implements ReportService {
         reportRepository.save(report);
         log.info("Reporte de {} id={} por usuario id={} ({})", request.targetType(), request.targetId(), actor.getId(),
                 request.reason());
+        if (reportRepository.countByTargetTypeAndTargetIdAndStatusAndReporterIsNotNull(request.targetType(),
+                request.targetId(), ReportStatus.PENDING) >= REPORTS_TO_HIDE) {
+            holdForReview(request.targetType(), request.targetId());
+        }
     }
 
     @Override
@@ -113,7 +125,10 @@ public class ReportServiceImpl implements ReportService {
         }
         boolean exists = targetExists(type, id);
         switch (request.action()) {
-            case DISMISS -> close(type, id, ReportStatus.DISMISSED, ReportAction.DISMISS, actor);
+            case DISMISS -> {
+                release(type, id);
+                close(type, id, ReportStatus.DISMISSED, ReportAction.DISMISS, actor);
+            }
             case HIDE -> {
                 hide(type, id);
                 close(type, id, ReportStatus.RESOLVED, ReportAction.HIDE, actor);
@@ -135,10 +150,70 @@ public class ReportServiceImpl implements ReportService {
 
     private void hide(ReportTargetType type, Long id) {
         switch (type) {
-            case DISCUSSION -> discussionRepository.findById(id).ifPresent(discussion -> discussion.setIsActive(false));
-            case TESTIMONIAL -> testimonialRepository.findById(id).ifPresent(testimonial -> testimonial.setIsActive(false));
-            case EVENT -> eventService.hide(id);
+            case DISCUSSION -> discussionRepository.findById(id).ifPresent(discussion -> {
+                discussion.setIsActive(false);
+                discussion.setHeld(false);
+            });
+            case TESTIMONIAL -> testimonialRepository.findById(id).ifPresent(testimonial -> {
+                testimonial.setIsActive(false);
+                testimonial.setIsPending(false);
+                testimonial.setHeld(false);
+            });
+            case EVENT -> {
+                eventService.hide(id);
+                eventRepository.findById(id).ifPresent(event -> event.setHeld(false));
+            }
             case COMMENT -> throw new BadRequestException("error.report.cannotHideComment");
+        }
+    }
+
+    private void holdForReview(ReportTargetType type, Long id) {
+        switch (type) {
+            case DISCUSSION -> discussionRepository.findById(id).filter(Discussion::isVisible).ifPresent(discussion -> {
+                discussion.setIsActive(false);
+                discussion.setHeld(true);
+                alertHidden(discussion.getTitle(), discussion.getContent());
+            });
+            case COMMENT -> commentRepository.findById(id).filter(comment -> !comment.isHeld()).ifPresent(comment -> {
+                comment.setHeld(true);
+                alertHidden(comment.getDiscussion().getTitle(), comment.getContent());
+            });
+            case TESTIMONIAL -> testimonialRepository.findById(id).filter(Testimonial::isPublished)
+                    .ifPresent(testimonial -> {
+                        testimonial.setIsPending(true);
+                        testimonial.setHeld(true);
+                        alertHidden(testimonial.getName(), testimonial.getContent());
+                    });
+            case EVENT -> eventRepository.findById(id).filter(CommunityEvent::isActive).ifPresent(event -> {
+                event.setActive(false);
+                event.setHeld(true);
+                alertHidden(event.getTitle(), event.getDescription());
+            });
+        }
+    }
+
+    private void alertHidden(String title, String content) {
+        contentModeration.hiddenByReports(title, content, REPORTS_TO_HIDE);
+    }
+
+    private void release(ReportTargetType type, Long id) {
+        switch (type) {
+            case DISCUSSION -> discussionRepository.findById(id).filter(Discussion::isHeld).ifPresent(discussion -> {
+                discussion.setIsActive(true);
+                discussion.setHeld(false);
+            });
+            case COMMENT -> commentRepository.findById(id).filter(Comment::isHeld).ifPresent(comment -> {
+                comment.setHeld(false);
+                notificationService.notifyNewComment(comment);
+            });
+            case TESTIMONIAL -> testimonialRepository.findById(id).filter(Testimonial::isHeld).ifPresent(testimonial -> {
+                testimonial.setIsPending(false);
+                testimonial.setHeld(false);
+            });
+            case EVENT -> eventRepository.findById(id).filter(CommunityEvent::isHeld).ifPresent(event -> {
+                event.setActive(true);
+                event.setHeld(false);
+            });
         }
     }
 
@@ -166,7 +241,7 @@ public class ReportServiceImpl implements ReportService {
                     .filter(Discussion::isVisible)
                     .map(discussion -> new Owner(discussion.getAuthor().getId()));
             case COMMENT -> commentRepository.findById(id)
-                    .filter(comment -> comment.getDiscussion().isVisible())
+                    .filter(comment -> comment.getDiscussion().isVisible() && !comment.isHeld())
                     .map(comment -> new Owner(comment.getAuthor().getId()));
             case TESTIMONIAL -> testimonialRepository.findById(id)
                     .filter(Testimonial::isPublished)
@@ -183,7 +258,7 @@ public class ReportServiceImpl implements ReportService {
         reports.forEach(report -> reasons.merge(report.getReason(), 1L, Long::sum));
         List<ReportCaseResponse.Entry> entries = reports.stream()
                 .map(report -> new ReportCaseResponse.Entry(report.getId(), report.getReason(), report.getDetails(),
-                        report.getReporter().getName(), report.getCreatedAt(), report.getStatus(),
+                        report.getReporter() == null ? null : report.getReporter().getName(), report.getCreatedAt(), report.getStatus(),
                         report.getResolution()))
                 .toList();
         return new ReportCaseResponse(row.getTargetType(), row.getTargetId(),
@@ -201,26 +276,26 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private static Target describe(Discussion discussion) {
-        return new Target(true, discussion.isVisible(), discussion.getTitle(),
+        return new Target(true, discussion.isVisible(), discussion.isHeld(), discussion.getTitle(),
                 TextUtil.truncate(discussion.getContent(), EXCERPT_LENGTH), discussion.getAuthor().getId(),
                 discussion.getAuthor().getName(), discussion.getId(), SlugUtil.slugify(discussion.getTitle()));
     }
 
     private static Target describe(Comment comment) {
         Discussion discussion = comment.getDiscussion();
-        return new Target(true, discussion.isVisible(), discussion.getTitle(),
+        return new Target(true, discussion.isVisible() && !comment.isHeld(), comment.isHeld(), discussion.getTitle(),
                 TextUtil.truncate(comment.getContent(), EXCERPT_LENGTH), comment.getAuthor().getId(),
                 comment.getAuthor().getName(), discussion.getId(), SlugUtil.slugify(discussion.getTitle()));
     }
 
     private static Target describe(Testimonial testimonial) {
-        return new Target(true, testimonial.isPublished(), testimonial.getName(),
+        return new Target(true, testimonial.isPublished(), testimonial.isHeld(), testimonial.getName(),
                 TextUtil.truncate(testimonial.getContent(), EXCERPT_LENGTH),
                 testimonial.getUser() == null ? null : testimonial.getUser().getId(), testimonial.getName(), null, null);
     }
 
     private static Target describe(CommunityEvent event) {
-        return new Target(true, event.isActive(), event.getTitle(),
+        return new Target(true, event.isActive(), event.isHeld(), event.getTitle(),
                 TextUtil.truncate(event.getDescription() + " — " + event.getUrl(), EXCERPT_LENGTH),
                 event.getAuthor().getId(), event.getAuthor().getName(), null, null);
     }

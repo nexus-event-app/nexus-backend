@@ -17,6 +17,7 @@ import com.nexus.backend.exception.ConflictException;
 import com.nexus.backend.exception.ForbiddenOperationException;
 import com.nexus.backend.exception.ResourceNotFoundException;
 import com.nexus.backend.mail.ModerationAlerts;
+import com.nexus.backend.moderation.ContentModeration;
 import com.nexus.backend.repository.CommunityEventRepository;
 import com.nexus.backend.repository.EventInterestRepository;
 import com.nexus.backend.repository.ReportRepository;
@@ -62,6 +63,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final AccountService accountService;
     private final ModerationAlerts moderationAlerts;
+    private final ContentModeration contentModeration;
     private final Clock clock;
 
     @Override
@@ -132,11 +134,20 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("error.event.duplicate");
         }
 
+        List<String> heldWords = contentModeration.wordsToHold(actor, request.getTitle(), request.getDescription());
+
         CommunityEvent event = new CommunityEvent();
         apply(event, request);
         event.setAuthor(userRepository.getSessionUser(actor.getId()));
+        if (!heldWords.isEmpty()) {
+            event.setActive(false);
+            event.setHeld(true);
+        }
         CommunityEvent saved = eventRepository.save(event);
-        if (!actor.isAdmin()) {
+        if (saved.isHeld()) {
+            contentModeration.holdForReview(ReportTargetType.EVENT, saved.getId(), saved.getTitle(),
+                    saved.getDescription() + "\n\n" + saved.getUrl(), heldWords);
+        } else if (!actor.isAdmin()) {
             moderationAlerts.newEvent(saved);
         }
         log.info("Evento id={} compartido por usuario id={}", saved.getId(), actor.getId());
@@ -249,7 +260,7 @@ public class EventServiceImpl implements EventService {
         return new EventResponse(event.getId(), event.getTitle(), event.getDescription(), event.getUrl(),
                 host(event.getUrl()), event.getStartsOn(), event.getStartTime(), event.getMode(), event.getCity(),
                 event.getAddress(), event.isForWomen(), viewerId != null && viewerId.equals(event.getAuthor().getId()),
-                interestedCount, interested);
+                interestedCount, interested, event.isHeld());
     }
 
     private static AdminEventResponse toAdminResponse(CommunityEvent event, LocalDate today) {

@@ -20,6 +20,7 @@ public class CommentResponse {
     private String authorName;
     private String authorAvatarUrl;
     private boolean authorDeleted;
+    private boolean held;
     private Integer likesCount;
     private Boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;

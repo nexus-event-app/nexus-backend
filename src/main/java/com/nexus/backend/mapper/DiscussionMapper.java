@@ -41,6 +41,7 @@ public class DiscussionMapper {
                 .authorAvatarUrl(author.getAvatarUrl())
                 .authorDeleted(author.isDeleted())
                 .isActive(discussion.getIsActive())
+                .held(discussion.isHeld())
                 .commentCount(commentCount)
                 .likesCount(likesCount)
                 .acceptedCommentId(discussion.getAcceptedCommentId())

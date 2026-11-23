@@ -64,6 +64,15 @@ public class EmailTemplates {
                 messages.get(locale, "mail.event.note", messages.get(locale, "mail.brand")));
     }
 
+    public EmailMessage heldForReview(String to, String title, String content, String reason) {
+        Locale locale = MODERATION_LOCALE;
+        String what = oneLine(title);
+        return moderationAlert(to, messages.get(locale, "mail.held.subject", what),
+                messages.get(locale, "mail.held.intro"), what, oneLine(reason), content, "/admin/reportes",
+                messages.get(locale, "mail.held.action"),
+                messages.get(locale, "mail.held.note", messages.get(locale, "mail.brand")));
+    }
+
     private EmailMessage moderationAlert(String to, String subject, String intro, String who, String details,
                                          String content, String adminPath, String action, String note) {
         String brand = messages.get(MODERATION_LOCALE, "mail.brand");

@@ -56,6 +56,9 @@ public class Discussion extends TimestampedEntity {
     @Column(name = "likes_count", nullable = false)
     private Integer likesCount = 0;
 
+    @Column(name = "held", nullable = false)
+    private boolean held;
+
     @Column(name = "accepted_comment_id")
     private Long acceptedCommentId;
 
