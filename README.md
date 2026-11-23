@@ -2,11 +2,10 @@
 
 # Primer Commit · Backend
 
-**API REST de [Primer Commit](https://primercommit.es), la comunidad para quienes dan sus primeros pasos en
-tecnología.**
+**API REST de [Primer Commit](https://primercommit.es), una comunidad para dar el primer paso en el mundo tech.**
 
-Noticias y ofertas importadas automáticamente, foro, eventos, rutas de aprendizaje, testimonios, perfiles,
-notificaciones, panel de administración y SEO, en castellano, catalán e inglés.
+Eventos, ofertas de empleo importadas automáticamente, foro, rutas de aprendizaje, noticias, testimonios, perfiles,
+notificaciones, moderación automática, panel de administración y SEO, en castellano, catalán e inglés.
 
 [**primercommit.es**](https://primercommit.es) · [Frontend](https://github.com/nexus-event-app/nexus-frontend) ·
 [Contrato de la API](docs/API.md) · [Guía de despliegue](deploy/README.md)
@@ -55,15 +54,19 @@ notificaciones, panel de administración y SEO, en castellano, catalán e inglé
 
 ## Funcionalidades
 
-- **Noticias** importadas de fuentes de confianza y **clasificadas por tema** automáticamente (IA, programación,
-  ciberseguridad, carrera...), con detección de idioma, búsqueda y relacionadas.
+- **Eventos** compartidos por la comunidad: calendario, filtros por modalidad, ciudad y día, bloque para comunidades
+  de mujeres, «Me apunto» (cuántos van, nunca quién), límite diario, sin duplicados y aviso por email a moderación.
 - **Empleo junior y prácticas** con prioridad para España (Adzuna) y filtros por nivel, modalidad y contrato;
   clasificador de nivel en varios idiomas, caducidad automática y ofertas guardadas.
 - **Foro**: discusiones, comentarios, «me gusta», mejor respuesta, edición, borrado y **reportes** con cola de
   moderación.
-- **Eventos** compartidos por la comunidad: calendario, filtros por modalidad, ciudad y día, bloque para comunidades
-  de mujeres, «Voy» (cuántos van, nunca quién), límite diario, sin duplicados y aviso por email a moderación.
 - **Rutas de aprendizaje** con progreso por persona.
+- **Noticias** importadas de fuentes de confianza y **clasificadas por tema** automáticamente (IA, programación,
+  ciberseguridad, carrera...), con detección de idioma, búsqueda y relacionadas.
+- **Moderación automática** (`moderation/`): un filtro de lenguaje en castellano, catalán e inglés bloquea los
+  insultos graves y retiene las palabrotas leves (también escritas con trucos como «m1erd4» o «p.u.t.o») como caso
+  de reporte para revisar; tres reportes de personas distintas ocultan el contenido hasta que se revisa, y descartar
+  los reportes lo vuelve a publicar.
 - **Testimonios** con moderación previa y aviso por email.
 - **Perfiles públicos** que solo muestran lo que la persona pone en ellos.
 - **Notificaciones** de respuestas y mejores respuestas, y **búsqueda global**.
@@ -87,6 +90,7 @@ src/main/java/com/nexus/backend
 ├── importer/     Proveedores RSS y de empleo, clasificadores, cliente HTTP seguro y planificador
 ├── mail/         Envío en segundo plano y plantillas de email
 ├── mapper/       Entidad ↔ DTO
+├── moderation/   Filtro de lenguaje y retención de contenido para revisar
 ├── repository/   Repositorios, Specifications y proyecciones
 ├── security/     JWT, filtros, política de contraseñas, tokens de un solo uso y Google
 ├── seo/          sitemap.xml y robots.txt
@@ -134,7 +138,7 @@ Plantilla completa en [`.env.example`](.env.example) (desarrollo) y [`deploy/.en
 | `UPLOAD_DIR` | Directorio de imágenes subidas | `./uploads` |
 | `MAIL_ENABLED` | Envía emails por SMTP; con `false` se escriben en el log | `false` |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Servidor SMTP y remitente | puerto `587` |
-| `MODERATION_EMAIL` | Recibe el aviso de cada testimonio y evento nuevo | administradores |
+| `MODERATION_EMAIL` | Recibe el aviso de cada testimonio y evento nuevo, y del contenido retenido u oculto | administradores |
 | `REQUIRE_VERIFIED_EMAIL` | Exige email verificado para publicar | `true` |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Activan «Continuar con Google»; sin ellas, el botón no aparece | vacías |
 | `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` | Ofertas de empleo de España (Adzuna) | vacías |
@@ -163,7 +167,7 @@ Los enums se guardan como `varchar` sin `CHECK`, así que añadir un valor no re
 ./mvnw verify
 ```
 
-- **~280 pruebas**: integración de cada área con MockMvc (permisos, validaciones, privacidad, límites), servicios,
+- **~310 pruebas**: integración de cada área con MockMvc (permisos, validaciones, privacidad, límites), servicios,
   importadores, clasificadores, emails, SEO y migraciones en Java.
 - Perfil `test`: H2 en memoria con las migraciones de Flyway.
 - `PostgresMigrationTest` aplica todas las migraciones sobre un **PostgreSQL real** si defines
@@ -238,6 +242,8 @@ contenido escrito por la comunidad o importado no se traduce.
   invalida sus sesiones al momento.
 - El registro público siempre crea usuarios normales; la administración solo se crea desde variables de entorno.
 - Contraseñas con BCrypt y política de longitud; límite de peticiones por IP en login, registro y publicaciones.
+- Filtro de lenguaje en el servidor (no se puede saltar desde el navegador) y ocultación automática con tres
+  reportes. Dependabot revisa cada semana las dependencias de Maven, GitHub Actions y Docker.
 - El contenido de usuario se guarda como texto plano. Subida de imágenes solo para administración, con lista blanca
   de tipos, comprobación de firma y nombres aleatorios.
 - **Privacidad:** la actividad de cada persona solo la ve ella; los perfiles públicos muestran solo lo que la persona
