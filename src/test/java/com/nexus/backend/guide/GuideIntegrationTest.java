@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -46,6 +47,41 @@ class GuideIntegrationTest {
                 .andExpect(jsonPath("$.content").value(not(containsString("tonta"))))
                 .andExpect(jsonPath("$.content").value(containsString("(/guias/como-preparar-tu-primera-entrevista-tecnica)")))
                 .andExpect(jsonPath("$.publishedAt").exists());
+    }
+
+    @Test
+    void eachPersonReadsTheGuidesInTheirLanguage() throws Exception {
+        mvc.perform(get("/api/guides/que-hacer-despues-de-un-bootcamp").header("Accept-Language", "ca"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.language").value("ca"))
+                .andExpect(jsonPath("$.title").value("Què fer després d’un bootcamp de programació: guia pas a pas"))
+                .andExpect(jsonPath("$.languages", contains("es", "ca", "en")));
+        mvc.perform(get("/api/guides/git-y-github-para-principiantes").header("Accept-Language", "en"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.language").value("en"))
+                .andExpect(jsonPath("$.title").value("Git and GitHub for beginners: your first commit step by step"))
+                .andExpect(jsonPath("$.category").value("HERRAMIENTAS"));
+        mvc.perform(get("/api/guides").header("Accept-Language", "en"))
+                .andExpect(jsonPath("$[?(@.slug == 'tu-primer-meetup-tech')].title",
+                        hasItem("Your first tech meetup: what to expect and how to make the most of it")))
+                .andExpect(jsonPath("$[?(@.slug == 'tu-primer-meetup-tech')].category", hasItem("COMUNIDAD")));
+    }
+
+    @Test
+    void aGuideWithoutTranslationIsShownInSpanish() throws Exception {
+        String admin = users.bearer(users.create("Admin guías", User.Role.ADMIN, true));
+        mvc.perform(post("/api/admin/guides").header("Authorization", admin)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"Solo en castellano","description":"Una guía sin traducir.",
+                                 "content":"## Hola\\n\\nTexto.","titleCa":"Només el títol","category":"EMPLEO","published":true}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.titleCa").value("Només el títol"))
+                .andExpect(jsonPath("$.languages", contains("es")));
+        mvc.perform(get("/api/guides/solo-en-castellano").header("Accept-Language", "ca"))
+                .andExpect(jsonPath("$.language").value("es"))
+                .andExpect(jsonPath("$.title").value("Solo en castellano"));
     }
 
     @Test

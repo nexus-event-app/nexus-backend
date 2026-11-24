@@ -29,6 +29,24 @@ public class GuideRequest {
     @Size(max = 50000, message = "{validation.guide.content.max50000}")
     private String content;
 
+    @Size(max = 200, message = "{validation.title.max200}")
+    private String titleCa;
+
+    @Size(max = 200, message = "{validation.title.max200}")
+    private String titleEn;
+
+    @Size(max = 300, message = "{validation.guide.description.max300}")
+    private String descriptionCa;
+
+    @Size(max = 300, message = "{validation.guide.description.max300}")
+    private String descriptionEn;
+
+    @Size(max = 50000, message = "{validation.guide.content.max50000}")
+    private String contentCa;
+
+    @Size(max = 50000, message = "{validation.guide.content.max50000}")
+    private String contentEn;
+
     @NotNull(message = "{validation.guide.category.required}")
     private GuideCategory category = GuideCategory.PRIMEROS_PASOS;
 
@@ -48,5 +66,29 @@ public class GuideRequest {
 
     public void setContent(String content) {
         this.content = TextUtil.clean(content);
+    }
+
+    public void setTitleCa(String titleCa) {
+        this.titleCa = TextUtil.optionalLine(titleCa);
+    }
+
+    public void setTitleEn(String titleEn) {
+        this.titleEn = TextUtil.optionalLine(titleEn);
+    }
+
+    public void setDescriptionCa(String descriptionCa) {
+        this.descriptionCa = TextUtil.optionalLine(descriptionCa);
+    }
+
+    public void setDescriptionEn(String descriptionEn) {
+        this.descriptionEn = TextUtil.optionalLine(descriptionEn);
+    }
+
+    public void setContentCa(String contentCa) {
+        this.contentCa = TextUtil.optional(contentCa);
+    }
+
+    public void setContentEn(String contentEn) {
+        this.contentEn = TextUtil.optional(contentEn);
     }
 }

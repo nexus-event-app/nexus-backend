@@ -3,6 +3,7 @@ package com.nexus.backend.seo;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.nexus.backend.i18n.Languages;
+import com.nexus.backend.dto.response.GuideResponse;
 import com.nexus.backend.repository.DiscussionRepository;
 import com.nexus.backend.repository.GuideRepository;
 import com.nexus.backend.repository.JobOfferRepository;
@@ -81,8 +82,14 @@ public class SitemapService {
         appendEntries(xml, "/noticias/", newsRepository.findSitemapEntries(limit));
         appendEntries(xml, "/empleo/", jobOfferRepository.findSitemapEntries(LocalDateTime.now(), limit));
         appendEntries(xml, "/foro/", discussionRepository.findSitemapEntries(limit));
-        guideRepository.findAllByPublishedTrueOrderByPublishedAtDesc()
-                .forEach(guide -> appendSingleUrl(xml, "/guias/" + guide.getSlug(), guide.getUpdatedAt()));
+        guideRepository.findAllByPublishedTrueOrderByPublishedAtDesc().forEach(guide -> {
+            String path = "/guias/" + guide.getSlug();
+            if (GuideResponse.languages(guide).size() == Languages.SUPPORTED.size()) {
+                appendTranslatedUrl(xml, path);
+            } else {
+                appendSingleUrl(xml, path, guide.getUpdatedAt());
+            }
+        });
 
         xml.append("</urlset>\n");
         return xml.toString();

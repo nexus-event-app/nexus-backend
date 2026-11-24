@@ -1,6 +1,7 @@
 package com.nexus.backend.service.impl;
 
 import com.nexus.backend.dto.request.GuideRequest;
+import com.nexus.backend.dto.response.AdminGuideResponse;
 import com.nexus.backend.dto.response.GuideResponse;
 import com.nexus.backend.entity.Guide;
 import com.nexus.backend.exception.ConflictException;
@@ -9,6 +10,7 @@ import com.nexus.backend.repository.GuideRepository;
 import com.nexus.backend.service.GuideService;
 import com.nexus.backend.util.SlugUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +30,7 @@ public class GuideServiceImpl implements GuideService {
     @Transactional(readOnly = true)
     public List<GuideResponse> getPublishedGuides() {
         return guideRepository.findAllByPublishedTrueOrderByPublishedAtDesc().stream()
-                .map(GuideResponse::summary)
+                .map(guide -> GuideResponse.summary(guide, LocaleContextHolder.getLocale()))
                 .toList();
     }
 
@@ -36,43 +38,43 @@ public class GuideServiceImpl implements GuideService {
     @Transactional(readOnly = true)
     public GuideResponse getPublishedGuide(String slug) {
         return guideRepository.findBySlugAndPublishedTrue(slug)
-                .map(GuideResponse::full)
+                .map(guide -> GuideResponse.full(guide, LocaleContextHolder.getLocale()))
                 .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_MESSAGE));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<GuideResponse> getAllGuides() {
-        return guideRepository.findAllByOrderByUpdatedAtDesc().stream().map(GuideResponse::summary).toList();
+    public List<AdminGuideResponse> getAllGuides() {
+        return guideRepository.findAllByOrderByUpdatedAtDesc().stream().map(AdminGuideResponse::summary).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public GuideResponse getGuide(Long id) {
-        return GuideResponse.full(findById(id));
+    public AdminGuideResponse getGuide(Long id) {
+        return AdminGuideResponse.full(findById(id));
     }
 
     @Override
     @Transactional
-    public GuideResponse create(GuideRequest request) {
+    public AdminGuideResponse create(GuideRequest request) {
         Guide guide = new Guide();
         apply(guide, request, slugFor(request));
         if (guideRepository.existsBySlug(guide.getSlug())) {
             throw new ConflictException(SLUG_TAKEN_MESSAGE);
         }
-        return GuideResponse.full(guideRepository.save(guide));
+        return AdminGuideResponse.full(guideRepository.save(guide));
     }
 
     @Override
     @Transactional
-    public GuideResponse update(Long id, GuideRequest request) {
+    public AdminGuideResponse update(Long id, GuideRequest request) {
         Guide guide = findById(id);
         String slug = slugFor(request);
         if (guideRepository.existsBySlugAndIdNot(slug, id)) {
             throw new ConflictException(SLUG_TAKEN_MESSAGE);
         }
         apply(guide, request, slug);
-        return GuideResponse.full(guideRepository.save(guide));
+        return AdminGuideResponse.full(guideRepository.save(guide));
     }
 
     @Override
@@ -92,6 +94,12 @@ public class GuideServiceImpl implements GuideService {
         guide.setSlug(slug);
         guide.setDescription(request.getDescription());
         guide.setContent(request.getContent());
+        guide.setTitleCa(request.getTitleCa());
+        guide.setDescriptionCa(request.getDescriptionCa());
+        guide.setContentCa(request.getContentCa());
+        guide.setTitleEn(request.getTitleEn());
+        guide.setDescriptionEn(request.getDescriptionEn());
+        guide.setContentEn(request.getContentEn());
         guide.setCategory(request.getCategory());
         guide.setPublished(request.isPublished());
         if (request.isPublished() && guide.getPublishedAt() == null) {

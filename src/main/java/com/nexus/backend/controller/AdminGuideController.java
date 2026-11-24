@@ -1,7 +1,7 @@
 package com.nexus.backend.controller;
 
 import com.nexus.backend.dto.request.GuideRequest;
-import com.nexus.backend.dto.response.GuideResponse;
+import com.nexus.backend.dto.response.AdminGuideResponse;
 import com.nexus.backend.service.GuideService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,22 +26,22 @@ public class AdminGuideController {
     private final GuideService guideService;
 
     @GetMapping
-    public ResponseEntity<List<GuideResponse>> getGuides() {
+    public ResponseEntity<List<AdminGuideResponse>> getGuides() {
         return ResponseEntity.ok(guideService.getAllGuides());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GuideResponse> getGuide(@PathVariable Long id) {
+    public ResponseEntity<AdminGuideResponse> getGuide(@PathVariable Long id) {
         return ResponseEntity.ok(guideService.getGuide(id));
     }
 
     @PostMapping
-    public ResponseEntity<GuideResponse> create(@Valid @RequestBody GuideRequest request) {
+    public ResponseEntity<AdminGuideResponse> create(@Valid @RequestBody GuideRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(guideService.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GuideResponse> update(@PathVariable Long id, @Valid @RequestBody GuideRequest request) {
+    public ResponseEntity<AdminGuideResponse> update(@PathVariable Long id, @Valid @RequestBody GuideRequest request) {
         return ResponseEntity.ok(guideService.update(id, request));
     }
 

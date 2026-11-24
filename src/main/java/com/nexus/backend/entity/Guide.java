@@ -40,6 +40,24 @@ public class Guide extends TimestampedEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "title_ca", length = 200)
+    private String titleCa;
+
+    @Column(name = "title_en", length = 200)
+    private String titleEn;
+
+    @Column(name = "description_ca", length = 300)
+    private String descriptionCa;
+
+    @Column(name = "description_en", length = 300)
+    private String descriptionEn;
+
+    @Column(name = "content_ca", columnDefinition = "TEXT")
+    private String contentCa;
+
+    @Column(name = "content_en", columnDefinition = "TEXT")
+    private String contentEn;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 30)

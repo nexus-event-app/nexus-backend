@@ -37,7 +37,15 @@ class SitemapServiceTest {
         GuideRepository guides = mock(GuideRepository.class);
         Guide guide = new Guide();
         guide.setSlug("que-hacer-despues-de-un-bootcamp");
-        when(guides.findAllByPublishedTrueOrderByPublishedAtDesc()).thenReturn(List.of(guide));
+        Guide translated = new Guide();
+        translated.setSlug("tu-primer-meetup-tech");
+        translated.setTitleCa("t");
+        translated.setDescriptionCa("d");
+        translated.setContentCa("c");
+        translated.setTitleEn("t");
+        translated.setDescriptionEn("d");
+        translated.setContentEn("c");
+        when(guides.findAllByPublishedTrueOrderByPublishedAtDesc()).thenReturn(List.of(guide, translated));
         xml = new SitemapService(news, jobs, discussions, guides, SITE + "/").getSitemapXml();
     }
 
@@ -55,6 +63,9 @@ class SitemapServiceTest {
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/glossari\"");
         assertThat(block(SITE + "/guias")).contains("hreflang=\"en\" href=\"" + SITE + "/en/guides\"",
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/guies\"");
+        assertThat(block(SITE + "/en/guides/tu-primer-meetup-tech")).contains(
+                "hreflang=\"ca\" href=\"" + SITE + "/ca/guies/tu-primer-meetup-tech\"",
+                "hreflang=\"es\" href=\"" + SITE + "/guias/tu-primer-meetup-tech\"");
         assertThat(xml).doesNotContain("/en/empleo", "/ca/foro<", "/en/noticias");
     }
 
