@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -39,7 +40,8 @@ class GuideIntegrationTest {
         mvc.perform(get("/api/guides/que-hacer-despues-de-un-bootcamp"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Qué hacer después de un bootcamp de programación: guía paso a paso"))
-                .andExpect(jsonPath("$.content").isNotEmpty())
+                .andExpect(jsonPath("$.content").value(containsString("un foro para resolver dudas entre todas y todos")))
+                .andExpect(jsonPath("$.content").value(not(containsString("tonta"))))
                 .andExpect(jsonPath("$.publishedAt").exists());
     }
 
