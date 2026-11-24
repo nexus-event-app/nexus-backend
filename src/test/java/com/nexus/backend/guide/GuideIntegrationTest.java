@@ -35,13 +35,15 @@ class GuideIntegrationTest {
         mvc.perform(get("/api/guides"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].slug", hasItem("que-hacer-despues-de-un-bootcamp")))
+                .andExpect(jsonPath("$[*].slug", hasItem("como-preparar-tu-primera-entrevista-tecnica")))
                 .andExpect(jsonPath("$[0].content").doesNotExist())
-                .andExpect(jsonPath("$[0].readingMinutes").value(5));
+                .andExpect(jsonPath("$[?(@.slug == 'que-hacer-despues-de-un-bootcamp')].readingMinutes", hasItem(5)));
         mvc.perform(get("/api/guides/que-hacer-despues-de-un-bootcamp"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Qué hacer después de un bootcamp de programación: guía paso a paso"))
                 .andExpect(jsonPath("$.content").value(containsString("un foro para resolver dudas entre todas y todos")))
                 .andExpect(jsonPath("$.content").value(not(containsString("tonta"))))
+                .andExpect(jsonPath("$.content").value(containsString("(/guias/como-preparar-tu-primera-entrevista-tecnica)")))
                 .andExpect(jsonPath("$.publishedAt").exists());
     }
 
@@ -49,32 +51,32 @@ class GuideIntegrationTest {
     void draftsAreOnlyVisibleInTheAdminPanelUntilTheyArePublished() throws Exception {
         String admin = users.bearer(users.create("Admin guías", User.Role.ADMIN, true));
         String body = """
-                {"title":"Cómo preparar tu primera entrevista técnica","description":"Consejos para tu primera entrevista.",
+                {"title":"Cómo escribir un buen README","description":"Consejos para tu README.",
                  "content":"## Antes de la entrevista\\n\\nRepasa los fundamentos.","published":false}
                 """;
         String created = mvc.perform(post("/api/admin/guides").header("Authorization", admin)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.slug").value("como-preparar-tu-primera-entrevista-tecnica"))
+                .andExpect(jsonPath("$.slug").value("como-escribir-un-buen-readme"))
                 .andExpect(jsonPath("$.publishedAt").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         String id = created.replaceAll(".*\"id\":(\\d+).*", "$1");
 
-        mvc.perform(get("/api/guides/como-preparar-tu-primera-entrevista-tecnica")).andExpect(status().isNotFound());
-        mvc.perform(get("/api/guides")).andExpect(jsonPath("$[*].slug", not(hasItem("como-preparar-tu-primera-entrevista-tecnica"))));
+        mvc.perform(get("/api/guides/como-escribir-un-buen-readme")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/guides")).andExpect(jsonPath("$[*].slug", not(hasItem("como-escribir-un-buen-readme"))));
 
         mvc.perform(put("/api/admin/guides/" + id).header("Authorization", admin)
                         .contentType(MediaType.APPLICATION_JSON).content(body.replace("\"published\":false", "\"published\":true")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.publishedAt").exists());
-        mvc.perform(get("/api/guides/como-preparar-tu-primera-entrevista-tecnica")).andExpect(status().isOk());
+        mvc.perform(get("/api/guides/como-escribir-un-buen-readme")).andExpect(status().isOk());
 
         mvc.perform(post("/api/admin/guides").header("Authorization", admin)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isConflict());
 
         mvc.perform(delete("/api/admin/guides/" + id).header("Authorization", admin)).andExpect(status().isNoContent());
-        mvc.perform(get("/api/guides/como-preparar-tu-primera-entrevista-tecnica")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/guides/como-escribir-un-buen-readme")).andExpect(status().isNotFound());
     }
 
     @Test
