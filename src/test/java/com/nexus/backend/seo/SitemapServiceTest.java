@@ -1,6 +1,8 @@
 package com.nexus.backend.seo;
 
+import com.nexus.backend.entity.Guide;
 import com.nexus.backend.repository.DiscussionRepository;
+import com.nexus.backend.repository.GuideRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.repository.projection.SitemapEntry;
@@ -32,7 +34,11 @@ class SitemapServiceTest {
         when(news.findSitemapEntries(any())).thenReturn(List.of(entry(7L, "Hola mundo")));
         when(jobs.findSitemapEntries(any(), any())).thenReturn(List.of(entry(3L, "Junior Java")));
         when(discussions.findSitemapEntries(any())).thenReturn(List.of(entry(5L, "Mi duda")));
-        xml = new SitemapService(news, jobs, discussions, SITE + "/").getSitemapXml();
+        GuideRepository guides = mock(GuideRepository.class);
+        Guide guide = new Guide();
+        guide.setSlug("que-hacer-despues-de-un-bootcamp");
+        when(guides.findAllByPublishedTrueOrderByPublishedAtDesc()).thenReturn(List.of(guide));
+        xml = new SitemapService(news, jobs, discussions, guides, SITE + "/").getSitemapXml();
     }
 
     @Test
@@ -47,12 +53,15 @@ class SitemapServiceTest {
                 "hreflang=\"en\" href=\"" + SITE + "/en/events\"");
         assertThat(block(SITE + "/glosario")).contains("hreflang=\"en\" href=\"" + SITE + "/en/glossary\"",
                 "hreflang=\"ca\" href=\"" + SITE + "/ca/glossari\"");
+        assertThat(block(SITE + "/guias")).contains("hreflang=\"en\" href=\"" + SITE + "/en/guides\"",
+                "hreflang=\"ca\" href=\"" + SITE + "/ca/guies\"");
         assertThat(xml).doesNotContain("/en/empleo", "/ca/foro<", "/en/noticias");
     }
 
     @Test
     void spanishOnlyContentIsListedOnceWithoutAlternates() {
-        for (String path : List.of("/noticias/7-hola-mundo", "/empleo/3-junior-java", "/foro/5-mi-duda", "/aviso-legal",
+        for (String path : List.of("/noticias/7-hola-mundo", "/empleo/3-junior-java", "/foro/5-mi-duda",
+                "/guias/que-hacer-despues-de-un-bootcamp", "/aviso-legal",
                 "/privacidad", "/cookies")) {
             assertThat(block(SITE + path)).as(path).doesNotContain("hreflang");
             assertThat(xml).as(path).doesNotContain("<loc>" + SITE + "/ca" + path + "</loc>")

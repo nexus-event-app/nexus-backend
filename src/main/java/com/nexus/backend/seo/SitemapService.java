@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.nexus.backend.i18n.Languages;
 import com.nexus.backend.repository.DiscussionRepository;
+import com.nexus.backend.repository.GuideRepository;
 import com.nexus.backend.repository.JobOfferRepository;
 import com.nexus.backend.repository.NewsRepository;
 import com.nexus.backend.repository.projection.SitemapEntry;
@@ -26,12 +27,13 @@ public class SitemapService {
     private static final String CACHE_KEY = "content";
     private static final List<String> TRANSLATED_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios",
             "/sobre-el-proyecto", "/rutas", "/rutas/frontend", "/rutas/backend", "/rutas/qa", "/rutas/datos", "/rutas/ia",
-            "/glosario", "/eventos");
+            "/glosario", "/eventos", "/guias");
     private static final List<String> SPANISH_ONLY_PATHS = List.of("/aviso-legal", "/privacidad", "/cookies");
 
     private final NewsRepository newsRepository;
     private final JobOfferRepository jobOfferRepository;
     private final DiscussionRepository discussionRepository;
+    private final GuideRepository guideRepository;
     private final String publicUrl;
 
     private final Cache<String, String> sitemapCache = Caffeine.newBuilder()
@@ -47,10 +49,12 @@ public class SitemapService {
     public SitemapService(NewsRepository newsRepository,
                           JobOfferRepository jobOfferRepository,
                           DiscussionRepository discussionRepository,
+                          GuideRepository guideRepository,
                           @Value("${app.public-url:http://localhost:5173}") String publicUrl) {
         this.newsRepository = newsRepository;
         this.jobOfferRepository = jobOfferRepository;
         this.discussionRepository = discussionRepository;
+        this.guideRepository = guideRepository;
         this.publicUrl = stripTrailingSlash(publicUrl);
     }
 
@@ -77,6 +81,8 @@ public class SitemapService {
         appendEntries(xml, "/noticias/", newsRepository.findSitemapEntries(limit));
         appendEntries(xml, "/empleo/", jobOfferRepository.findSitemapEntries(LocalDateTime.now(), limit));
         appendEntries(xml, "/foro/", discussionRepository.findSitemapEntries(limit));
+        guideRepository.findAllByPublishedTrueOrderByPublishedAtDesc()
+                .forEach(guide -> appendSingleUrl(xml, "/guias/" + guide.getSlug(), guide.getUpdatedAt()));
 
         xml.append("</urlset>\n");
         return xml.toString();
