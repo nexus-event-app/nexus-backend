@@ -31,8 +31,14 @@ public class JobController {
             @RequestParam(required = false) JobLevel level,
             @RequestParam(required = false) WorkMode workMode,
             @RequestParam(required = false) ContractType contractType,
+            @RequestParam(required = false) String city,
             @RequestParam(required = false) String q) {
-        return ResponseEntity.ok(jobService.getPublicJobs(level, workMode, contractType, q, page, size));
+        return ResponseEntity.ok(jobService.getPublicJobs(level, workMode, contractType, city, q, page, size));
+    }
+
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities() {
+        return ResponseEntity.ok(jobService.getPublishedCities());
     }
 
     @GetMapping("/latest")

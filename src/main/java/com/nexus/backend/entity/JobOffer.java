@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import com.nexus.backend.util.SpainLocation;
+import com.nexus.backend.util.SpanishCities;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -85,6 +86,9 @@ public class JobOffer extends TimestampedEntity {
     @Column(name = "in_spain", nullable = false)
     private boolean inSpain;
 
+    @Column(length = 80)
+    private String city;
+
     @Column(name = "published_at", nullable = false)
     private LocalDateTime publishedAt;
 
@@ -96,6 +100,7 @@ public class JobOffer extends TimestampedEntity {
     protected void onCreate() {
         super.onCreate();
         inSpain = SpainLocation.matches(location);
+        city = SpanishCities.canonical(location).orElse(null);
         if (publishedAt == null) {
             publishedAt = getCreatedAt();
         }
@@ -106,6 +111,7 @@ public class JobOffer extends TimestampedEntity {
     protected void onUpdate() {
         super.onUpdate();
         inSpain = SpainLocation.matches(location);
+        city = SpanishCities.canonical(location).orElse(null);
     }
 
     public boolean isPublishedAt(LocalDateTime now) {

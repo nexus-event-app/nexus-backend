@@ -3,6 +3,7 @@ package com.nexus.backend.util;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,11 @@ public final class SpanishCities {
             .map(city -> Pattern.compile("(?<![\\p{L}\\p{N}])" + Pattern.quote(normalize(city)) + "(?![\\p{L}\\p{N}])"))
             .toList();
 
+    private static final Map<String, String> ALIASES = Map.ofEntries(
+            Map.entry("València", "Valencia"), Map.entry("La Coruña", "A Coruña"), Map.entry("Lérida", "Lleida"),
+            Map.entry("Gerona", "Girona"), Map.entry("Iruña", "Pamplona"), Map.entry("Donostia", "San Sebastián"),
+            Map.entry("Vitoria", "Vitoria-Gasteiz"), Map.entry("Palma de Mallorca", "Palma"));
+
     private SpanishCities() {
     }
 
@@ -40,6 +46,10 @@ public final class SpanishCities {
             }
         }
         return Optional.empty();
+    }
+
+    public static Optional<String> canonical(String text) {
+        return find(text).map(city -> ALIASES.getOrDefault(city, city));
     }
 
     public static boolean looksLikeAddress(String text) {

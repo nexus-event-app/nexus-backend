@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +39,18 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<String> getPublishedCities() {
+        return jobOfferRepository.findPublishedCities(LocalDateTime.now()).stream()
+                .sorted(Comparator.comparing(city -> city.toLowerCase(Locale.ROOT)))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public PageResponse<JobResponse> getPublicJobs(JobLevel level, WorkMode workMode, ContractType contractType,
-                                                   String text, int page, int size) {
+                                                   String city, String text, int page, int size) {
         Page<JobOffer> result = jobOfferRepository.findAll(
-                JobSpecifications.isPublished().and(JobSpecifications.filter(level, workMode, contractType, text)),
+                JobSpecifications.isPublished().and(JobSpecifications.filter(level, workMode, contractType, city, text)),
                 Pagination.spainFirst(page, size));
         return PageResponse.from(result.map(jobMapper::toResponse));
     }

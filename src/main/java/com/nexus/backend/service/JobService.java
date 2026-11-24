@@ -12,7 +12,9 @@ import java.util.List;
 
 public interface JobService {
 
-    PageResponse<JobResponse> getPublicJobs(JobLevel level, WorkMode workMode, ContractType contractType,
+    List<String> getPublishedCities();
+
+    PageResponse<JobResponse> getPublicJobs(JobLevel level, WorkMode workMode, ContractType contractType, String city,
                                             String text, int page, int size);
 
     List<JobResponse> getLatestJobs(int limit);

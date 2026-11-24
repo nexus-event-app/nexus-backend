@@ -20,6 +20,10 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, Long>, JpaSp
             + "where j.isActive = true and j.externalId is null and (j.expiresAt is null or j.expiresAt > :currentTime) order by j.updatedAt desc")
     List<SitemapEntry> findSitemapEntries(@Param("currentTime") LocalDateTime now, Pageable pageable);
 
+    @Query("select distinct j.city from JobOffer j where j.city is not null and j.isActive = true "
+            + "and (j.expiresAt is null or j.expiresAt > :currentTime)")
+    List<String> findPublishedCities(@Param("currentTime") LocalDateTime now);
+
     @Query("select j.externalId from JobOffer j where j.externalId in :ids")
     Set<String> findExistingExternalIds(@Param("ids") Collection<String> externalIds);
 

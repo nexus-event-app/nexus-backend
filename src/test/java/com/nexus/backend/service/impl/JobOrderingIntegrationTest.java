@@ -39,11 +39,24 @@ class JobOrderingIntegrationTest {
 
     @Test
     void publicListShowsSpainFirstThenNewestPublication() {
-        assertThat(jobService.getPublicJobs(null, null, null, null, 0, 10).getContent())
+        assertThat(jobService.getPublicJobs(null, null, null, null, null, 0, 10).getContent())
                 .extracting(JobResponse::getTitle)
                 .containsExactly("Girona reciente", "Valencia antigua", "Chile reciente", "Remoto intermedia", "Chile antigua");
         assertThat(jobService.getLatestJobs(3)).extracting(JobResponse::getTitle)
                 .containsExactly("Girona reciente", "Valencia antigua", "Chile reciente");
+    }
+
+    @Test
+    void filtersByCityAndListsOnlyCitiesWithOffers() {
+        save("Valencia con acento", "València, Comunitat Valenciana", LocalDateTime.now().minusDays(3));
+
+        assertThat(jobService.getPublishedCities()).containsExactly("Girona", "Valencia");
+        assertThat(jobService.getPublicJobs(null, null, null, "valencia", null, 0, 10).getContent())
+                .extracting(JobResponse::getTitle)
+                .containsExactlyInAnyOrder("Valencia antigua", "Valencia con acento");
+        assertThat(jobService.getPublicJobs(null, null, null, "Girona", null, 0, 10).getContent())
+                .extracting(JobResponse::getTitle)
+                .containsExactly("Girona reciente");
     }
 
     @Test

@@ -44,7 +44,7 @@ public class SearchServiceImpl implements SearchService {
         return new SearchResponse(
                 text,
                 Group.of(newsService.getPublicNews(null, text, null, 0, size)),
-                Group.of(jobService.getPublicJobs(null, null, null, text, 0, size)),
+                Group.of(jobService.getPublicJobs(null, null, null, null, text, 0, size)),
                 Group.of(discussionService.getDiscussions(null, text, 0, size, viewer)),
                 people(text, size));
     }

@@ -25,4 +25,13 @@ class SpanishCitiesTest {
         assertThat(SpanishCities.looksLikeAddress("Calle Mayor, 1")).isTrue();
         assertThat(SpanishCities.looksLikeAddress("Doofinder C. de Cronos 63")).isTrue();
     }
+
+    @Test
+    void givesOneNameForEachCityWhateverTheSpelling() {
+        assertThat(SpanishCities.canonical("València, Comunitat Valenciana")).contains("Valencia");
+        assertThat(SpanishCities.canonical("Palma de Mallorca, Illes Balears")).contains("Palma");
+        assertThat(SpanishCities.canonical("Gerona")).contains("Girona");
+        assertThat(SpanishCities.canonical("Madrid, España (híbrido)")).contains("Madrid");
+        assertThat(SpanishCities.canonical("Remoto")).isEmpty();
+    }
 }

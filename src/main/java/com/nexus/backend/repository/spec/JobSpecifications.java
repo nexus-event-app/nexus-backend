@@ -7,6 +7,7 @@ import com.nexus.backend.enums.WorkMode;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 public final class JobSpecifications {
 
@@ -25,9 +26,23 @@ public final class JobSpecifications {
     }
 
     public static Specification<JobOffer> filter(JobLevel level, WorkMode workMode, ContractType contractType, String text) {
+        return filter(level, workMode, contractType, null, text);
+    }
+
+    public static Specification<JobOffer> filter(JobLevel level, WorkMode workMode, ContractType contractType, String city,
+                                                 String text) {
         return SpecificationUtils.<JobOffer>equalTo("level", level)
                 .and(SpecificationUtils.<JobOffer>equalTo("workMode", workMode))
                 .and(SpecificationUtils.<JobOffer>equalTo("contractType", contractType))
+                .and(inCity(city))
                 .and(SpecificationUtils.<JobOffer>textContains(text, "title", "company", "description"));
+    }
+
+    public static Specification<JobOffer> inCity(String city) {
+        if (city == null || city.isBlank()) {
+            return (root, query, cb) -> null;
+        }
+        String normalized = city.trim().toLowerCase(Locale.ROOT);
+        return (root, query, cb) -> cb.equal(cb.lower(root.get("city")), normalized);
     }
 }
