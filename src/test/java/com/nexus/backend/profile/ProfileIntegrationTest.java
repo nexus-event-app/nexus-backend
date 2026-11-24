@@ -79,7 +79,9 @@ class ProfileIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Ana García"))
                 .andExpect(jsonPath("$.technologies", contains("React", "java", "Spring Boot")));
 
-        mvc.perform(get("/api/users/" + ana.getId()))
+        String viewer = users.bearer(users.create("Marta", User.Role.USER, true));
+        mvc.perform(get("/api/users/" + ana.getId())).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/users/" + ana.getId()).header("Authorization", viewer))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value("ana-garcia"))
                 .andExpect(jsonPath("$.headline").value("Estudiante de DAW"))
@@ -108,8 +110,9 @@ class ProfileIntegrationTest {
         User user = users.create("Desactivada", User.Role.USER, true);
         user.setEnabled(false);
         userRepository.save(user);
-        mvc.perform(get("/api/users/" + user.getId())).andExpect(status().isNotFound());
-        mvc.perform(get("/api/users/999999")).andExpect(status().isNotFound());
+        String viewer = users.bearer(users.create("Marta", User.Role.USER, true));
+        mvc.perform(get("/api/users/" + user.getId()).header("Authorization", viewer)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/users/999999").header("Authorization", viewer)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -120,7 +123,8 @@ class ProfileIntegrationTest {
         testimonial(luis, "Publicado y aprobado por el equipo de moderación de la comunidad.", true);
         testimonial(luis, "Pendiente de moderación todavía, no debería verse en el perfil público.", false);
 
-        mvc.perform(get("/api/users/" + luis.getId()))
+        String viewer = users.bearer(users.create("Marta", User.Role.USER, true));
+        mvc.perform(get("/api/users/" + luis.getId()).header("Authorization", viewer))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Luis"))
                 .andExpect(jsonPath("$.discussionCount").doesNotExist())

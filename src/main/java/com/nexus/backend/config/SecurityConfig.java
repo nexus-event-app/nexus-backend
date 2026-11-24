@@ -120,7 +120,6 @@ public class SecurityConfig {
                                 "/api/comments/discussion/*",
                                 "/api/testimonials", "/api/testimonials/latest",
                                 "/api/events", "/api/events/calendar", "/api/events/cities",
-                                "/api/users/*",
                                 "/api/search").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/discussions", "/api/discussions/*/like",

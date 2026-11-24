@@ -90,7 +90,8 @@ class AccountDeletionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.authorName").value("Cuenta eliminada"))
                 .andExpect(jsonPath("$.authorDeleted").value(true));
-        mvc.perform(get("/api/users/" + ana.getId())).andExpect(status().isNotFound());
+        String viewer = users.bearer(users.create("Marta", User.Role.USER, true));
+        mvc.perform(get("/api/users/" + ana.getId()).header("Authorization", viewer)).andExpect(status().isNotFound());
 
         mvc.perform(get("/api/profile").header("Authorization", anaToken)).andExpect(status().isUnauthorized());
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
