@@ -36,6 +36,8 @@ class GuideIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].slug", hasItem("que-hacer-despues-de-un-bootcamp")))
                 .andExpect(jsonPath("$[*].slug", hasItem("como-preparar-tu-primera-entrevista-tecnica")))
+                .andExpect(jsonPath("$[?(@.slug == 'como-preparar-tu-primera-entrevista-tecnica')].category", hasItem("EMPLEO")))
+                .andExpect(jsonPath("$[?(@.slug == 'que-hacer-despues-de-un-bootcamp')].category", hasItem("PRIMEROS_PASOS")))
                 .andExpect(jsonPath("$[0].content").doesNotExist())
                 .andExpect(jsonPath("$[?(@.slug == 'que-hacer-despues-de-un-bootcamp')].readingMinutes", hasItem(5)));
         mvc.perform(get("/api/guides/que-hacer-despues-de-un-bootcamp"))
@@ -48,16 +50,25 @@ class GuideIntegrationTest {
     }
 
     @Test
+    void theInterviewGuideUsesRespectfulWording() throws Exception {
+        mvc.perform(get("/api/guides/como-preparar-tu-primera-entrevista-tecnica"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value(not(containsString("chino"))))
+                .andExpect(jsonPath("$.content").value(containsString("Si alguna palabra no la conoces")));
+    }
+
+    @Test
     void draftsAreOnlyVisibleInTheAdminPanelUntilTheyArePublished() throws Exception {
         String admin = users.bearer(users.create("Admin guías", User.Role.ADMIN, true));
         String body = """
                 {"title":"Cómo escribir un buen README","description":"Consejos para tu README.",
-                 "content":"## Antes de la entrevista\\n\\nRepasa los fundamentos.","published":false}
+                 "content":"## Antes de la entrevista\\n\\nRepasa los fundamentos.","category":"HERRAMIENTAS","published":false}
                 """;
         String created = mvc.perform(post("/api/admin/guides").header("Authorization", admin)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.slug").value("como-escribir-un-buen-readme"))
+                .andExpect(jsonPath("$.category").value("HERRAMIENTAS"))
                 .andExpect(jsonPath("$.publishedAt").doesNotExist())
                 .andReturn().getResponse().getContentAsString();
         String id = created.replaceAll(".*\"id\":(\\d+).*", "$1");

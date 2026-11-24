@@ -1,7 +1,9 @@
 package com.nexus.backend.dto.request;
 
+import com.nexus.backend.enums.GuideCategory;
 import com.nexus.backend.util.TextUtil;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -26,6 +28,9 @@ public class GuideRequest {
     @NotBlank(message = "{validation.content.required}")
     @Size(max = 50000, message = "{validation.guide.content.max50000}")
     private String content;
+
+    @NotNull(message = "{validation.guide.category.required}")
+    private GuideCategory category = GuideCategory.PRIMEROS_PASOS;
 
     private boolean published;
 

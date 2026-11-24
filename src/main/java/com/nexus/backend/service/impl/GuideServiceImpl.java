@@ -92,6 +92,7 @@ public class GuideServiceImpl implements GuideService {
         guide.setSlug(slug);
         guide.setDescription(request.getDescription());
         guide.setContent(request.getContent());
+        guide.setCategory(request.getCategory());
         guide.setPublished(request.isPublished());
         if (request.isPublished() && guide.getPublishedAt() == null) {
             guide.setPublishedAt(LocalDateTime.now());
