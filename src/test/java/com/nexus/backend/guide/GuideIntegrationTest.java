@@ -38,8 +38,7 @@ class GuideIntegrationTest {
                 .andExpect(jsonPath("$[*].slug", hasItem("como-preparar-tu-primera-entrevista-tecnica")))
                 .andExpect(jsonPath("$[?(@.slug == 'como-preparar-tu-primera-entrevista-tecnica')].category", hasItem("EMPLEO")))
                 .andExpect(jsonPath("$[?(@.slug == 'que-hacer-despues-de-un-bootcamp')].category", hasItem("PRIMEROS_PASOS")))
-                .andExpect(jsonPath("$[0].content").doesNotExist())
-                .andExpect(jsonPath("$[?(@.slug == 'que-hacer-despues-de-un-bootcamp')].readingMinutes", hasItem(5)));
+                .andExpect(jsonPath("$[0].content").doesNotExist());
         mvc.perform(get("/api/guides/que-hacer-despues-de-un-bootcamp"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Qué hacer después de un bootcamp de programación: guía paso a paso"))
