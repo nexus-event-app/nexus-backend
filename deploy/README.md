@@ -170,6 +170,19 @@ cd /opt/primercommit/nexus-backend/deploy
 
 - **Terminar la beta**: en `.env`, `VITE_BETA=false`, y `./actualizar.sh`. Los datos se quedan tal cual.
 
+## Ver la base de datos con pgAdmin
+
+La base de datos solo escucha en el propio servidor (`127.0.0.1:5432`), nunca en internet. Para verla desde tu ordenador,
+pgAdmin entra por un túnel SSH con tu misma clave:
+
+- **General → Name:** Primer Commit
+- **Connection:** host `127.0.0.1`, puerto `5432`, base de datos `nexus`, usuario `nexus` y la contraseña
+  `POSTGRES_PASSWORD` del `.env` del servidor.
+- **SSH Tunnel:** activado, host la IP del servidor, puerto `22`, usuario `root`, autenticación con
+  *Identity file* (tu clave privada SSH) y su frase de paso.
+
+Mirar no tiene riesgo; cualquier cambio (`update`, `delete`…) se aplica al momento en la web real.
+
 ## Seguridad
 
 - `.env` lleva contraseñas: solo vive en el servidor (permisos 600) y está en `.gitignore`.
