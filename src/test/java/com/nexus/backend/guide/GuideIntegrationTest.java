@@ -106,6 +106,19 @@ class GuideIntegrationTest {
     }
 
     @Test
+    void everyGuideEndsWithFrequentlyAskedQuestionsInEachLanguage() throws Exception {
+        for (String slug : new String[]{"que-hacer-despues-de-un-bootcamp", "como-preparar-tu-primera-entrevista-tecnica",
+                "git-y-github-para-principiantes", "tu-primer-meetup-tech", "sindrome-del-impostor"}) {
+            mvc.perform(get("/api/guides/" + slug))
+                    .andExpect(jsonPath("$.content").value(containsString("## Preguntas frecuentes\n\n### ¿")));
+            mvc.perform(get("/api/guides/" + slug).header("Accept-Language", "ca"))
+                    .andExpect(jsonPath("$.content").value(containsString("## Preguntes freqüents\n\n### ")));
+            mvc.perform(get("/api/guides/" + slug).header("Accept-Language", "en"))
+                    .andExpect(jsonPath("$.content").value(containsString("## Frequently asked questions\n\n### ")));
+        }
+    }
+
+    @Test
     void aGuideWithoutTranslationIsShownInSpanish() throws Exception {
         String admin = users.bearer(users.create("Admin guías", User.Role.ADMIN, true));
         mvc.perform(post("/api/admin/guides").header("Authorization", admin)
