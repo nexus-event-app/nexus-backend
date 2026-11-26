@@ -104,7 +104,7 @@ public class SecurityConfig {
                                 "error.forbidden")))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/error", "/uploads/**", "/sitemap.xml", "/robots.txt").permitAll()
+                        .requestMatchers("/error", "/uploads/**", "/sitemap.xml", "/robots.txt", "/llms.txt").permitAll()
                         .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/forgot-password",

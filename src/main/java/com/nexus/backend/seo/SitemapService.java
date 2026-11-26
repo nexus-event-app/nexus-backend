@@ -139,7 +139,8 @@ public class SitemapService {
                 robots.append("Disallow: ").append(Languages.localizePath(locale, path)).append('\n');
             }
         }
-        return robots.append("\nSitemap: ").append(publicUrl).append("/sitemap.xml\n").toString();
+        return robots.append("\nSitemap: ").append(publicUrl).append("/sitemap.xml\n")
+                .append("# Resumen para asistentes de IA: ").append(publicUrl).append("/llms.txt\n").toString();
     }
 
     private static String escapeXml(String value) {

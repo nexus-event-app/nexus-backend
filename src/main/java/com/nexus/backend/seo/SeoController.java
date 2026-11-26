@@ -17,7 +17,10 @@ public class SeoController {
     private static final MediaType XML_UTF8 = new MediaType("application", "xml", StandardCharsets.UTF_8);
     private static final MediaType TEXT_UTF8 = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
+    private static final MediaType MARKDOWN_UTF8 = new MediaType("text", "markdown", StandardCharsets.UTF_8);
+
     private final SitemapService sitemapService;
+    private final LlmsTxtService llmsTxtService;
 
     @GetMapping("/sitemap.xml")
     public ResponseEntity<String> sitemap() {
@@ -33,5 +36,13 @@ public class SeoController {
                 .contentType(TEXT_UTF8)
                 .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic())
                 .body(sitemapService.getRobotsTxt());
+    }
+
+    @GetMapping("/llms.txt")
+    public ResponseEntity<String> llms() {
+        return ResponseEntity.ok()
+                .contentType(MARKDOWN_UTF8)
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic())
+                .body(llmsTxtService.getLlmsTxt());
     }
 }
