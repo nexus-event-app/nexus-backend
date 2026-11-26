@@ -58,6 +58,15 @@ public class Guide extends TimestampedEntity {
     @Column(name = "content_en", columnDefinition = "TEXT")
     private String contentEn;
 
+    @Column(length = 300)
+    private String keywords;
+
+    @Column(name = "keywords_ca", length = 300)
+    private String keywordsCa;
+
+    @Column(name = "keywords_en", length = 300)
+    private String keywordsEn;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 30)

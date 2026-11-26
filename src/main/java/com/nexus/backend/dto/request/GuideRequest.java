@@ -47,6 +47,15 @@ public class GuideRequest {
     @Size(max = 50000, message = "{validation.guide.content.max50000}")
     private String contentEn;
 
+    @Size(max = 300, message = "{validation.guide.keywords.max300}")
+    private String keywords;
+
+    @Size(max = 300, message = "{validation.guide.keywords.max300}")
+    private String keywordsCa;
+
+    @Size(max = 300, message = "{validation.guide.keywords.max300}")
+    private String keywordsEn;
+
     @NotNull(message = "{validation.guide.category.required}")
     private GuideCategory category = GuideCategory.PRIMEROS_PASOS;
 
@@ -90,5 +99,17 @@ public class GuideRequest {
 
     public void setContentEn(String contentEn) {
         this.contentEn = TextUtil.optional(contentEn);
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = TextUtil.optionalLine(keywords);
+    }
+
+    public void setKeywordsCa(String keywordsCa) {
+        this.keywordsCa = TextUtil.optionalLine(keywordsCa);
+    }
+
+    public void setKeywordsEn(String keywordsEn) {
+        this.keywordsEn = TextUtil.optionalLine(keywordsEn);
     }
 }

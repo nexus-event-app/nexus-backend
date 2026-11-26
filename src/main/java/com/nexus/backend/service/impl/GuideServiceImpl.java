@@ -100,6 +100,9 @@ public class GuideServiceImpl implements GuideService {
         guide.setTitleEn(request.getTitleEn());
         guide.setDescriptionEn(request.getDescriptionEn());
         guide.setContentEn(request.getContentEn());
+        guide.setKeywords(request.getKeywords());
+        guide.setKeywordsCa(request.getKeywordsCa());
+        guide.setKeywordsEn(request.getKeywordsEn());
         guide.setCategory(request.getCategory());
         guide.setPublished(request.isPublished());
         if (request.isPublished() && guide.getPublishedAt() == null) {

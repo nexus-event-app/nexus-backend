@@ -68,6 +68,44 @@ class GuideIntegrationTest {
     }
 
     @Test
+    void eachGuideShowsItsKeywordsInTheReaderLanguage() throws Exception {
+        mvc.perform(get("/api/guides/sindrome-del-impostor"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.keywords[0]").value("Síndrome del impostor"))
+                .andExpect(jsonPath("$.keywords.length()").value(10))
+                .andExpect(jsonPath("$.content").value(not(containsString("tranquila"))))
+                .andExpect(jsonPath("$.content").value(not(containsString("sola"))))
+                .andExpect(jsonPath("$.content").value(containsString("hay más gente como tú")));
+        mvc.perform(get("/api/guides/sindrome-del-impostor").header("Accept-Language", "ca"))
+                .andExpect(jsonPath("$.content").value(not(containsString("sola"))))
+                .andExpect(jsonPath("$.content").value(not(containsString("mateixa"))))
+                .andExpect(jsonPath("$.content").value(containsString("hi ha més gent com tu")));
+        mvc.perform(get("/api/guides/git-y-github-para-principiantes").header("Accept-Language", "en"))
+                .andExpect(jsonPath("$.keywords", hasItem("Pull request")))
+                .andExpect(jsonPath("$.keywords[0]").value("Git and GitHub"));
+        mvc.perform(get("/api/guides"))
+                .andExpect(jsonPath("$[0].keywords").doesNotExist());
+    }
+
+    @Test
+    void theAdminPanelSavesTheKeywordsOfEachLanguage() throws Exception {
+        String admin = users.bearer(users.create("Admin guías", User.Role.ADMIN, true));
+        mvc.perform(post("/api/admin/guides").header("Authorization", admin)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"Guía con etiquetas","description":"Una guía.","content":"## Hola\\n\\nTexto.",
+                                 "keywords":" Uno ,  Dos ,, Tres ","keywordsCa":"U, Dos","category":"EMPLEO","published":true}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.keywordsCa").value("U, Dos"));
+        mvc.perform(get("/api/guides/guia-con-etiquetas"))
+                .andExpect(jsonPath("$.keywords", contains("Uno", "Dos", "Tres")));
+        mvc.perform(get("/api/guides/guia-con-etiquetas").header("Accept-Language", "ca"))
+                .andExpect(jsonPath("$.language").value("es"))
+                .andExpect(jsonPath("$.keywords", contains("Uno", "Dos", "Tres")));
+    }
+
+    @Test
     void aGuideWithoutTranslationIsShownInSpanish() throws Exception {
         String admin = users.bearer(users.create("Admin guías", User.Role.ADMIN, true));
         mvc.perform(post("/api/admin/guides").header("Authorization", admin)

@@ -11,19 +11,21 @@ import java.util.List;
 public record AdminGuideResponse(Long id, String slug, String title, String description, String content,
                                  String titleCa, String descriptionCa, String contentCa,
                                  String titleEn, String descriptionEn, String contentEn,
+                                 String keywords, String keywordsCa, String keywordsEn,
                                  List<String> languages, GuideCategory category, boolean published,
                                  LocalDateTime publishedAt, LocalDateTime updatedAt) {
 
     public static AdminGuideResponse full(Guide guide) {
         return new AdminGuideResponse(guide.getId(), guide.getSlug(), guide.getTitle(), guide.getDescription(),
                 guide.getContent(), guide.getTitleCa(), guide.getDescriptionCa(), guide.getContentCa(),
-                guide.getTitleEn(), guide.getDescriptionEn(), guide.getContentEn(), GuideResponse.languages(guide),
+                guide.getTitleEn(), guide.getDescriptionEn(), guide.getContentEn(), guide.getKeywords(),
+                guide.getKeywordsCa(), guide.getKeywordsEn(), GuideResponse.languages(guide),
                 guide.getCategory(), guide.isPublished(), guide.getPublishedAt(), guide.getUpdatedAt());
     }
 
     public static AdminGuideResponse summary(Guide guide) {
         return new AdminGuideResponse(guide.getId(), guide.getSlug(), guide.getTitle(), guide.getDescription(), null,
-                null, null, null, null, null, null, GuideResponse.languages(guide), guide.getCategory(),
+                null, null, null, null, null, null, null, null, null, GuideResponse.languages(guide), guide.getCategory(),
                 guide.isPublished(), guide.getPublishedAt(), guide.getUpdatedAt());
     }
 }
