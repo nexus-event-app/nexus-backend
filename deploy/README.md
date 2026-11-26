@@ -55,17 +55,43 @@ Recomendado: **Hetzner Cloud** (centros de datos en la UE, buena relación preci
 
 ### 3. Email (para verificar cuentas y recuperar contraseñas)
 
-Los emails salen de la **cuenta de Gmail del proyecto**, con una «contraseña de aplicación»: gratis, sin dar ninguna
-dirección postal y con un límite de unos 500 al día, de sobra para la beta.
+Los emails salen con **Brevo** (plan gratis, 300 al día) desde `Primer Commit <hola@primercommit.es>`, con el dominio
+autenticado para que lleguen a la bandeja de entrada y no a spam. Esa dirección solo envía: no tiene buzón.
 
-1. Con la sesión iniciada en la cuenta del proyecto, en myaccount.google.com → «Seguridad», activa la
-   **verificación en dos pasos**.
-2. Entra en myaccount.google.com/apppasswords, crea una con el nombre `Primer Commit web` y guarda las 16 letras en
-   la app «Contraseñas» del Mac. Google solo la enseña una vez; si se pierde, se borra y se crea otra.
-3. Va en el `.env` del servidor (`MAIL_USERNAME` y `MAIL_PASSWORD`), nunca en el chat ni en el código.
+1. En Brevo, «Remitentes, dominios e IP dedicadas» → «Dominios», añade `primercommit.es` en modo **manual** (sin
+   subdominio con marca ni conexión automática con DonDominio).
+2. En DonDominio, «Zona DNS» de `primercommit.es`, añade los cuatro registros que da Brevo, sin tocar el registro `A`
+   del servidor. En «Host» va solo lo que se indica: DonDominio añade `.primercommit.es` por su cuenta.
 
-> Más adelante, si quieres enviar desde `hola@tu-dominio`, se puede cambiar a un proveedor como Brevo: solo cambian
-> las líneas `MAIL_*` del `.env`. Brevo pide una dirección postal (se puede usar un apartado de correos).
+   | Tipo | Host | Valor |
+   |---|---|---|
+   | TXT | `@` | `brevo-code:…` (el código que enseña Brevo) |
+   | CNAME | `brevo1._domainkey` | `b1.primercommit-es.dkim.brevo.com` |
+   | CNAME | `brevo2._domainkey` | `b2.primercommit-es.dkim.brevo.com` |
+   | TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com` |
+
+3. En Brevo, «Verificar registros» y «Autenticar dominio» (los cambios de DNS pueden tardar unos minutos), y después
+   «Remitentes» → «Añadir remitente»: `Primer Commit`, `hola@primercommit.es`. Con el dominio autenticado queda
+   verificado al momento.
+4. En «SMTP y API» → «SMTP», genera una clave SMTP y guárdala en la app «Contraseñas» del Mac: Brevo solo la enseña una
+   vez. El usuario es el «Iniciar sesión» de esa página (termina en `@smtp-brevo.com`).
+5. En el `.env` del servidor, nunca en el chat ni en el código:
+
+   ```
+   MAIL_HOST=smtp-relay.brevo.com
+   MAIL_PORT=587
+   MAIL_USERNAME=el «Iniciar sesión» de Brevo
+   MAIL_PASSWORD=la clave SMTP de Brevo
+   MAIL_FROM="Primer Commit <hola@primercommit.es>"
+   ```
+
+   y reinicia el backend con `docker compose up -d backend`. Para comprobarlo sin enseñar la clave:
+   `docker compose exec backend printenv MAIL_HOST MAIL_FROM`.
+6. Prueba: crea una cuenta con email y contraseña (mejor de Outlook o Hotmail, que es el más estricto) y comprueba que
+   el correo de confirmación llega a la bandeja de entrada.
+
+El uso del día se ve en Brevo, en «Uso y plan». Si una persona no consigue confirmar su cuenta, la administración
+puede confirmarla a mano (ver «Ver la base de datos con pgAdmin» o la consola de PostgreSQL).
 
 ### 4. Google (opcional)
 
@@ -113,7 +139,7 @@ nano /opt/primercommit/nexus-backend/deploy/.env
 ```
 
 Rellena: `DOMAIN`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` (tu cuenta de administradora; contraseña larga y única), los datos
-de email de Gmail, `MODERATION_EMAIL` (la dirección del proyecto: ahí llega el aviso de cada testimonio nuevo), `ADZUNA_APP_ID` y `ADZUNA_APP_KEY` (ofertas de empleo de España: las mismas claves que tienes en tu Mac), los de Google si los tienes y `VITE_LEGAL_OWNER_NAME`, `VITE_LEGAL_EMAIL` y
+de email de Brevo (ver el paso 3), `MODERATION_EMAIL` (la dirección del proyecto: ahí llega el aviso de cada testimonio nuevo), `ADZUNA_APP_ID` y `ADZUNA_APP_KEY` (ofertas de empleo de España: las mismas claves que tienes en tu Mac), los de Google si los tienes y `VITE_LEGAL_OWNER_NAME`, `VITE_LEGAL_EMAIL` y
 `VITE_LEGAL_HOSTING_PROVIDER` (por ejemplo, `Hetzner Online GmbH (Alemania)`). No toques `POSTGRES_PASSWORD` ni
 `JWT_SECRET`: ya están generados. Guarda con `Ctrl+O`, `Intro`, y sal con `Ctrl+X`.
 
