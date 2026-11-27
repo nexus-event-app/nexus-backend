@@ -52,7 +52,7 @@ class ContactIntegrationTest {
     @Test
     void robotsThatFillTheHiddenFieldAreIgnoredQuietly() throws Exception {
         mvc.perform(post("/api/contact").contentType(MediaType.APPLICATION_JSON).content("""
-                        {"name":"Robot","email":"bot@test.com","reason":"IDEAS","message":"Compra ya mis productos.",
+                        {"name":"Robot","email":"bot@test.com","reason":"PARTNERS","message":"Compra ya mis productos.",
                          "website":"https://spam.test"}
                         """))
                 .andExpect(status().isAccepted());

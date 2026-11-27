@@ -28,7 +28,7 @@ public class SitemapService {
     private static final String CACHE_KEY = "content";
     private static final List<String> TRANSLATED_PATHS = List.of("/", "/noticias", "/empleo", "/foro", "/testimonios",
             "/sobre-el-proyecto", "/rutas", "/rutas/frontend", "/rutas/backend", "/rutas/qa", "/rutas/datos", "/rutas/ia",
-            "/glosario", "/eventos", "/guias");
+            "/glosario", "/eventos", "/guias", "/contacto");
     private static final List<String> SPANISH_ONLY_PATHS = List.of("/aviso-legal", "/privacidad", "/cookies");
 
     private final NewsRepository newsRepository;

@@ -54,6 +54,7 @@ class LanguagesTest {
                 Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths")),
                 Map.entry("glosario", Map.of("ca", "glossari", "en", "glossary")),
                 Map.entry("guias", Map.of("ca", "guies", "en", "guides")),
+                Map.entry("contacto", Map.of("ca", "contacte", "en", "contact")),
                 Map.entry("eventos", Map.of("ca", "esdeveniments", "en", "events"))));
         assertThat(Languages.SUBSEGMENTS).containsExactlyInAnyOrderEntriesOf(Map.of(
                 "foro", Map.of("nueva", Map.of("ca", "nova", "en", "new")),

@@ -29,7 +29,8 @@ public final class Languages {
             Map.entry("rutas", Map.of("ca", "rutes", "en", "learning-paths")),
             Map.entry("glosario", Map.of("ca", "glossari", "en", "glossary")),
             Map.entry("eventos", Map.of("ca", "esdeveniments", "en", "events")),
-            Map.entry("guias", Map.of("ca", "guies", "en", "guides")));
+            Map.entry("guias", Map.of("ca", "guies", "en", "guides")),
+            Map.entry("contacto", Map.of("ca", "contacte", "en", "contact")));
 
     static final Map<String, Map<String, Map<String, String>>> SUBSEGMENTS = Map.of(
             "foro", Map.of("nueva", Map.of("ca", "nova", "en", "new")),

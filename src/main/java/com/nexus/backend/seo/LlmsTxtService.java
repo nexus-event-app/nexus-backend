@@ -29,7 +29,8 @@ public class LlmsTxtService {
             new Section("Noticias", "/noticias", "actualidad del sector tecnológico explicada para perfiles junior"),
             new Section("Glosario tech", "/glosario", "términos de programación explicados de forma sencilla"),
             new Section("Testimonios", "/testimonios", "experiencias reales de personas de la comunidad"),
-            new Section("Sobre el proyecto", "/sobre-el-proyecto", "qué es Primer Commit y por qué existe"));
+            new Section("Sobre el proyecto", "/sobre-el-proyecto", "qué es Primer Commit y por qué existe"),
+            new Section("Contacto", "/contacto", "formulario para dudas, problemas con la cuenta, ayudar a la comunidad o colaborar"));
 
     private final GuideRepository guideRepository;
     private final String publicUrl;
