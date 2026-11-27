@@ -32,8 +32,9 @@ public class SmtpEmailSender implements EmailSender {
             MimeMessage mime = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mime, true, StandardCharsets.UTF_8.name());
             helper.setFrom(from);
-            if (!replyTo.isEmpty()) {
-                helper.setReplyTo(replyTo);
+            String answerTo = message.replyTo() == null || message.replyTo().isBlank() ? replyTo : message.replyTo();
+            if (!answerTo.isEmpty()) {
+                helper.setReplyTo(answerTo);
             }
             helper.setTo(message.to());
             helper.setSubject(message.subject());

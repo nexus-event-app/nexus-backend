@@ -114,6 +114,37 @@ public class EmailTemplates {
         return new EmailMessage(to, subject, text, html);
     }
 
+    public EmailMessage contactMessage(String to, String name, String email, String reason, String message) {
+        Locale locale = MODERATION_LOCALE;
+        String who = oneLine(name);
+        String from = oneLine(email);
+        String subject = messages.get(locale, "mail.contact.subject", oneLine(reason), who);
+        String intro = messages.get(locale, "mail.contact.intro");
+        String note = messages.get(locale, "mail.contact.note");
+        String text = intro + "\n\n" + who + " <" + from + ">\n" + oneLine(reason) + "\n\n" + message + "\n\n" + note + "\n";
+        String body = HtmlUtils.htmlEscape(message).replace("\r\n", "\n").replace("\n", "<br>");
+        String html = """
+                <!doctype html>
+                <html lang="es"><body style="margin:0;padding:24px;background:#f8fafc;font-family:Arial,Helvetica,sans-serif;color:#0f172a">
+                <table role="presentation" width="100%%" cellpadding="0" cellspacing="0"><tr><td align="center">
+                <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;padding:32px">
+                <tr><td>
+                <p style="margin:0 0 24px;font-size:20px;font-weight:bold;color:#4f46e5">%s</p>
+                <p style="margin:0 0 20px;font-size:16px;line-height:1.5">%s</p>
+                <p style="margin:0 0 4px;font-size:14px;color:#475569"><strong style="color:#0f172a">%s</strong> &lt;%s&gt;</p>
+                <p style="margin:0 0 16px;font-size:14px;color:#4f46e5;font-weight:bold">%s</p>
+                <blockquote style="margin:0 0 24px;padding:16px 20px;background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px">
+                <p style="margin:0;font-size:16px;line-height:1.6">%s</p>
+                </blockquote>
+                <p style="margin:0;font-size:13px;color:#475569;line-height:1.5">%s</p>
+                </td></tr></table>
+                </td></tr></table>
+                </body></html>
+                """.formatted(messages.get(locale, "mail.brand"), HtmlUtils.htmlEscape(intro), HtmlUtils.htmlEscape(who),
+                HtmlUtils.htmlEscape(from), HtmlUtils.htmlEscape(oneLine(reason)), body, HtmlUtils.htmlEscape(note));
+        return new EmailMessage(to, subject, text, html, from);
+    }
+
     private static String joinDetails(String... values) {
         return Stream.of(values).filter(value -> value != null && !value.isBlank()).map(EmailTemplates::oneLine)
                 .collect(Collectors.joining(" · "));

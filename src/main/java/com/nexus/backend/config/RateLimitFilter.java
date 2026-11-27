@@ -48,6 +48,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
             new Rule("testimonial", "/api/testimonials", 5, Duration.ofHours(1)),
             new Rule("report", "/api/reports", 20, Duration.ofHours(1)),
             new Rule("avatar", "/api/profile/avatar", 20, Duration.ofHours(1)),
+            new Rule("contact", "/api/contact", 5, Duration.ofHours(1)),
             new Rule("GET", "search", "/api/search", 120, Duration.ofMinutes(1)));
 
     private final ApiErrorWriter apiErrorWriter;

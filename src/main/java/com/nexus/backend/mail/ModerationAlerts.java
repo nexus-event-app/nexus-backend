@@ -55,6 +55,13 @@ public class ModerationAlerts {
         log.info("Aviso de contenido retenido para {} destinatario(s)", recipients.size());
     }
 
+    public void contactMessage(String contactEmail, String name, String email, String reason, String message) {
+        List<String> recipients = contactEmail == null || contactEmail.isBlank() ? recipients() : List.of(contactEmail.trim());
+        recipients.forEach(to -> events.publishEvent(new EmailRequestedEvent(
+                emailTemplates.contactMessage(to, name, email, reason, message))));
+        log.info("Mensaje de contacto ({}) para {} destinatario(s)", reason, recipients.size());
+    }
+
     private List<String> recipients() {
         return moderationEmail.isEmpty() ? userRepository.findAdminEmails() : List.of(moderationEmail);
     }
