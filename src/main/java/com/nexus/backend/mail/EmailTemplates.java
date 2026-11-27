@@ -18,10 +18,19 @@ public class EmailTemplates {
 
     private final Messages messages;
     private final String publicUrl;
+    private final String contactEmail;
 
-    public EmailTemplates(Messages messages, @Value("${app.public-url:http://localhost:5173}") String publicUrl) {
+    public EmailTemplates(Messages messages, @Value("${app.public-url:http://localhost:5173}") String publicUrl,
+                          @Value("${app.contact.email:}") String contactEmail) {
         this.messages = messages;
         this.publicUrl = publicUrl.replaceAll("/+$", "");
+        this.contactEmail = contactEmail == null ? "" : contactEmail.trim();
+    }
+
+    private String noReply(Locale locale) {
+        return contactEmail.isEmpty()
+                ? messages.get(locale, "mail.noReply")
+                : messages.get(locale, "mail.noReplyContact", contactEmail);
     }
 
     public EmailMessage emailVerification(String to, String name, String token) {
@@ -124,7 +133,9 @@ public class EmailTemplates {
         String greeting = messages.get(locale, "mail.greeting", name);
         String signature = messages.get(locale, "mail.signature", brand);
         String fallback = messages.get(locale, "mail.fallbackLink");
-        String text = greeting + "\n\n" + intro + "\n\n" + action + ": " + link + "\n\n" + note + "\n\n" + signature + "\n";
+        String noReply = noReply(locale);
+        String text = greeting + "\n\n" + intro + "\n\n" + action + ": " + link + "\n\n" + note + "\n\n" + signature
+                + "\n\n" + noReply + "\n";
 
         String safeLink = HtmlUtils.htmlEscape(link);
         String html = """
@@ -139,11 +150,13 @@ public class EmailTemplates {
                 <p style="margin:0 0 24px"><a href="%s" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px">%s</a></p>
                 <p style="margin:0 0 16px;font-size:13px;color:#475569;line-height:1.5">%s<br><a href="%s" style="color:#4f46e5;word-break:break-all">%s</a></p>
                 <p style="margin:0;font-size:13px;color:#475569;line-height:1.5">%s</p>
+                <p style="margin:24px 0 0;padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;line-height:1.5">%s</p>
                 </td></tr></table>
                 </td></tr></table>
                 </body></html>
                 """.formatted(locale.getLanguage(), brand, HtmlUtils.htmlEscape(greeting), HtmlUtils.htmlEscape(intro), safeLink,
-                HtmlUtils.htmlEscape(action), HtmlUtils.htmlEscape(fallback), safeLink, safeLink, HtmlUtils.htmlEscape(note));
+                HtmlUtils.htmlEscape(action), HtmlUtils.htmlEscape(fallback), safeLink, safeLink, HtmlUtils.htmlEscape(note),
+                HtmlUtils.htmlEscape(noReply));
         return new EmailMessage(to, subject, text, html);
     }
 }

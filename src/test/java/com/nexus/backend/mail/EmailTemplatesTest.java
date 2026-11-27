@@ -12,7 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EmailTemplatesTest {
 
-    private final EmailTemplates templates = new EmailTemplates(new Messages(messageSource()), "https://primercommit.test/");
+    private final EmailTemplates templates = new EmailTemplates(new Messages(messageSource()), "https://primercommit.test/",
+            "contacto@primercommit.test");
 
     @AfterEach
     void resetLocale() {
@@ -28,6 +29,20 @@ class EmailTemplatesTest {
         assertThat(message.subject()).isEqualTo("Confirma tu email en Primer Commit");
         assertThat(message.text()).contains("Hola, Ana:").contains("https://primercommit.test/verificar-email?token=TOKEN");
         assertThat(message.html()).contains("<html lang=\"es\">");
+    }
+
+    @Test
+    void everyEmailWarnsThatItCannotBeAnsweredAndSaysWhereToWrite() {
+        LocaleContextHolder.setLocale(Locale.forLanguageTag("es"));
+
+        EmailMessage message = templates.emailVerification("ana@test.com", "Ana", "TOKEN");
+
+        assertThat(message.text()).contains("no se pueden responder").contains("escríbenos a contacto@primercommit.test");
+        assertThat(message.html()).contains("contacto@primercommit.test");
+
+        EmailMessage withoutContact = new EmailTemplates(new Messages(messageSource()), "https://primercommit.test", " ")
+                .passwordReset("ana@test.com", "Ana", "TOKEN");
+        assertThat(withoutContact.text()).contains("no respondas a este mensaje").doesNotContain("escríbenos");
     }
 
     @Test

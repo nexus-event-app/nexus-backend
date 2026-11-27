@@ -17,10 +17,13 @@ public class SmtpEmailSender implements EmailSender {
 
     private final JavaMailSender mailSender;
     private final String from;
+    private final String replyTo;
 
-    public SmtpEmailSender(JavaMailSender mailSender, @Value("${app.mail.from}") String from) {
+    public SmtpEmailSender(JavaMailSender mailSender, @Value("${app.mail.from}") String from,
+                           @Value("${app.contact.email:}") String replyTo) {
         this.mailSender = mailSender;
         this.from = from;
+        this.replyTo = replyTo == null ? "" : replyTo.trim();
     }
 
     @Override
@@ -29,6 +32,9 @@ public class SmtpEmailSender implements EmailSender {
             MimeMessage mime = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mime, true, StandardCharsets.UTF_8.name());
             helper.setFrom(from);
+            if (!replyTo.isEmpty()) {
+                helper.setReplyTo(replyTo);
+            }
             helper.setTo(message.to());
             helper.setSubject(message.subject());
             helper.setText(message.text(), message.html());
