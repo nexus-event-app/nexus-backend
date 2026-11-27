@@ -108,7 +108,7 @@ class GuideIntegrationTest {
     @Test
     void everyGuideEndsWithFrequentlyAskedQuestionsInEachLanguage() throws Exception {
         for (String slug : new String[]{"que-hacer-despues-de-un-bootcamp", "como-preparar-tu-primera-entrevista-tecnica",
-                "git-y-github-para-principiantes", "tu-primer-meetup-tech", "sindrome-del-impostor"}) {
+                "git-y-github-para-principiantes", "tu-primer-meetup-tech", "sindrome-del-impostor", "docker-para-principiantes"}) {
             mvc.perform(get("/api/guides/" + slug))
                     .andExpect(jsonPath("$.content").value(containsString("## Preguntas frecuentes\n\n### ¿")));
             mvc.perform(get("/api/guides/" + slug).header("Accept-Language", "ca"))
